@@ -33,8 +33,11 @@ public final class GrantPermissionService implements GrantPermissionUseCase {
             var permission = repository.findPermissionByCode(command.permissionCode()).orElseThrow(() -> failure("permissionCode"));
             repository.grantPermission(role.id(), permission.id());
             audit.append(event(actor, command, AuditOutcome.SUCCESS));
+        } catch (BusinessFailure failure) {
+            audit.append(event(actor, command, AuditOutcome.FAILURE));
+            throw failure;
         } catch (RuntimeException failure) {
-            if (!(failure instanceof BusinessFailure)) audit.append(event(actor, command, AuditOutcome.DENIED));
+            audit.append(event(actor, command, AuditOutcome.DENIED));
             throw failure;
         }
     }
