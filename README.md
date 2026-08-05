@@ -9,6 +9,9 @@ PostgreSQL 18 和 Flyway 13.1.0。UI 编程模型仅支持 Vaadin Flow；Hilla�
 TypeScript 不在首个版本范围内。Spring Boot 是当前运行时，但 contracts 和 platform
 不绑定 Spring，为后续适配其他运行框架保留边界。
 
+Java、Maven、Spring Boot 或 Vaadin 的升级均通过独立 PR 完成，并需经过完整 CI
+验证。发布记录与兼容性策略见 [CHANGELOG.md](CHANGELOG.md)。
+
 ## 快速启动
 
 ```bash
@@ -27,6 +30,7 @@ docker compose --env-file .env up --build
 - [扩展指南](docs/extension-guide.md)
 - [部署与运维](docs/deployment.md)
 - [贡献指南](docs/contributing.md)
+- [变更记录与升级策略](CHANGELOG.md)
 
 ## 验证
 
