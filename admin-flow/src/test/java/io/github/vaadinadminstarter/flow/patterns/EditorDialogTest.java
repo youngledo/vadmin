@@ -51,4 +51,41 @@ class EditorDialogTest {
 
         assertThat(dialog.getPrimaryAction().isEnabled()).isFalse();
     }
+
+    @Test
+    void preventsEscapeAndOutsideClosingWhileBusyAndRestoresThePriorPolicy() {
+        var dialog = new EditorDialog("Create user", "Save", () -> { });
+
+        dialog.setBusy(true);
+
+        assertThat(dialog.isCloseOnEsc()).isFalse();
+        assertThat(dialog.isCloseOnOutsideClick()).isFalse();
+
+        dialog.setBusy(false);
+
+        assertThat(dialog.isCloseOnEsc()).isTrue();
+        assertThat(dialog.isCloseOnOutsideClick()).isTrue();
+    }
+
+    @Test
+    void preservesAnExistingNoClosePolicyAfterBusyState() {
+        var dialog = new EditorDialog("Create user", "Save", () -> { });
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+
+        dialog.setBusy(true);
+        dialog.setBusy(false);
+
+        assertThat(dialog.isCloseOnEsc()).isFalse();
+        assertThat(dialog.isCloseOnOutsideClick()).isFalse();
+    }
+
+    @Test
+    void placesVisibleCommandsInAWrappingFooterRowInCancelThenPrimaryOrder() {
+        var dialog = new EditorDialog("Create user", "Save", () -> { });
+
+        assertThat(dialog.getFooter().getElement().getChildren().toList())
+                .containsExactly(dialog.getCancelAction().getElement(), dialog.getPrimaryAction().getElement());
+        assertThat(dialog.getFooter().getElement().getStyle().get("flex-wrap")).isEqualTo("wrap");
+    }
 }

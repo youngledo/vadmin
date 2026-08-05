@@ -42,6 +42,24 @@ class DataWorkspaceTest {
     }
 
     @Test
+    void preservesAConsumerDisablingAnActiveBulkActionAcrossSelectionChanges() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        grid.setItems(List.of(row));
+        var workspace = new DataWorkspace<>(grid);
+        var restricted = new Button("Restricted action");
+
+        workspace.addBulkAction(restricted);
+        grid.select(row);
+        restricted.setEnabled(false);
+        grid.deselectAll();
+        grid.select(row);
+
+        assertThat(restricted.isEnabled()).isFalse();
+    }
+
+    @Test
     void exposesBusyEmptyAndFailureStatesWithAccessibleStatusText() {
         var workspace = new DataWorkspace<>(new Grid<Row>(Row.class, false));
 

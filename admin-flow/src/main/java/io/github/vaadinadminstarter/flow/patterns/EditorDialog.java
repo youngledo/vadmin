@@ -5,10 +5,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import java.util.Objects;
 
-/** A modal editor surface with responsive fields, validation feedback, and standard commands. */
+/**
+ * A modal editor surface with responsive fields, validation feedback, and standard commands.
+ * The footer wraps its actions on narrow dialogs; application theme CSS owns breakpoint-specific polish.
+ */
 public final class EditorDialog extends Dialog {
     private final FormLayout form = new FormLayout();
     private final Div validation = new Div();
@@ -17,6 +19,8 @@ public final class EditorDialog extends Dialog {
     private boolean busy;
     private boolean primaryActionEnabledBeforeBusy;
     private boolean cancelActionEnabledBeforeBusy;
+    private boolean closeOnEscBeforeBusy;
+    private boolean closeOnOutsideClickBeforeBusy;
 
     public EditorDialog(String title, String primaryActionLabel, Runnable onPrimaryAction) {
         setHeaderTitle(Objects.requireNonNull(title));
@@ -29,9 +33,9 @@ public final class EditorDialog extends Dialog {
                 event -> Objects.requireNonNull(onPrimaryAction).run());
         cancelAction = new Button("Cancel", event -> close());
         cancelAction.getElement().setAttribute("aria-label", "Cancel editor");
-        var commands = new HorizontalLayout(cancelAction, primaryAction);
-        commands.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
-        add(form, validation, commands);
+        getFooter().getElement().getStyle().set("flex-wrap", "wrap");
+        getFooter().add(cancelAction, primaryAction);
+        add(form, validation);
     }
 
     public FormLayout getForm() {
@@ -71,11 +75,17 @@ public final class EditorDialog extends Dialog {
         if (busy) {
             primaryActionEnabledBeforeBusy = primaryAction.isEnabled();
             cancelActionEnabledBeforeBusy = cancelAction.isEnabled();
+            closeOnEscBeforeBusy = isCloseOnEsc();
+            closeOnOutsideClickBeforeBusy = isCloseOnOutsideClick();
             primaryAction.setEnabled(false);
             cancelAction.setEnabled(false);
+            setCloseOnEsc(false);
+            setCloseOnOutsideClick(false);
         } else {
             primaryAction.setEnabled(primaryActionEnabledBeforeBusy);
             cancelAction.setEnabled(cancelActionEnabledBeforeBusy);
+            setCloseOnEsc(closeOnEscBeforeBusy);
+            setCloseOnOutsideClick(closeOnOutsideClickBeforeBusy);
         }
     }
 }
