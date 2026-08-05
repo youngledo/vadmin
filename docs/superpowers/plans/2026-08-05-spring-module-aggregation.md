@@ -73,7 +73,6 @@ Create `admin-spring/pom.xml` with this complete content:
         <groupId>io.github.vaadinadminstarter</groupId>
         <artifactId>vaadin-admin-starter</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>admin-spring</artifactId>
@@ -95,6 +94,9 @@ Replace the three root Spring `subproject` entries with one entry:
 
 Keep the root entries for `admin-contracts`, `admin-platform`, `admin-flow`, and `admin-reference-app` unchanged.
 
+Maven's default parent lookup resolves the root parent POM at `../pom.xml` for
+`admin-spring` in this layout.
+
 - [ ] **Step 4: Change each moved child POM to inherit from `admin-spring`**
 
 In each of these three files, replace only the existing `<parent>` block with:
@@ -104,9 +106,11 @@ In each of these three files, replace only the existing `<parent>` block with:
     <groupId>io.github.vaadinadminstarter</groupId>
     <artifactId>admin-spring</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
 </parent>
 ```
+
+Maven's default parent lookup resolves `admin-spring/pom.xml` at
+`../pom.xml` for each moved child module.
 
 Do not change the child `artifactId`, dependencies, Java sources, resource files, or test files.
 

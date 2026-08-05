@@ -36,9 +36,10 @@ admin-reference-app/
 from the root POM and lists the three Spring child modules as Maven 4
 `subproject` entries.
 
-Each moved child module inherits from `admin-spring` using an explicit
-`../pom.xml` relative path. Root-level dependency management, Java release,
-plugin management, and the production profile remain inherited transitively.
+Each moved child module inherits from `admin-spring`; Maven's default parent
+lookup resolves the parent POM at `../pom.xml` in this layout. Root-level
+dependency management, Java release, plugin management, and the production
+profile remain inherited transitively.
 
 The root POM replaces its three direct Spring subprojects with one
 `admin-spring` subproject. It continues to aggregate the framework-neutral
