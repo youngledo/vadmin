@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: vaadin-admin-starter
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/vaadin_admin}
+    username: ${DATABASE_USERNAME:vaadin_admin}
+    password: ${DATABASE_PASSWORD:vaadin_admin}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+app:
+  bootstrap:
+    password: ${APP_BOOTSTRAP_PASSWORD:}
+  file-storage:
+    directory: ${APP_FILE_STORAGE_DIRECTORY:./data/files}

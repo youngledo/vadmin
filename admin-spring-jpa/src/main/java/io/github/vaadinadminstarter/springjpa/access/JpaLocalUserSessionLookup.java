@@ -20,9 +20,10 @@ public final class JpaLocalUserSessionLookup implements LocalUserSessionLookup {
                             user.id, user.enabled, user.authVersion)
                         from JpaUserAccountEntity user
                         where user.id = :userId
-                        """, LocalUserSession.class)
+                """, LocalUserSession.class)
                 .setParameter("userId", userId)
-                .getResultStream()
+                .getResultList()
+                .stream()
                 .findFirst();
     }
 }

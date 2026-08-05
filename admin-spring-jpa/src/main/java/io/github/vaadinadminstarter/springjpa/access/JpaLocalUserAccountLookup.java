@@ -20,10 +20,11 @@ public final class JpaLocalUserAccountLookup implements LocalUserAccountLookup {
     @Override
     public Optional<LocalUserAccount> findByUsername(String username) {
         return entityManager.createQuery(
-                        "select user from JpaUserAccountEntity user where user.username = :username",
+                "select user from JpaUserAccountEntity user where user.username = :username",
                         JpaUserAccountEntity.class)
                 .setParameter("username", username)
-                .getResultStream()
+                .getResultList()
+                .stream()
                 .findFirst()
                 .map(this::toAccount);
     }

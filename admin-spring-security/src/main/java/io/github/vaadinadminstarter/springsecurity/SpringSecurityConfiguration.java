@@ -51,15 +51,10 @@ public class SpringSecurityConfiguration {
     }
 
     @Bean
-    AuthenticationVersionFilter authenticationVersionFilter(LocalUserSessionLookup sessionLookup) {
-        return new AuthenticationVersionFilter(sessionLookup);
-    }
-
-    @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, DaoAuthenticationProvider authenticationProvider,
-                                            AuthenticationVersionFilter authenticationVersionFilter) throws Exception {
+                                            LocalUserSessionLookup sessionLookup) throws Exception {
         http.authenticationProvider(authenticationProvider);
-        http.addFilterBefore(authenticationVersionFilter, AuthorizationFilter.class);
+        http.addFilterBefore(new AuthenticationVersionFilter(sessionLookup), AuthorizationFilter.class);
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer.loginView(LoginView.class));
         return http.build();
     }

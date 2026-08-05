@@ -1,6 +1,5 @@
 package io.github.vaadinadminstarter.springboot;
 
-import io.github.vaadinadminstarter.springboot.error.BusinessFailureAdvice;
 import io.github.vaadinadminstarter.springboot.error.CorrelationIdFilter;
 import io.github.vaadinadminstarter.springboot.error.MdcCorrelationIdProvider;
 import io.github.vaadinadminstarter.springboot.error.ProblemDetailMapper;
@@ -20,11 +19,6 @@ public class SpringBootErrorConfiguration {
     @Bean
     ProblemDetailMapper problemDetailMapper(CorrelationIdProvider correlationIdProvider) {
         return new ProblemDetailMapper(correlationIdProvider);
-    }
-
-    @Bean
-    BusinessFailureAdvice businessFailureAdvice(ProblemDetailMapper problemDetailMapper) {
-        return new BusinessFailureAdvice(problemDetailMapper);
     }
 
     @Bean
