@@ -2,6 +2,7 @@ package io.github.vaadinadminstarter.flow.patterns;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
@@ -83,9 +84,14 @@ class EditorDialogTest {
     @Test
     void placesVisibleCommandsInAWrappingFooterRowInCancelThenPrimaryOrder() {
         var dialog = new EditorDialog("Create user", "Save", () -> { });
+        var footerActions = (HorizontalLayout) dialog.getFooter().getElement().getChildren()
+                .findFirst().flatMap(element -> element.getComponent()).orElseThrow();
 
         assertThat(dialog.getFooter().getElement().getChildren().toList())
-                .containsExactly(dialog.getCancelAction().getElement(), dialog.getPrimaryAction().getElement());
-        assertThat(dialog.getFooter().getElement().getStyle().get("flex-wrap")).isEqualTo("wrap");
+                .containsExactly(footerActions.getElement());
+        assertThat(footerActions.getChildren().toList())
+                .containsExactly(dialog.getCancelAction(), dialog.getPrimaryAction());
+        assertThat(footerActions.getWidth()).isEqualTo("100%");
+        assertThat(footerActions.getStyle().get("flex-wrap")).isEqualTo("wrap");
     }
 }

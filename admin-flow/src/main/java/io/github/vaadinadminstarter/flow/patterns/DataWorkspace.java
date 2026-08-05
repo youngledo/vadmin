@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /** A grid frame with selection-aware bulk actions and explicit data presentation states. */
 public final class DataWorkspace<T> extends VerticalLayout {
@@ -22,7 +23,8 @@ public final class DataWorkspace<T> extends VerticalLayout {
     private final HorizontalLayout bulkActions = new HorizontalLayout();
     private final Div status = new Div();
     private final List<Button> selectionActions = new ArrayList<>();
-    private final Map<Button, Boolean> actionEligibility = new LinkedHashMap<>();
+    private final Map<Button, Boolean> inferredActionEligibility = new LinkedHashMap<>();
+    private final Map<Button, BooleanSupplier> explicitActionEligibility = new LinkedHashMap<>();
     private final Map<Button, Boolean> actionEnabledBySelection = new LinkedHashMap<>();
     private Component stateView;
     private State state = State.READY;
@@ -73,8 +75,22 @@ public final class DataWorkspace<T> extends VerticalLayout {
     }
 
     public void addBulkAction(Button action) {
-        selectionActions.add(Objects.requireNonNull(action));
-        actionEligibility.put(action, action.isEnabled());
+        action = Objects.requireNonNull(action);
+        inferredActionEligibility.put(action, action.isEnabled());
+        registerBulkAction(action);
+    }
+
+    /**
+     * Adds a bulk action whose caller-owned eligibility is evaluated independently from selection.
+     */
+    public void addBulkAction(Button action, BooleanSupplier eligibility) {
+        action = Objects.requireNonNull(action);
+        explicitActionEligibility.put(action, Objects.requireNonNull(eligibility));
+        registerBulkAction(action);
+    }
+
+    private void registerBulkAction(Button action) {
+        selectionActions.add(action);
         bulkActions.add(action);
         updateSelection(selectedItemCount);
     }
@@ -132,11 +148,18 @@ public final class DataWorkspace<T> extends VerticalLayout {
     }
 
     private void updateActionAvailability(Button action, boolean selectionAvailable) {
+        var explicitEligibility = explicitActionEligibility.get(action);
+        if (explicitEligibility != null) {
+            var actionEnabled = explicitEligibility.getAsBoolean() && selectionAvailable;
+            action.setEnabled(actionEnabled);
+            actionEnabledBySelection.put(action, actionEnabled);
+            return;
+        }
         var previousSelectionState = actionEnabledBySelection.get(action);
         if (previousSelectionState != null && action.isEnabled() != previousSelectionState) {
-            actionEligibility.put(action, action.isEnabled());
+            inferredActionEligibility.put(action, action.isEnabled());
         }
-        var actionEnabled = actionEligibility.get(action) && selectionAvailable;
+        var actionEnabled = inferredActionEligibility.get(action) && selectionAvailable;
         action.setEnabled(actionEnabled);
         actionEnabledBySelection.put(action, actionEnabled);
     }

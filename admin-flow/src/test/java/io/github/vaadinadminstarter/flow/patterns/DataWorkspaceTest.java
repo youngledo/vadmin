@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 class DataWorkspaceTest {
@@ -54,6 +55,23 @@ class DataWorkspaceTest {
         grid.select(row);
         restricted.setEnabled(false);
         grid.deselectAll();
+        grid.select(row);
+
+        assertThat(restricted.isEnabled()).isFalse();
+    }
+
+    @Test
+    void evaluatesExplicitBulkActionEligibilityWhenSelectionChangesFromZero() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        grid.setItems(List.of(row));
+        var workspace = new DataWorkspace<>(grid);
+        var restricted = new Button("Restricted action");
+        var eligible = new AtomicBoolean(true);
+
+        workspace.addBulkAction(restricted, eligible::get);
+        eligible.set(false);
         grid.select(row);
 
         assertThat(restricted.isEnabled()).isFalse();

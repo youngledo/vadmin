@@ -5,11 +5,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import java.util.Objects;
 
 /**
  * A modal editor surface with responsive fields, validation feedback, and standard commands.
- * The footer wraps its actions on narrow dialogs; application theme CSS owns breakpoint-specific polish.
+ * A real footer action row wraps its commands on narrow dialogs; application theme CSS owns
+ * breakpoint-specific polish.
  */
 public final class EditorDialog extends Dialog {
     private final FormLayout form = new FormLayout();
@@ -33,8 +35,13 @@ public final class EditorDialog extends Dialog {
                 event -> Objects.requireNonNull(onPrimaryAction).run());
         cancelAction = new Button("Cancel", event -> close());
         cancelAction.getElement().setAttribute("aria-label", "Cancel editor");
-        getFooter().getElement().getStyle().set("flex-wrap", "wrap");
-        getFooter().add(cancelAction, primaryAction);
+        var footerActions = new HorizontalLayout(cancelAction, primaryAction);
+        footerActions.setPadding(false);
+        footerActions.setSpacing(true);
+        footerActions.setWidthFull();
+        footerActions.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        footerActions.getStyle().set("flex-wrap", "wrap");
+        getFooter().add(footerActions);
         add(form, validation);
     }
 
