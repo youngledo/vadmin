@@ -84,6 +84,7 @@ public final class DataWorkspace<T> extends VerticalLayout {
 
     /**
      * Adds a bulk action whose caller-owned eligibility is evaluated independently from selection.
+     * Call {@link #refreshBulkActions()} after externally owned eligibility changes.
      */
     public void addBulkAction(Button action, BooleanSupplier eligibility) {
         action = Objects.requireNonNull(action);
@@ -95,6 +96,11 @@ public final class DataWorkspace<T> extends VerticalLayout {
         selectionActions.add(action);
         bulkActions.add(action);
         updateSelection(selectedItemCount);
+    }
+
+    /** Re-evaluates bulk action eligibility using the current selection and workspace state. */
+    public void refreshBulkActions() {
+        updateSelection(grid.getSelectedItems().size());
     }
 
     public void setBusy(boolean busy) {

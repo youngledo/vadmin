@@ -101,6 +101,24 @@ class DataWorkspaceTest {
     }
 
     @Test
+    void refreshesExplicitBulkActionEligibilityWithoutASelectionChange() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        grid.setItems(List.of(row));
+        var workspace = new DataWorkspace<>(grid);
+        var restricted = new Button("Restricted action");
+        var eligible = new AtomicBoolean(true);
+
+        workspace.addBulkAction(restricted, eligible::get);
+        grid.select(row);
+        eligible.set(false);
+        workspace.refreshBulkActions();
+
+        assertThat(restricted.isEnabled()).isFalse();
+    }
+
+    @Test
     void exposesBusyEmptyAndFailureStatesWithAccessibleStatusText() {
         var workspace = new DataWorkspace<>(new Grid<Row>(Row.class, false));
 
