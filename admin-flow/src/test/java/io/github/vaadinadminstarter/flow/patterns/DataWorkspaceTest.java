@@ -43,21 +43,44 @@ class DataWorkspaceTest {
     }
 
     @Test
-    void preservesAConsumerDisablingAnActiveBulkActionAcrossSelectionChanges() {
+    void evaluatesExplicitBulkActionEligibilityAcrossSelectionChanges() {
         var grid = new Grid<Row>(Row.class, false);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         var row = new Row("Ada");
         grid.setItems(List.of(row));
         var workspace = new DataWorkspace<>(grid);
         var restricted = new Button("Restricted action");
+        var eligible = new AtomicBoolean(true);
 
-        workspace.addBulkAction(restricted);
+        workspace.addBulkAction(restricted, eligible::get);
         grid.select(row);
-        restricted.setEnabled(false);
+        eligible.set(false);
         grid.deselectAll();
         grid.select(row);
 
         assertThat(restricted.isEnabled()).isFalse();
+    }
+
+    @Test
+    void usesInitialEligibilityForLegacyBulkActionsDespiteLaterButtonChanges() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        grid.setItems(List.of(row));
+        var workspace = new DataWorkspace<>(grid);
+        var legacy = new Button("Legacy action");
+
+        workspace.addBulkAction(legacy);
+        legacy.setEnabled(false);
+        grid.select(row);
+
+        assertThat(legacy.isEnabled()).isTrue();
+
+        legacy.setEnabled(false);
+        grid.deselectAll();
+        grid.select(row);
+
+        assertThat(legacy.isEnabled()).isTrue();
     }
 
     @Test
@@ -92,6 +115,26 @@ class DataWorkspaceTest {
         workspace.showFailure("Unable to load users");
         assertThat(workspace.getState()).isEqualTo(DataWorkspace.State.FAILURE);
         assertThat(workspace.getStatusMessage()).isEqualTo("Unable to load users");
+    }
+
+    @Test
+    void disablesBulkActionsWhenEmptyOrFailureStatesRetainGridSelection() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        grid.setItems(List.of(row));
+        var workspace = new DataWorkspace<>(grid);
+        var disable = new Button("Disable selected");
+
+        workspace.addBulkAction(disable);
+        grid.select(row);
+        workspace.showEmpty(new EmptyState("No users", "Create a user to begin."));
+
+        assertThat(disable.isEnabled()).isFalse();
+
+        workspace.showFailure("Unable to load users");
+
+        assertThat(disable.isEnabled()).isFalse();
     }
 
     private record Row(String name) { }

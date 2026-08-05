@@ -74,6 +74,10 @@ public final class EditorDialog extends Dialog {
         return busy;
     }
 
+    /**
+     * Temporarily disables commands and closing, then restores their pre-busy state when cleared.
+     * Apply caller-owned command or close-policy changes after {@code setBusy(false)}.
+     */
     public void setBusy(boolean busy) {
         if (this.busy == busy) {
             return;

@@ -23,9 +23,7 @@ public final class DataWorkspace<T> extends VerticalLayout {
     private final HorizontalLayout bulkActions = new HorizontalLayout();
     private final Div status = new Div();
     private final List<Button> selectionActions = new ArrayList<>();
-    private final Map<Button, Boolean> inferredActionEligibility = new LinkedHashMap<>();
-    private final Map<Button, BooleanSupplier> explicitActionEligibility = new LinkedHashMap<>();
-    private final Map<Button, Boolean> actionEnabledBySelection = new LinkedHashMap<>();
+    private final Map<Button, BooleanSupplier> actionEligibility = new LinkedHashMap<>();
     private Component stateView;
     private State state = State.READY;
     private int selectedItemCount;
@@ -74,10 +72,14 @@ public final class DataWorkspace<T> extends VerticalLayout {
         return bulkActions;
     }
 
+    /**
+     * Adds a bulk action with eligibility captured from its enabled state at registration time.
+     * Use {@link #addBulkAction(Button, BooleanSupplier)} for caller-owned dynamic eligibility.
+     */
     public void addBulkAction(Button action) {
         action = Objects.requireNonNull(action);
-        inferredActionEligibility.put(action, action.isEnabled());
-        registerBulkAction(action);
+        var eligibleAtRegistration = action.isEnabled();
+        addBulkAction(action, () -> eligibleAtRegistration);
     }
 
     /**
@@ -85,7 +87,7 @@ public final class DataWorkspace<T> extends VerticalLayout {
      */
     public void addBulkAction(Button action, BooleanSupplier eligibility) {
         action = Objects.requireNonNull(action);
-        explicitActionEligibility.put(action, Objects.requireNonNull(eligibility));
+        actionEligibility.put(action, Objects.requireNonNull(eligibility));
         registerBulkAction(action);
     }
 
@@ -143,24 +145,11 @@ public final class DataWorkspace<T> extends VerticalLayout {
     private void updateSelection(int count) {
         selectedItemCount = count;
         selectionSummary.setText(count == 1 ? "1 selected" : count + " selected");
-        var enabled = count > 0 && state != State.BUSY;
+        var enabled = count > 0 && state == State.READY;
         selectionActions.forEach(action -> updateActionAvailability(action, enabled));
     }
 
     private void updateActionAvailability(Button action, boolean selectionAvailable) {
-        var explicitEligibility = explicitActionEligibility.get(action);
-        if (explicitEligibility != null) {
-            var actionEnabled = explicitEligibility.getAsBoolean() && selectionAvailable;
-            action.setEnabled(actionEnabled);
-            actionEnabledBySelection.put(action, actionEnabled);
-            return;
-        }
-        var previousSelectionState = actionEnabledBySelection.get(action);
-        if (previousSelectionState != null && action.isEnabled() != previousSelectionState) {
-            inferredActionEligibility.put(action, action.isEnabled());
-        }
-        var actionEnabled = inferredActionEligibility.get(action) && selectionAvailable;
-        action.setEnabled(actionEnabled);
-        actionEnabledBySelection.put(action, actionEnabled);
+        action.setEnabled(actionEligibility.get(action).getAsBoolean() && selectionAvailable);
     }
 }

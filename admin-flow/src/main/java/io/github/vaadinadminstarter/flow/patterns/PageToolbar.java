@@ -69,6 +69,10 @@ public final class PageToolbar extends HorizontalLayout {
         return busy;
     }
 
+    /**
+     * Temporarily disables command actions, then restores their pre-busy state when cleared.
+     * Apply caller-owned command availability changes after {@code setBusy(false)}.
+     */
     public void setBusy(boolean busy) {
         if (this.busy == busy) {
             return;
