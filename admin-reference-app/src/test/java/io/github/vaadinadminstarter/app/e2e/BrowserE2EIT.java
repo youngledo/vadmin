@@ -173,6 +173,39 @@ class BrowserE2EIT {
     }
 
     @Test
+    void mutatingAdministrationPagesUseSharedToolbarAndWorkspace() {
+        signInAs("admin", "change-me");
+
+        assertMutatingWorkspace("users", "用户");
+        assertMutatingWorkspace("roles", "角色");
+        assertMutatingWorkspace("customers", "客户");
+    }
+
+    @Test
+    void selectingUserEnablesBulkActions() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        var workspace = page.locator("[data-testid=users-workspace]");
+        workspace.getByText("admin", new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true)).click();
+
+        assertThat(workspace.getByText("1 selected",
+                new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(page.getByLabel("启用所选用户")).isEnabled();
+        assertThat(page.getByLabel("停用所选用户")).isEnabled();
+    }
+
+    @Test
+    void userEditorShowsValidationFeedbackBeforeSubmittingInvalidValues() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("新增用户")).click();
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("保存")).click();
+
+        assertThat(page.getByRole(AriaRole.ALERT)).hasText("用户名和初始密码均为必填项。");
+    }
+
+    @Test
     void roleGrantCreatesAuditEntry() {
         createRole("audited-role");
 
@@ -204,6 +237,7 @@ class BrowserE2EIT {
 
         assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).isVisible();
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除客户")).click();
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("删除客户"))).isVisible();
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除").setExact(true)).click();
         assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).not().isVisible();
     }
@@ -229,12 +263,22 @@ class BrowserE2EIT {
                 new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).not().isVisible();
     }
 
+    private void assertMutatingWorkspace(String route, String title) {
+        page.navigate(baseUrl() + "/" + route);
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(title))).isVisible();
+        assertThat(page.locator("[data-testid=" + route + "-toolbar]")).isVisible();
+        assertThat(page.locator("[data-testid=" + route + "-workspace] vaadin-grid")).isVisible();
+    }
+
     private void grantPermission(String roleCode, String permissionCode) {
-        page.getByLabel("角色").click();
-        page.getByRole(AriaRole.OPTION, new Page.GetByRoleOptions().setName(roleCode)).click();
-        page.getByLabel("权限").click();
-        page.getByRole(AriaRole.OPTION, new Page.GetByRoleOptions().setName(permissionCode)).click();
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("授予权限")).click();
+        var dialog = page.getByRole(AriaRole.DIALOG);
+        dialog.getByLabel("角色").click();
+        page.getByRole(AriaRole.OPTION, new Page.GetByRoleOptions().setName(roleCode)).click();
+        dialog.getByLabel("权限").click();
+        page.getByRole(AriaRole.OPTION, new Page.GetByRoleOptions().setName(permissionCode)).click();
+        dialog.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("保存授权")).click();
     }
 
     private UUID createRole(String code, String... permissions) {
