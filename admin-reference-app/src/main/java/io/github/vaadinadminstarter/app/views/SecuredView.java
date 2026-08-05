@@ -7,7 +7,9 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
+import jakarta.annotation.security.PermitAll;
 
+@PermitAll
 abstract class SecuredView extends VerticalLayout implements BeforeEnterObserver {
     private final SecurityContextCurrentUserProvider currentUser;
     private final AuthorizationService authorization;

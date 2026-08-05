@@ -8,11 +8,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Layout;
+import jakarta.annotation.security.PermitAll;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.flow.navigation.PageRegistry;
 import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
 
 @Layout
+@PermitAll
 public final class MainLayout extends AppLayout {
     public MainLayout(PageRegistry pages, SecurityContextCurrentUserProvider currentUser,
                       AuthorizationService authorization) {

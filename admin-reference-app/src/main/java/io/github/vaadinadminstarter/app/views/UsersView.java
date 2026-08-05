@@ -1,9 +1,13 @@
 package io.github.vaadinadminstarter.app.views;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -32,6 +36,8 @@ public final class UsersView extends SecuredView {
         this.commands = commands;
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+        var create = new Button("新增用户", VaadinIcon.PLUS.create(), event -> createUser());
+        create.setVisible(authorization.hasPermission(requireCurrentUser(), PermissionCode.of("system:user:create")));
         grid.addColumn(AdministrationQueryService.UserRow::username).setHeader("用户名").setAutoWidth(true);
         grid.addColumn(user -> user.enabled() ? "启用" : "停用").setHeader("状态");
         grid.addColumn(AdministrationQueryService.UserRow::authVersion).setHeader("认证版本");
@@ -47,7 +53,7 @@ public final class UsersView extends SecuredView {
             enableSelected.setEnabled(enabled);
             disableSelected.setEnabled(enabled);
         });
-        add(new H1("用户"), filter, enableSelected, disableSelected, grid);
+        add(new H1("用户"), new HorizontalLayout(filter, create, enableSelected, disableSelected), grid);
     }
 
     @Override PermissionCode requiredPermission() { return PermissionCode.of("system:user:read"); }
@@ -74,6 +80,20 @@ public final class UsersView extends SecuredView {
         action.setEnabled(false);
         action.setVisible(authorization.hasPermission(requireCurrentUser(), PermissionCode.of("system:user:update")));
         return action;
+    }
+
+    private void createUser() {
+        var dialog = new Dialog();
+        var username = new TextField("用户名");
+        var password = new PasswordField("初始密码");
+        var save = new Button("保存", event -> {
+            commands.create(requireCurrentUser(), username.getValue(), password.getValue());
+            dialog.close();
+            pages.refresh();
+        });
+        dialog.add(new VerticalLayout(username, password, new HorizontalLayout(save,
+                new Button("取消", event -> dialog.close()))));
+        dialog.open();
     }
 
 }

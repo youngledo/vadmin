@@ -63,12 +63,15 @@ public final class CustomersView extends SecuredView {
     private HorizontalLayout actions(Customer customer, AuthorizationService authorization) {
         var edit = new Button(VaadinIcon.EDIT.create(), event -> edit(customer));
         edit.setTooltipText("编辑客户");
+        edit.setAriaLabel("编辑客户");
         edit.setVisible(authorization.hasPermission(requireCurrentUser(), PermissionCode.of("customer:customer:update")));
         var delete = new Button(VaadinIcon.TRASH.create(), event -> confirmDelete(customer));
         delete.setTooltipText("删除客户");
+        delete.setAriaLabel("删除客户");
         delete.setVisible(authorization.hasPermission(requireCurrentUser(), PermissionCode.of("customer:customer:delete")));
         var attachments = new Button(VaadinIcon.PAPERCLIP.create(), event -> showAttachments(customer, authorization));
         attachments.setTooltipText("客户附件");
+        attachments.setAriaLabel("客户附件");
         return new HorizontalLayout(edit, attachments, delete);
     }
 
