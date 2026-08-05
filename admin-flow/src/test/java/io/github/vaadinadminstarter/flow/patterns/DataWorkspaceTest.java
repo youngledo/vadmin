@@ -155,5 +155,14 @@ class DataWorkspaceTest {
         assertThat(disable.isEnabled()).isFalse();
     }
 
+    @Test
+    void canHideSelectionControlsForReadOnlyWorkspaces() {
+        var workspace = new DataWorkspace<>(new Grid<Row>(Row.class, false));
+
+        workspace.setSelectionBarVisible(false);
+
+        assertThat(workspace.isSelectionBarVisible()).isFalse();
+    }
+
     private record Row(String name) { }
 }

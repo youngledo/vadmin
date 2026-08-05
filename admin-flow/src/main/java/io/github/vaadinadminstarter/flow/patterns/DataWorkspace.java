@@ -21,6 +21,7 @@ public final class DataWorkspace<T> extends VerticalLayout {
     private final Grid<T> grid;
     private final Span selectionSummary = new Span("0 selected");
     private final HorizontalLayout bulkActions = new HorizontalLayout();
+    private final HorizontalLayout selectionBar = new HorizontalLayout(selectionSummary, bulkActions);
     private final Div status = new Div();
     private final List<Button> selectionActions = new ArrayList<>();
     private final Map<Button, BooleanSupplier> actionEligibility = new LinkedHashMap<>();
@@ -34,7 +35,6 @@ public final class DataWorkspace<T> extends VerticalLayout {
         setSpacing(true);
         setSizeFull();
 
-        var selectionBar = new HorizontalLayout(selectionSummary, bulkActions);
         selectionBar.setWidthFull();
         selectionBar.setAlignItems(Alignment.CENTER);
         bulkActions.setPadding(false);
@@ -70,6 +70,15 @@ public final class DataWorkspace<T> extends VerticalLayout {
 
     public HorizontalLayout getBulkActions() {
         return bulkActions;
+    }
+
+    /** Shows or hides selection controls for workspaces that support bulk operations. */
+    public void setSelectionBarVisible(boolean visible) {
+        selectionBar.setVisible(visible);
+    }
+
+    public boolean isSelectionBarVisible() {
+        return selectionBar.isVisible();
     }
 
     /**

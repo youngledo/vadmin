@@ -108,6 +108,27 @@ class BrowserE2EIT {
     }
 
     @Test
+    void workplaceShowsOnlyPermittedQuickLinks() {
+        var roleId = createRole("user-readers", "system:user:read");
+        createUser("workplace-reader", "workplace-password", roleId);
+
+        signInAs("workplace-reader", "workplace-password");
+
+        var shortcuts = page.locator("[data-testid=workplace-shortcuts]");
+        assertThat(shortcuts.getByRole(AriaRole.LINK, new com.microsoft.playwright.Locator.GetByRoleOptions()
+                .setName("用户"))).isVisible();
+        org.assertj.core.api.Assertions.assertThat(shortcuts.getByRole(AriaRole.LINK).count()).isEqualTo(1);
+    }
+
+    @Test
+    void readOnlyWorkspacesUseSharedPageHeaderAndGridFrame() {
+        signInAs("admin", "change-me");
+
+        assertReadOnlyWorkspace("permissions", "权限目录");
+        assertReadOnlyWorkspace("audit", "审计日志");
+    }
+
+    @Test
     void authenticatedAdministratorSeesShellAndActiveNavigation() {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/users");
@@ -198,6 +219,14 @@ class BrowserE2EIT {
                 && "POST".equals(response.request().method()),
                 () -> loginForm.locator("vaadin-button[slot=submit]").click());
         org.assertj.core.api.Assertions.assertThat(loginResponse.status()).isEqualTo(302);
+    }
+
+    private void assertReadOnlyWorkspace(String route, String title) {
+        page.navigate(baseUrl() + "/" + route);
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(title))).isVisible();
+        assertThat(page.locator("[data-testid=read-only-workspace] vaadin-grid")).isVisible();
+        assertThat(page.locator("[data-testid=read-only-workspace]").getByText("0 selected",
+                new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).not().isVisible();
     }
 
     private void grantPermission(String roleCode, String permissionCode) {
