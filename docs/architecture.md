@@ -51,7 +51,7 @@ depends on it.
 | `admin-spring-boot` | auto-configuration, HTTP error mapping, logging and observability wiring | Spring Boot, all adapter-facing modules |
 | `admin-reference-app` | Spring Boot launcher, deployment configuration, sample domain module | reusable modules |
 
-`admin-spring` is an organizational Maven parent only; consumers continue to depend on the three leaf artifacts directly.
+`admin-spring` is an organizational Maven parent and reactor aggregator; it has no runtime code or runtime dependency role. Consumers continue to depend on the three leaf artifacts directly.
 
 `admin-flow` is a primary adapter for user actions. JPA, Spring Security,
 file storage, and HTTP APIs are secondary or protocol-specific adapters. A Flow
