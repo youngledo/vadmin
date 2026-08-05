@@ -108,6 +108,16 @@ class BrowserE2EIT {
     }
 
     @Test
+    void authenticatedAdministratorSeesShellAndActiveNavigation() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        assertThat(page.getByText("Vaadin Admin Starter", new Page.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(page.getByLabel("当前用户菜单")).isVisible();
+        assertThat(page.locator("vaadin-side-nav-item[current]")).hasText("用户");
+    }
+
+    @Test
     void unassignedUserCannotOpenUsersRoute() {
         createUser("unassigned", "unassigned-password");
 
