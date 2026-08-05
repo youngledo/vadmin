@@ -9,4 +9,5 @@ public interface AccessControlRepository {
     Optional<Role> findRoleByCode(String code);
     Optional<Permission> findPermissionByCode(PermissionCode code);
     void grantPermission(UUID roleId, UUID permissionId);
+    void incrementAuthVersionForRole(UUID roleId);
 }

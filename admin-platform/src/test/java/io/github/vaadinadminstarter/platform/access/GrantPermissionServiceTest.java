@@ -27,13 +27,15 @@ class GrantPermissionServiceTest {
         var repository = new InMemoryRepository(new Role(UUID.randomUUID(), "operator"), new Permission(UUID.randomUUID(), userRead));
         var audit = new Events();
         var service = new GrantPermissionService(new SetAuthorizationService(), repository,
-                new PermissionCatalog(Set.of(grantPermission, userRead)), audit);
+                new PermissionCatalog(Set.of(grantPermission, userRead)), audit, () -> "request-42");
 
         service.grant(new CurrentUser(UUID.randomUUID(), "admin", Set.of(grantPermission), 1),
                 new GrantPermissionCommand("operator", userRead));
 
         assertThat(repository.granted).isTrue();
+        assertThat(repository.authVersionIncremented).isTrue();
         assertThat(audit.events).singleElement().extracting(AuditEvent::actionCode).isEqualTo("system:role:grant");
+        assertThat(audit.events).singleElement().extracting(AuditEvent::correlationId).isEqualTo("request-42");
     }
 
     @Test
@@ -62,6 +64,8 @@ class GrantPermissionServiceTest {
         InMemoryRepository(Role role, Permission permission) { this.role = role; this.permission = permission; }
         public Optional<Role> findRoleByCode(String code) { return Optional.ofNullable(role.code().equals(code) ? role : null); }
         public Optional<Permission> findPermissionByCode(PermissionCode code) { return Optional.ofNullable(permission.code().equals(code) ? permission : null); }
+        boolean authVersionIncremented;
         public void grantPermission(UUID roleId, UUID permissionId) { granted = role.id().equals(roleId) && permission.id().equals(permissionId); }
+        public void incrementAuthVersionForRole(UUID roleId) { authVersionIncremented = role.id().equals(roleId); }
     }
 }

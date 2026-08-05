@@ -2,8 +2,8 @@ package io.github.vaadinadminstarter.springjpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
-import io.github.vaadinadminstarter.platform.access.AccessControlRepository;
+import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
+import io.github.vaadinadminstarter.contracts.auth.LocalUserSessionLookup;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -19,14 +19,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(classes = JpaAccessControlRepositoryTest.TestApplication.class)
+@SpringBootTest(classes = JpaLocalUserAccountLookupTest.TestApplication.class)
 @Testcontainers
-class JpaAccessControlRepositoryTest {
+class JpaLocalUserAccountLookupTest {
     @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
 
     @Autowired
-    private AccessControlRepository repository;
+    private LocalUserAccountLookup lookup;
+
+    @Autowired
+    private LocalUserSessionLookup sessionLookup;
 
     @Autowired
     private EntityManager entityManager;
@@ -41,49 +44,38 @@ class JpaAccessControlRepositoryTest {
 
     @Test
     @Transactional
-    void findsRoleAndPermissionAndGrantsTheRelationship() {
-        var roleId = UUID.randomUUID();
-        var permissionId = UUID.randomUUID();
-        entityManager.createNativeQuery("insert into roles (id, code) values (:id, :code)")
-                .setParameter("id", roleId)
-                .setParameter("code", "operator")
-                .executeUpdate();
-        entityManager.createNativeQuery("""
-                insert into permissions (id, code, system_managed)
-                values (:id, :code, true)
-                """)
-                .setParameter("id", permissionId)
-                .setParameter("code", "system:user:read")
-                .executeUpdate();
-
-        var role = repository.findRoleByCode("operator");
-        var permission = repository.findPermissionByCode(PermissionCode.of("system:user:read"));
-        repository.grantPermission(role.orElseThrow().id(), permission.orElseThrow().id());
-        entityManager.flush();
-
-        var grants = ((Number) entityManager.createNativeQuery("select count(*) from role_permissions")
-                .getSingleResult()).longValue();
-        assertThat(grants).isOne();
-    }
-
-    @Test
-    @Transactional
-    void incrementsAuthenticationVersionForUsersAssignedToTheChangedRole() {
+    void loadsPasswordStateVersionAndPermissionsForUsername() {
         var userId = UUID.randomUUID();
         var roleId = UUID.randomUUID();
+        var permissionId = UUID.randomUUID();
         entityManager.createNativeQuery("""
                 insert into users (id, username, password_hash, enabled, auth_version)
-                values (:id, 'operator', 'stored-hash', true, 4)
+                values (:id, 'operator', 'stored-hash', true, 7)
                 """).setParameter("id", userId).executeUpdate();
         entityManager.createNativeQuery("insert into roles (id, code) values (:id, 'operator')")
                 .setParameter("id", roleId).executeUpdate();
+        entityManager.createNativeQuery("""
+                insert into permissions (id, code, system_managed)
+                values (:id, 'system:user:read', true)
+                """).setParameter("id", permissionId).executeUpdate();
         entityManager.createNativeQuery("insert into user_roles (user_id, role_id) values (:userId, :roleId)")
                 .setParameter("userId", userId).setParameter("roleId", roleId).executeUpdate();
+        entityManager.createNativeQuery("""
+                insert into role_permissions (role_id, permission_id)
+                values (:roleId, :permissionId)
+                """).setParameter("roleId", roleId).setParameter("permissionId", permissionId).executeUpdate();
 
-        repository.incrementAuthVersionForRole(roleId);
+        var account = lookup.findByUsername("operator").orElseThrow();
 
-        assertThat(entityManager.createNativeQuery("select auth_version from users where id = :id")
-                .setParameter("id", userId).getSingleResult()).isEqualTo(5L);
+        assertThat(account.userId()).isEqualTo(userId);
+        assertThat(account.passwordHash()).isEqualTo("stored-hash");
+        assertThat(account.authVersion()).isEqualTo(7);
+        assertThat(account.permissions()).extracting(permission -> permission.value())
+                .containsExactly("system:user:read");
+        assertThat(sessionLookup.findSessionByUserId(userId)).hasValueSatisfying(session -> {
+            assertThat(session.enabled()).isTrue();
+            assertThat(session.authVersion()).isEqualTo(7);
+        });
     }
 
     @SpringBootConfiguration

@@ -7,4 +7,12 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>admin-spring-security</artifactId>
+    <dependencies>
+        <dependency><groupId>io.github.vaadinadminstarter</groupId><artifactId>admin-contracts</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webmvc</artifactId></dependency>
+        <dependency><groupId>com.vaadin</groupId><artifactId>vaadin-core</artifactId><version>${vaadin.version}</version></dependency>
+        <dependency><groupId>com.vaadin</groupId><artifactId>vaadin-spring</artifactId><version>${vaadin.version}</version></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
+    </dependencies>
 </project>

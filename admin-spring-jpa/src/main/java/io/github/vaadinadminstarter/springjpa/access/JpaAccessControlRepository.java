@@ -46,4 +46,15 @@ public final class JpaAccessControlRepository implements AccessControlRepository
                 .setParameter("permissionId", permissionId)
                 .executeUpdate();
     }
+
+    @Override
+    public void incrementAuthVersionForRole(UUID roleId) {
+        entityManager.createNativeQuery("""
+                update users
+                set auth_version = auth_version + 1
+                where id in (select user_id from user_roles where role_id = :roleId)
+                """)
+                .setParameter("roleId", roleId)
+                .executeUpdate();
+    }
 }
