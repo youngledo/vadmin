@@ -8,4 +8,5 @@ playwright-report/
 test-results/
 .worktrees/
 admin-reference-app/src/main/frontend/generated/
+admin-reference-app/src/main/bundles/
 data/

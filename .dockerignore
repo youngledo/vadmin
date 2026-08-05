@@ -4,5 +4,6 @@
 .idea
 .vscode
 **/target
+admin-reference-app/src/main/bundles
 data
 test-results
