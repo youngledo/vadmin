@@ -38,3 +38,6 @@ jobs:
 
       - name: Verify production build
         run: ./mvnw -B -ntp -Pproduction verify
+
+      - name: Build container image
+        run: docker build -t vaadin-admin-starter:ci .

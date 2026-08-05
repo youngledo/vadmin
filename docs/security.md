@@ -34,9 +34,10 @@
 状态、`errorCode`、安全的详情、字段错误及关联 ID。不要在 Problem Details 中返回
 堆栈、SQL、密码、令牌或敏感元数据。
 
-Vaadin Flow 的 RPC 和导航不是 REST API：验证失败显示为字段反馈，访问被拒绝会
-进入 403 视图，其他失败显示安全通知或 500 视图，而不会强行包装成 Problem
-Details。
+Vaadin Flow 的 RPC 和导航不是 REST API：当前验证失败显示为安全的通用提示，访问
+被拒绝会进入 403 视图，其他失败进入 500 视图，而不会强行包装成 Problem Details。
+业务失败仍携带字段错误，以便未来的表单绑定器按字段呈现，但通用 Flow 错误呈现器
+不会将它们直接暴露给用户。
 
 每个 HTTP 请求接受或生成 `X-Correlation-Id`，并在响应头、日志 MDC、审计记录和
 Problem Details 中使用它。排障时应记录并提供该 ID，而不是复制敏感请求内容。
