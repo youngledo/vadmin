@@ -44,7 +44,7 @@ depends on it.
 |---|---|---|
 | `admin-contracts` | `CurrentUser`, authorization, audit, navigation, file contracts and error semantics | Java 25 |
 | `admin-platform` | RBAC administration use cases, application models, persistence and audit ports | contracts |
-| `admin-flow` | app shell, route guards, permission gates, CRUD page patterns, Flow-specific error presentation | contracts, platform, Vaadin Flow |
+| `admin-flow` | route guards, permission gates, Java page patterns, Flow-specific error presentation | contracts, platform, Vaadin Flow |
 | `admin-spring` | Maven parent and reactor aggregator for Spring-specific adapters; no runtime code | root POM inheritance only |
 | `admin-spring-security` | local account authentication and `CurrentUser`/authorization adapters | Spring Security, contracts, platform |
 | `admin-spring-jpa` | PostgreSQL JPA mappings, RBAC/audit port implementations, Flyway integration | Spring/JPA/Flyway, contracts, platform |
@@ -56,6 +56,42 @@ depends on it.
 `admin-flow` is a primary adapter for user actions. JPA, Spring Security,
 file storage, and HTTP APIs are secondary or protocol-specific adapters. A Flow
 View never talks directly to JPA repositories.
+
+### 2.3 Flow Design System
+
+Phase 1 keeps reusable Flow patterns in `admin-flow`, and keeps theme assets
+and application composition in `admin-reference-app`:
+
+```text
+ApplicationShell (@Theme("admin-theme"))
+  -> admin-theme/theme.json + styles.css
+  -> MainLayout (AppLayout)
+       -> PageRegistry.visibleTo(currentUser, authorization)
+       -> protected Flow views
+            -> PageHeader / PageToolbar / DataWorkspace / EditorDialog
+```
+
+`ApplicationShell` is the Flow `AppShellConfigurator`; it is the required
+place for the application-wide `@Theme` annotation. `MainLayout` is an
+application composition class, not a reusable Spring adapter. It obtains the
+permission-filtered page projection from `PageRegistry`, supplies the product
+header and grouped navigation, and updates the current route title after
+navigation.
+
+The named `admin-theme` lives at
+`admin-reference-app/src/main/frontend/themes/admin-theme/`. Its CSS owns
+semantic light and dark color tokens, density, focus, shell, canvas, and narrow
+viewport rules. The current-user menu stores the selected light/dark mode in
+the Vaadin session and applies it to the Flow UI root. It is intentionally not
+a persisted account preference in Phase 1. A consuming application can create
+its own app shell and named theme without modifying `admin-flow`.
+
+`admin-flow` remains Spring-free: it may depend on Vaadin Flow,
+`admin-contracts`, and `admin-platform`, but must not import Spring Framework,
+Spring Boot, Spring Security, JPA, Flyway, the reference application, or its
+business types. ArchUnit enforces the framework-import portion of this
+boundary; module dependency direction keeps the reference application outside
+the reusable modules.
 
 ## 3. Authorization and Navigation
 
@@ -155,7 +191,7 @@ points.
 | Unit | contracts and platform authorization, RBAC invariants, audit event construction |
 | Architecture | ArchUnit checks that core modules do not import Spring, JPA, Flyway, or concrete adapters |
 | Integration | Testcontainers PostgreSQL validates Flyway, JPA ports, authentication adapters, transactions, and audit writes |
-| Browser E2E | login, menu filtering, direct route denial, action denial, permission change, and sample CRUD path |
+| Browser E2E | login, desktop and narrow shell navigation, session theme switching, menu filtering, direct route denial, validation and failure presentation, permission change, and sample CRUD path |
 
 CI runs formatting and static checks, all test layers, a production build, and a
 Docker image build. Releases publish the compatibility baseline and treat a new

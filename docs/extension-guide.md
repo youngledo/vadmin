@@ -17,6 +17,76 @@ Flow 页面使用 `@Route` 注册，并在页面进入前检查与页面定义�
 登录页，无权限进入 `access-denied`。页面上的按钮只是体验层控制，创建、修改、删除
 等平台用例必须再次调用 `AuthorizationService`。
 
+## 使用 Flow 设计系统
+
+`admin-flow` 提供可组合的 Java Flow 页面模式，而不是另一个前端组件运行时。页面继续
+直接使用标准 Vaadin 组件；只在重复的后台工作流中组合下列模式：
+
+| 模式 | 用途 |
+|---|---|
+| `PageHeader` | 页面标题、说明、位置和页面级动作。 |
+| `PageToolbar` | 查询字段、附加操作与主创建操作。 |
+| `DataWorkspace<T>` | `Grid` 的稳定容器、选择数量、批量操作和忙碌/空/失败状态。 |
+| `EditorDialog` | 响应式 `FormLayout`、字段校验提示与标准页脚操作。 |
+| `EmptyState` | 有明确下一步的空数据或加载失败内容。 |
+| `PagedGrid<T>` | 把服务端分页查询绑定到 `Grid`，并统一刷新和空表格文案。 |
+
+下面是一个精简的页面组合示例。领域查询和命令仍是应用层依赖，示例不引入 Spring
+类型到 `admin-flow`：
+
+```java
+var header = new PageHeader("订单", "处理可访问订单。");
+
+var filter = new TextField("搜索订单");
+var toolbar = new PageToolbar();
+toolbar.addFilter(filter);
+toolbar.setPrimaryAction(new Button("新增订单", event -> openEditor()));
+
+var grid = new Grid<OrderRow>();
+grid.setSelectionMode(Grid.SelectionMode.MULTI);
+var pages = new PagedGrid<>(grid, queries::orders,
+        () -> Map.of("q", filter.getValue()), "number");
+filter.addValueChangeListener(event -> pages.refresh());
+
+var workspace = new DataWorkspace<>(grid);
+workspace.addBulkAction(cancelSelected, () -> canCancelOrders());
+add(header, toolbar, workspace);
+```
+
+编辑器使用实际命令处理器保存，并把可恢复的字段错误显示在对话框内：
+
+```java
+var editor = new EditorDialog("新增订单", "保存", () -> { });
+editor.addField(number, customer);
+editor.getPrimaryAction().addClickListener(event -> {
+    if (number.isEmpty()) {
+        editor.showValidationMessage("订单号为必填项。");
+        return;
+    }
+    commands.create(requireCurrentUser(), number.getValue(), customer.getValue());
+    editor.close();
+    pages.refresh();
+});
+editor.open();
+```
+
+用 `workspace.setBusy(true)`、`workspace.showEmpty(...)`、
+`workspace.showFailure(...)` 和 `workspace.showData()` 显式表示异步查询或加载
+结果。不要把“无数据”伪装成成功表格，也不要在可复用模式里写入领域文案或权限判断。
+批量操作的资格由页面提供；资格会变化时，页面调用
+`workspace.refreshBulkActions()`。
+
+主题属于应用层。参考应用通过 `ApplicationShell` 上的
+`@Theme("admin-theme")` 注册
+`src/main/frontend/themes/admin-theme/theme.json` 和 `styles.css`。新应用应复制或
+新建自己的命名主题，覆盖 `--admin-*` 语义变量，而不是修改 `admin-flow`。当前用户
+菜单的深浅模式仅保存在 Vaadin session；它不是账户偏好设置。
+
+应用外壳由参考应用的 `MainLayout` 组合：它使用 `AppLayout`、
+`PageRegistry.visibleTo(...)` 和授权服务生成分组菜单，并在窄屏中通过
+`DrawerToggle` 保持导航可达。扩展页面应复用该布局或实现同样的权限过滤与直接路由
+保护；不能依据菜单隐藏来替代用例级授权。
+
 ## 新增业务模块
 
 业务模块应定义自己的实体、查询模型、端口和用例。建议的调用方向是：

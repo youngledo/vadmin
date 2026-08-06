@@ -10,6 +10,7 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Response;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.FilePayload;
+import com.microsoft.playwright.options.ViewportSize;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -142,6 +143,35 @@ class BrowserE2EIT {
     }
 
     @Test
+    void desktopShellCanSwitchBetweenLightAndDarkModes() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        var userMenu = page.getByLabel("当前用户菜单");
+        userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
+        page.getByText("切换至深色模式", new Page.GetByTextOptions().setExact(true)).click();
+
+        assertThat(page.locator("body")).hasAttribute("theme", "dark");
+        userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
+        assertThat(page.getByText("切换至浅色模式", new Page.GetByTextOptions().setExact(true))).isVisible();
+    }
+
+    @Test
+    void narrowShellKeepsNavigationReachable() {
+        useNarrowBrowser();
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        assertThat(page.getByLabel("切换导航")).isVisible();
+        assertThat(page.getByLabel("当前用户菜单")).isVisible();
+        page.getByLabel("切换导航").click();
+        assertThat(page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("客户"))).isVisible();
+        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("客户")).click();
+        page.waitForURL(baseUrl() + "/customers");
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("客户"))).isVisible();
+    }
+
+    @Test
     void authenticatedAdministratorSeesEachNavigationGroupHeadingOnce() {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/users");
@@ -230,6 +260,26 @@ class BrowserE2EIT {
     }
 
     @Test
+    void emptyCustomerWorkspaceShowsTheGridEmptyPresentation() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/customers");
+
+        var workspace = page.locator("[data-testid=customers-workspace]");
+        assertThat(workspace.locator("vaadin-grid")).isVisible();
+        assertThat(workspace.getByText("暂无数据", new com.microsoft.playwright.Locator.GetByTextOptions()
+                .setExact(true))).isVisible();
+    }
+
+    @Test
+    void systemFailureRouteUsesTheFailurePresentation() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/system-error");
+
+        assertThat(page.getByRole(AriaRole.HEADING,
+                new Page.GetByRoleOptions().setName("系统暂时不可用"))).isVisible();
+    }
+
+    @Test
     void roleGrantCreatesAuditEntry() {
         createRole("audited-role");
 
@@ -277,6 +327,15 @@ class BrowserE2EIT {
                 && "POST".equals(response.request().method()),
                 () -> loginForm.locator("vaadin-button[slot=submit]").click());
         org.assertj.core.api.Assertions.assertThat(loginResponse.status()).isEqualTo(302);
+    }
+
+    private void useNarrowBrowser() {
+        browserContext.close();
+        browserContext = browser.newContext(new Browser.NewContextOptions()
+                .setViewportSize(new ViewportSize(390, 844))
+                .setIsMobile(true));
+        page = browserContext.newPage();
+        page.setDefaultTimeout(10_000);
     }
 
     private void assertReadOnlyWorkspace(String route, String title) {

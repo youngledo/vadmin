@@ -22,6 +22,21 @@ set +a
 export DATABASE_URL="jdbc:postgresql://localhost:5432/${POSTGRES_DB}"
 export DATABASE_USERNAME="${POSTGRES_USER}"
 export DATABASE_PASSWORD="${POSTGRES_PASSWORD}"
+SPRING_PROFILES_ACTIVE=development \
+  ./mvnw -B -ntp -pl admin-reference-app -am spring-boot:run
+```
+
+开发模式下访问 `http://localhost:8080`，使用 `admin` / `change-me` 登录。此启动路径
+保留 Vaadin 开发服务器，用于修改 Java Flow 视图、`admin-theme` CSS 或主题配置后的
+本地迭代。开发模式的密码只适用于本机空数据库，不能用于共享环境。
+
+参考应用使用 `ApplicationShell` 注册名为 `admin-theme` 的 Flow 主题；登录后可从当前
+用户菜单切换浅色和深色模式。该选择只保留在当前 Vaadin session，新的会话会恢复
+浅色模式。
+
+使用生产构建和外部化引导密码时，改用以下命令：
+
+```bash
 ./mvnw -B -ntp -Pproduction -pl admin-reference-app -am package -DskipTests
 SPRING_PROFILES_ACTIVE=prod java -jar admin-reference-app/target/admin-reference-app-0.1.0-SNAPSHOT.jar
 ```
