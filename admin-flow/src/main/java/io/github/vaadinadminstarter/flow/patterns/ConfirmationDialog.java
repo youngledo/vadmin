@@ -25,10 +25,11 @@ public final class ConfirmationDialog extends Dialog {
         failure.setVisible(false);
         add(new Paragraph(Objects.requireNonNull(consequence)), failure);
 
-        confirmAction = new Button(Objects.requireNonNull(confirmActionLabel),
-                event -> Objects.requireNonNull(onConfirm).run());
+        confirmAction = new Button(Objects.requireNonNull(confirmActionLabel), event -> {
+            Objects.requireNonNull(onConfirm).run();
+            close();
+        });
         cancelAction = new Button("Cancel", event -> close());
-        cancelAction.getElement().setAttribute("aria-label", "Cancel confirmation");
 
         var footerActions = new HorizontalLayout(cancelAction, confirmAction);
         footerActions.setPadding(false);

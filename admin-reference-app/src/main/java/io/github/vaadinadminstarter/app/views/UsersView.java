@@ -3,6 +3,7 @@ package io.github.vaadinadminstarter.app.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -14,12 +15,16 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.error.BusinessFailure;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
+import io.github.vaadinadminstarter.flow.patterns.ConfirmationDialog;
+import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
 import io.github.vaadinadminstarter.flow.patterns.EditorDialog;
+import io.github.vaadinadminstarter.flow.patterns.OperationFeedback;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
 import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Route(value = "users", layout = MainLayout.class)
@@ -32,6 +37,7 @@ public final class UsersView extends SecuredView {
     private final Grid<AdministrationQueryService.UserRow> grid = new Grid<>();
     private final TextField filter = new TextField("搜索用户");
     private final PagedGrid<AdministrationQueryService.UserRow> pages;
+    private final OperationFeedback feedback = new OperationFeedback();
 
     public UsersView(SecurityContextCurrentUserProvider currentUser, AuthorizationService authorization,
                      AdministrationQueryService queries, UserAdministrationService commands) {
@@ -74,29 +80,53 @@ public final class UsersView extends SecuredView {
         return PermissionCode.of("system:user:read");
     }
 
-    private Button action(AdministrationQueryService.UserRow user, AuthorizationService authorization) {
-        var enabled = new Button(user.enabled() ? VaadinIcon.PAUSE.create() : VaadinIcon.PLAY.create(), event -> {
-            commands.setEnabled(requireCurrentUser(), user.id(), !user.enabled());
-            pages.refresh();
-        });
-        enabled.setTooltipText(user.enabled() ? "停用用户" : "启用用户");
-        enabled.setAriaLabel(user.enabled() ? "停用用户" : "启用用户");
+    private HorizontalLayout action(AdministrationQueryService.UserRow user, AuthorizationService authorization) {
+        var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(user));
+        details.setTooltipText("查看用户详情");
+        details.setAriaLabel("查看用户详情：" + user.username());
+        var actionLabel = user.enabled() ? "停用用户" : "启用用户";
+        var enabled = new Button(user.enabled() ? VaadinIcon.PAUSE.create() : VaadinIcon.PLAY.create(),
+                event -> confirmStatusChange(Set.of(user.id()), user.enabled()));
+        enabled.setTooltipText(actionLabel);
+        enabled.setAriaLabel(actionLabel + "：" + user.username());
         enabled.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
-        return enabled;
+        var actions = new HorizontalLayout(details, enabled);
+        actions.setPadding(false);
+        actions.setSpacing(true);
+        return actions;
     }
 
     private Button bulkAction(VaadinIcon icon, String label, boolean enabled, AuthorizationService authorization) {
-        var action = new Button(icon.create(), event -> {
-            commands.setEnabled(requireCurrentUser(), grid.getSelectedItems().stream()
-                    .map(AdministrationQueryService.UserRow::id)
-                    .collect(Collectors.toSet()), enabled);
-            grid.deselectAll();
-            pages.refresh();
-        });
+        var action = new Button(icon.create(), event -> confirmStatusChange(grid.getSelectedItems().stream()
+                .map(AdministrationQueryService.UserRow::id)
+                .collect(Collectors.toSet()), !enabled));
         action.setTooltipText(label);
         action.setAriaLabel(label);
         action.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
         return action;
+    }
+
+    private void showDetails(AdministrationQueryService.UserRow user) {
+        var dialog = new DetailDialog("用户详情");
+        dialog.getCloseAction().setText("关闭");
+        dialog.addField("用户名", user.username());
+        dialog.addField("状态", user.enabled() ? "启用" : "停用");
+        dialog.addField("认证版本", Long.toString(user.authVersion()));
+        dialog.open();
+    }
+
+    private void confirmStatusChange(Set<java.util.UUID> userIds, boolean currentlyEnabled) {
+        var enabling = !currentlyEnabled;
+        var title = enabling ? "启用用户" : "停用用户";
+        var consequence = enabling ? "该用户将恢复登录权限。" : "该用户将无法登录。";
+        var confirmation = new ConfirmationDialog(title, consequence, enabling ? "启用" : "停用", () -> {
+            commands.setEnabled(requireCurrentUser(), userIds, enabling);
+            grid.deselectAll();
+            pages.refresh();
+            feedback.success(enabling ? "用户已启用。" : "用户已停用。");
+        });
+        confirmation.getCancelAction().setText("取消");
+        confirmation.open();
     }
 
     private void createUser() {

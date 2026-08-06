@@ -34,7 +34,6 @@ public final class EditorDialog extends Dialog {
         primaryAction = new Button(Objects.requireNonNull(primaryActionLabel),
                 event -> Objects.requireNonNull(onPrimaryAction).run());
         cancelAction = new Button("Cancel", event -> close());
-        cancelAction.getElement().setAttribute("aria-label", "Cancel editor");
         var footerActions = new HorizontalLayout(cancelAction, primaryAction);
         footerActions.setPadding(false);
         footerActions.setSpacing(true);

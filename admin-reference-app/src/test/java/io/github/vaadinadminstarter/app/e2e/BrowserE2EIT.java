@@ -110,7 +110,7 @@ class BrowserE2EIT {
     }
 
     @Test
-    void workplaceShowsOnlyPermittedQuickLinks() {
+    void workplaceShowsOnlyPermittedOperationEntries() {
         var roleId = createRole("user-readers", "system:user:read");
         createUser("workplace-reader", "workplace-password", roleId);
 
@@ -119,6 +119,9 @@ class BrowserE2EIT {
         var shortcuts = page.locator("[data-testid=workplace-shortcuts]");
         assertThat(shortcuts.getByRole(AriaRole.LINK, new com.microsoft.playwright.Locator.GetByRoleOptions()
                 .setName("用户"))).isVisible();
+        assertThat(shortcuts.locator("[data-testid=workplace-entry]")).hasCount(1);
+        assertThat(shortcuts.getByText("管理可登录账户及其启用状态。",
+                new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).isVisible();
         org.assertj.core.api.Assertions.assertThat(shortcuts.getByRole(AriaRole.LINK).count()).isEqualTo(1);
     }
 
@@ -260,6 +263,51 @@ class BrowserE2EIT {
     }
 
     @Test
+    void userDetailsAndStatusChangeRequireExplicitConfirmation() {
+        createUser("managed-user", "managed-password");
+
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+        page.getByLabel("查看用户详情：managed-user").click();
+
+        var details = page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("用户详情"));
+        assertThat(details.getByLabel("用户名")).hasValue("managed-user");
+        assertThat(details.getByLabel("状态")).hasValue("启用");
+        details.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("关闭")).click();
+
+        page.getByLabel("停用用户：managed-user").click();
+        var confirmation = page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("停用用户"));
+        assertThat(confirmation.getByText("该用户将无法登录。",
+                new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).isVisible();
+        confirmation.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("取消")).click();
+        org.assertj.core.api.Assertions.assertThat(userIsEnabled("managed-user")).isTrue();
+
+        page.getByLabel("停用用户：managed-user").click();
+        page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("停用用户"))
+                .getByRole(AriaRole.BUTTON,
+                        new com.microsoft.playwright.Locator.GetByRoleOptions().setName("停用")).click();
+        assertThat(page.getByText("用户已停用。", new Page.GetByTextOptions().setExact(true))).isVisible();
+        org.assertj.core.api.Assertions.assertThat(page.getByRole(AriaRole.DIALOG,
+                new Page.GetByRoleOptions().setName("停用用户")).count()).isZero();
+        waitUntil(() -> !userIsEnabled("managed-user"));
+    }
+
+    @Test
+    void roleDetailsPresentReadableRoleMetadata() {
+        createRole("role-details", "system:user:read");
+
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/roles");
+        page.getByLabel("查看角色详情：role-details").click();
+
+        var details = page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("角色详情"));
+        assertThat(details.getByLabel("角色代码")).hasValue("role-details");
+        assertThat(details.getByLabel("权限数量")).hasValue("1");
+    }
+
+    @Test
     void emptyCustomerWorkspaceShowsTheGridEmptyPresentation() {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/customers");
@@ -299,6 +347,12 @@ class BrowserE2EIT {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("保存")).click();
 
         assertThat(page.getByText("Acme E2E", new Page.GetByTextOptions().setExact(true))).isVisible();
+        page.getByLabel("查看客户详情：Acme E2E").click();
+        var details = page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("客户详情"));
+        assertThat(details.getByLabel("名称")).hasValue("Acme E2E");
+        assertThat(details.getByLabel("邮箱")).hasValue("contact@acme-e2e.test");
+        details.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("关闭")).click();
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("客户附件")).click();
         page.locator("input[type=file]").setInputFiles(new FilePayload("brief.txt", "text/plain",
                 "attachment content".getBytes(StandardCharsets.UTF_8)));
@@ -312,7 +366,13 @@ class BrowserE2EIT {
         assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).isVisible();
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除客户")).click();
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("删除客户"))).isVisible();
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("取消")).click();
+        assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).isVisible();
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除客户")).click();
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除").setExact(true)).click();
+        assertThat(page.getByText("客户已删除。", new Page.GetByTextOptions().setExact(true))).isVisible();
+        org.assertj.core.api.Assertions.assertThat(page.getByRole(AriaRole.DIALOG,
+                new Page.GetByRoleOptions().setName("删除客户")).count()).isZero();
         assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).not().isVisible();
     }
 
@@ -421,6 +481,11 @@ class BrowserE2EIT {
                 where action_code = ? and target_id = ? and outcome = 'SUCCESS'
                 """, Long.class, actionCode, targetId);
         return entries == 1;
+    }
+
+    private boolean userIsEnabled(String username) {
+        var enabled = jdbcTemplate.queryForObject("select enabled from users where username = ?", Boolean.class, username);
+        return Boolean.TRUE.equals(enabled);
     }
 
     private void waitUntil(BooleanSupplier condition) {

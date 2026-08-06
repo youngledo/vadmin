@@ -2,7 +2,6 @@ package io.github.vaadinadminstarter.app.views;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
@@ -24,8 +23,11 @@ import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.error.BusinessFailure;
 import io.github.vaadinadminstarter.contracts.file.FileStorage;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
+import io.github.vaadinadminstarter.flow.patterns.ConfirmationDialog;
+import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
 import io.github.vaadinadminstarter.flow.patterns.EditorDialog;
 import io.github.vaadinadminstarter.flow.patterns.FlowFileUpload;
+import io.github.vaadinadminstarter.flow.patterns.OperationFeedback;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
@@ -46,6 +48,7 @@ public final class CustomersView extends SecuredView {
     private final Grid<Customer> grid = new Grid<>(Customer.class, false);
     private final TextField filter = new TextField("搜索");
     private final PagedGrid<Customer> pages;
+    private final OperationFeedback feedback = new OperationFeedback();
 
     public CustomersView(SecurityContextCurrentUserProvider currentUser, AuthorizationService authorization,
                          CustomerService customers, FileStorage fileStorage) {
@@ -87,6 +90,9 @@ public final class CustomersView extends SecuredView {
     }
 
     private HorizontalLayout actions(Customer customer, AuthorizationService authorization) {
+        var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(customer));
+        details.setTooltipText("查看客户详情");
+        details.setAriaLabel("查看客户详情：" + customer.name());
         var edit = new Button(VaadinIcon.EDIT.create(), event -> edit(customer));
         edit.setTooltipText("编辑客户");
         edit.setAriaLabel("编辑客户");
@@ -98,7 +104,19 @@ public final class CustomersView extends SecuredView {
         var attachments = new Button(VaadinIcon.PAPERCLIP.create(), event -> showAttachments(customer, authorization));
         attachments.setTooltipText("客户附件");
         attachments.setAriaLabel("客户附件");
-        return new HorizontalLayout(edit, attachments, delete);
+        var actions = new HorizontalLayout(details, edit, attachments, delete);
+        actions.setPadding(false);
+        actions.setSpacing(true);
+        return actions;
+    }
+
+    private void showDetails(Customer customer) {
+        var dialog = new DetailDialog("客户详情");
+        dialog.getCloseAction().setText("关闭");
+        dialog.addField("名称", customer.name());
+        dialog.addField("邮箱", customer.email());
+        dialog.addField("状态", customer.active() ? "启用" : "停用");
+        dialog.open();
     }
 
     private void edit(Customer customer) {
@@ -129,6 +147,7 @@ public final class CustomersView extends SecuredView {
                 }
                 dialog.close();
                 pages.refresh();
+                feedback.success(customer == null ? "客户已创建。" : "客户已更新。");
             } catch (BusinessFailure failure) {
                 ViewBusinessFailureHandler.handle(failure,
                         validationFailure -> dialog.showValidationMessage(customerValidationMessage(validationFailure)));
@@ -139,11 +158,12 @@ public final class CustomersView extends SecuredView {
     }
 
     private void confirmDelete(Customer customer) {
-        var confirmation = new ConfirmDialog("删除客户", "删除后无法恢复。", "删除", event -> {
+        var confirmation = new ConfirmationDialog("删除客户", "删除后无法恢复。", "删除", () -> {
             customers.delete(requireCurrentUser(), customer.id());
             pages.refresh();
+            feedback.success("客户已删除。");
         });
-        confirmation.setCancelable(true);
+        confirmation.getCancelAction().setText("取消");
         confirmation.open();
     }
 
@@ -167,6 +187,7 @@ public final class CustomersView extends SecuredView {
                     metadata.fileName(), metadata.contentType(), new ByteArrayInputStream(content));
             customers.attach(requireCurrentUser(), customer.id(), stored);
             attachments.setItems(customers.attachments(requireCurrentUser(), customer.id()));
+            feedback.success("附件已上传。");
         }));
         upload.setAcceptedFileTypes("text/plain", ".txt", "application/pdf", ".pdf", "image/png", ".png",
                 "image/jpeg", ".jpg", ".jpeg");

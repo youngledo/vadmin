@@ -17,7 +17,6 @@ public final class DetailDialog extends Dialog {
         getElement().setAttribute("aria-label", title);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("40em", 2));
-        closeAction.getElement().setAttribute("aria-label", "Close details");
 
         var footerActions = new HorizontalLayout(closeAction);
         footerActions.setPadding(false);

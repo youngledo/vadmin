@@ -1,6 +1,7 @@
 package io.github.vaadinadminstarter.app.views;
 
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -37,9 +38,28 @@ public final class HomeView extends VerticalLayout {
     }
 
     private Anchor shortcut(PageDefinition page) {
-        var shortcut = new Anchor(page.route(), titleFor(page));
-        shortcut.getElement().setAttribute("aria-label", titleFor(page));
+        var title = titleFor(page);
+        var shortcut = new Anchor(page.route());
+        shortcut.getElement().setAttribute("aria-label", title);
+        shortcut.getElement().setAttribute("data-testid", "workplace-entry");
+        shortcut.addClassName("admin-workplace-entry");
+        var entryTitle = new Span(title);
+        entryTitle.addClassName("admin-workplace-entry-title");
+        var intent = new Span(intentFor(page));
+        intent.addClassName("admin-workplace-entry-intent");
+        shortcut.add(new Div(entryTitle, intent));
         return shortcut;
+    }
+
+    private String intentFor(PageDefinition page) {
+        return switch (page.pageId()) {
+            case "system-users" -> "管理可登录账户及其启用状态。";
+            case "system-roles" -> "查看角色并授予已登记的系统权限。";
+            case "system-permissions" -> "查阅受系统管理的权限目录。";
+            case "system-audit" -> "查看已记录的管理操作审计日志。";
+            case "customers" -> "维护客户档案和受控附件。";
+            default -> "进入已授权的管理工作区。";
+        };
     }
 
     private String titleFor(PageDefinition page) {

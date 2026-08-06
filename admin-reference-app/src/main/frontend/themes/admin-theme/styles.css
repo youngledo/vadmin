@@ -163,6 +163,44 @@ vaadin-menu-bar-button:focus-visible {
   max-width: none;
 }
 
+.admin-workplace-entry {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  box-sizing: border-box;
+  color: var(--admin-text);
+  display: block;
+  max-width: 42rem;
+  padding: var(--admin-space-standard);
+  text-decoration: none;
+  width: 100%;
+}
+
+.admin-workplace-entry:hover {
+  border-color: var(--admin-primary);
+  color: var(--admin-text);
+}
+
+.admin-workplace-entry:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+.admin-workplace-entry-title,
+.admin-workplace-entry-intent {
+  display: block;
+}
+
+.admin-workplace-entry-title {
+  font-weight: 600;
+}
+
+.admin-workplace-entry-intent {
+  color: var(--admin-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
 @media (max-width: 44rem) {
   .admin-shell-header {
     gap: var(--admin-space-compact);
