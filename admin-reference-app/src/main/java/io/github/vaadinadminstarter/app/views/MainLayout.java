@@ -129,7 +129,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private Component[] navigationGroup(String label, SideNavItem... items) {
         var section = new Span(label);
         section.addClassName("admin-drawer-section");
-        var navigation = new SideNav(label);
+        var navigation = new SideNav();
         navigation.getElement().setAttribute("aria-label", label);
         navigation.addClassName("admin-drawer-nav");
         navigation.addItem(items);

@@ -12,6 +12,7 @@ import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.FilePayload;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.AfterAll;
@@ -138,6 +139,17 @@ class BrowserE2EIT {
         var currentNavigationItem = page.locator("vaadin-side-nav-item[current]");
         assertThat(currentNavigationItem).isVisible();
         org.assertj.core.api.Assertions.assertThat(currentNavigationItem.getAttribute("path")).isEqualTo("users");
+    }
+
+    @Test
+    void authenticatedAdministratorSeesEachNavigationGroupHeadingOnce() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+        assertThat(page.locator("vaadin-side-nav")).hasCount(3);
+
+        assertNavigationGroupHeadingOccursOnce("工作空间");
+        assertNavigationGroupHeadingOccursOnce("系统管理");
+        assertNavigationGroupHeadingOccursOnce("客户管理");
     }
 
     @Test
@@ -280,6 +292,15 @@ class BrowserE2EIT {
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(title))).isVisible();
         assertThat(page.locator("[data-testid=" + route + "-toolbar]")).isVisible();
         assertThat(page.locator("[data-testid=" + route + "-workspace] vaadin-grid")).isVisible();
+    }
+
+    private void assertNavigationGroupHeadingOccursOnce(String heading) {
+        var occurrenceCount = Stream.concat(
+                        page.locator(".admin-drawer-section").allInnerTexts().stream(),
+                        page.locator("vaadin-side-nav").allInnerTexts().stream())
+                .mapToInt(text -> text.split(heading, -1).length - 1)
+                .sum();
+        org.assertj.core.api.Assertions.assertThat(occurrenceCount).isEqualTo(1);
     }
 
     private void grantPermission(String roleCode, String permissionCode) {
