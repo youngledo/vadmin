@@ -1,6 +1,6 @@
 # 扩展指南
 
-[English](../extension-guide.md) | 简体中文
+[English](../en/extension-guide.md) | 简体中文
 
 本项目是模块化单体。`admin-contracts` 定义 Java 级端口和共享模型，
 `admin-platform` 定义经过授权的业务用例。Flow、Spring Security、JPA 和 Spring Boot

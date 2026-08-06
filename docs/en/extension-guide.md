@@ -1,6 +1,6 @@
 # Extension Guide
 
-English | [简体中文](zh-CN/extension-guide.md)
+English | [简体中文](../zh-CN/extension-guide.md)
 
 This project is a modular monolith. `admin-contracts` defines Java-level ports
 and shared models, while `admin-platform` defines authorized business use

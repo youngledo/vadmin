@@ -1,6 +1,6 @@
 # Vaadin Admin Starter - 架构设计
 
-[English](../architecture.md) | 简体中文
+[English](../en/architecture.md) | 简体中文
 
 状态：草案 0.1  
 日期：2026-08-04

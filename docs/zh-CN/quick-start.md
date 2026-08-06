@@ -1,6 +1,6 @@
 # 快速开始
 
-[English](../quick-start.md) | 简体中文
+[English](../en/quick-start.md) | 简体中文
 
 Vaadin Admin Starter 是面向 Java 团队、用于构建内部业务应用的 Vaadin Flow
 脚手架。首个版本使用 Spring Boot 作为运行时，并使用 PostgreSQL 作为数据库。

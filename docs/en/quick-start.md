@@ -1,6 +1,6 @@
 # Quick Start
 
-English | [简体中文](zh-CN/quick-start.md)
+English | [简体中文](../zh-CN/quick-start.md)
 
 Vaadin Admin Starter is a Vaadin Flow starter for Java teams building internal
 business applications. The first release uses Spring Boot as its runtime and

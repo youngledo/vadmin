@@ -1,6 +1,6 @@
 # Vaadin Admin Starter - Architecture Design
 
-English | [简体中文](zh-CN/architecture.md)
+English | [简体中文](../zh-CN/architecture.md)
 
 Status: Draft 0.1  
 Date: 2026-08-04
