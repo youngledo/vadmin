@@ -45,8 +45,10 @@ SPRING_PROFILES_ACTIVE=prod java -jar admin-reference-app/target/admin-reference
 ```
 
 访问 `http://localhost:8080`，使用用户名 `admin` 和
-`APP_BOOTSTRAP_PASSWORD` 的值登录。`local-admin-change-me` 仅为本地示例；登录后请
-立即替换密码。生产环境必须通过受保护的密钥管理机制注入该变量。
+`APP_BOOTSTRAP_PASSWORD` 的值登录。在初始化空的生产数据库之前，请通过受保护的密钥
+管理机制将此变量设置为高强度值。`local-admin-change-me` 仅为本地示例。应用只会在创建
+第一个 `admin` 账户时读取 `APP_BOOTSTRAP_PASSWORD`；之后修改该变量不会更改或重置已有
+密码。参考应用当前不提供密码管理操作。
 
 可执行 JAR 默认不包含 Vaadin 开发服务器，因此不要使用 `development` profile 启动它。
 如需使用 Flow 开发模式，请通过 Maven 运行应用并确保 `vaadin-dev` 依赖可用；不要把

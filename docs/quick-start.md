@@ -51,9 +51,13 @@ SPRING_PROFILES_ACTIVE=prod java -jar admin-reference-app/target/admin-reference
 ```
 
 Open `http://localhost:8080` and sign in as `admin` with the value of
-`APP_BOOTSTRAP_PASSWORD`. `local-admin-change-me` is only a local example;
-replace the password immediately after signing in. Production environments
-must inject this variable through a protected secret-management mechanism.
+`APP_BOOTSTRAP_PASSWORD`. Before initializing an empty production database,
+set this variable to a strong value through a protected secret-management
+mechanism. `local-admin-change-me` is only a local example. The application
+reads `APP_BOOTSTRAP_PASSWORD` only while creating the first `admin` account;
+changing the variable later does not change or reset an existing password. The
+reference application does not currently provide a password-management
+operation.
 
 The executable JAR does not include the Vaadin development server by default,
 so do not start it with the `development` profile. To use Flow development
