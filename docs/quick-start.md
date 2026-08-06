@@ -1,17 +1,21 @@
-# 快速开始
+# Quick Start
 
-Vaadin Admin Starter 是供 Java 团队构建内部业务系统的 Vaadin Flow
-脚手架。首个版本的运行时为 Spring Boot，数据库为 PostgreSQL。
+English | [简体中文](zh-CN/quick-start.md)
 
-## 前置条件
+Vaadin Admin Starter is a Vaadin Flow starter for Java teams building internal
+business applications. The first release uses Spring Boot as its runtime and
+PostgreSQL as its database.
 
-- JDK 25。
-- Docker Desktop（用于 PostgreSQL 或完整 Compose 栈）。
-- 网络可访问 Maven Central；项目自带 Maven 4 RC6 Wrapper。
+## Prerequisites
 
-## 从源码构建并运行
+- JDK 25.
+- Docker Desktop, for PostgreSQL or the complete Compose stack.
+- Network access to Maven Central. The project includes a Maven 4 RC6 Wrapper.
 
-先准备本地环境变量。示例文件仅包含可公开的本地开发值：
+## Build And Run From Source
+
+First, prepare local environment variables. The example file contains only
+public values intended for local development:
 
 ```bash
 cp .env.example .env
@@ -26,41 +30,51 @@ SPRING_PROFILES_ACTIVE=development \
   ./mvnw -B -ntp -pl admin-reference-app -am spring-boot:run
 ```
 
-开发模式下访问 `http://localhost:8080`，使用 `admin` / `change-me` 登录。此启动路径
-保留 Vaadin 开发服务器，用于修改 Java Flow 视图、`admin-theme` CSS 或主题配置后的
-本地迭代。开发模式的密码只适用于本机空数据库，不能用于共享环境。
+In development mode, open `http://localhost:8080` and sign in with `admin` /
+`change-me`. This startup path keeps the Vaadin development server available
+for local iteration after changes to Java Flow views, `admin-theme` CSS, or
+theme configuration. The development-mode password is only suitable for an
+empty database on the local machine and must not be used in a shared
+environment.
 
-参考应用使用 `ApplicationShell` 注册名为 `admin-theme` 的 Flow 主题；登录后可从当前
-用户菜单切换浅色和深色模式。该选择只保留在当前 Vaadin session，新的会话会恢复
-浅色模式。
+The reference application uses `ApplicationShell` to register the Flow theme
+named `admin-theme`. After signing in, the current-user menu can switch between
+light and dark modes. The choice is retained only for the current Vaadin
+session; a new session returns to light mode.
 
-使用生产构建和外部化引导密码时，改用以下命令：
+For a production build with an externalized bootstrap password, use these
+commands instead:
 
 ```bash
 ./mvnw -B -ntp -Pproduction -pl admin-reference-app -am package -DskipTests
 SPRING_PROFILES_ACTIVE=prod java -jar admin-reference-app/target/admin-reference-app-0.1.0-SNAPSHOT.jar
 ```
 
-访问 `http://localhost:8080`，使用用户名 `admin` 和
-`APP_BOOTSTRAP_PASSWORD` 的值登录。这里的 `local-admin-change-me` 仅为本地示例；
-登录后立刻替换密码。生产环境必须由受保护的密钥机制注入该变量。
+Open `http://localhost:8080` and sign in as `admin` with the value of
+`APP_BOOTSTRAP_PASSWORD`. `local-admin-change-me` is only a local example;
+replace the password immediately after signing in. Production environments
+must inject this variable through a protected secret-management mechanism.
 
-可执行 JAR 默认不包含 Vaadin 开发服务器，因此不要使用 `development` profile 启动
-它。需要使用 Flow 开发模式时，从 Maven 运行应用并保留 `vaadin-dev` 依赖，而不要
-将开发模式作为部署 JAR 的运行方式。
+The executable JAR does not include the Vaadin development server by default,
+so do not start it with the `development` profile. To use Flow development
+mode, run the application through Maven with the `vaadin-dev` dependency
+available; do not use development mode as the runtime for a deployment JAR.
 
-## 使用 Compose 启动完整栈
+## Start The Complete Stack With Compose
 
 ```bash
 cp .env.example .env
 docker compose --env-file .env up --build
 ```
 
-Compose 会等待 PostgreSQL 的健康检查通过后再启动应用。首次对空数据库启动时，
-应用创建 `admin` 用户，并将 `APP_BOOTSTRAP_PASSWORD` 设为其密码。停止服务但保留
-命名卷不会重新创建管理员或重置密码。
+Compose waits for the PostgreSQL health check before starting the application.
+On its first startup against an empty database, the application creates the
+`admin` user and assigns `APP_BOOTSTRAP_PASSWORD` as its password. Stopping the
+services while retaining the named volume does not recreate the administrator
+or reset its password.
 
-清除本地演示数据会删除数据库与附件，执行前请确认没有需要保留的数据：
+Removing local demonstration data deletes the database and attachments. Ensure
+that there is no data to retain before running:
 
 ```bash
 docker compose down --volumes
