@@ -130,7 +130,8 @@ public final class CustomersView extends SecuredView {
                 dialog.close();
                 pages.refresh();
             } catch (BusinessFailure failure) {
-                dialog.showValidationMessage(customerValidationMessage(failure));
+                ViewBusinessFailureHandler.handle(failure,
+                        validationFailure -> dialog.showValidationMessage(customerValidationMessage(validationFailure)));
             }
         });
         dialog.addField(name, email, active);

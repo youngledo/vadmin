@@ -115,7 +115,8 @@ public final class UsersView extends SecuredView {
                 dialog.close();
                 pages.refresh();
             } catch (BusinessFailure failure) {
-                dialog.showValidationMessage(userValidationMessage(failure));
+                ViewBusinessFailureHandler.handle(failure,
+                        validationFailure -> dialog.showValidationMessage(userValidationMessage(validationFailure)));
             }
         });
         dialog.getCancelAction().setText("取消");
