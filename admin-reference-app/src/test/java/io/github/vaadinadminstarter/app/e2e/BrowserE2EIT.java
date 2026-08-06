@@ -135,7 +135,9 @@ class BrowserE2EIT {
 
         assertThat(page.getByText("Vaadin Admin Starter", new Page.GetByTextOptions().setExact(true))).isVisible();
         assertThat(page.getByLabel("当前用户菜单")).isVisible();
-        assertThat(page.locator("vaadin-side-nav-item[current]")).hasText("用户");
+        var currentNavigationItem = page.locator("vaadin-side-nav-item[current]");
+        assertThat(currentNavigationItem).isVisible();
+        org.assertj.core.api.Assertions.assertThat(currentNavigationItem.getAttribute("path")).isEqualTo("users");
     }
 
     @Test
@@ -196,7 +198,8 @@ class BrowserE2EIT {
         page.navigate(baseUrl() + "/users");
 
         var workspace = page.locator("[data-testid=users-workspace]");
-        workspace.getByText("admin", new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true)).click();
+        workspace.getByRole(AriaRole.CHECKBOX, new com.microsoft.playwright.Locator.GetByRoleOptions()
+                .setName("Select Row")).click();
 
         assertThat(workspace.getByText("1 selected",
                 new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).isVisible();
