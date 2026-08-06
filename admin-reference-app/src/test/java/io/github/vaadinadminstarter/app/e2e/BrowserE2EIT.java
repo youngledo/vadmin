@@ -139,6 +139,15 @@ class BrowserE2EIT {
     }
 
     @Test
+    void anonymousVisitorCanLoadLoginWithoutAuthenticatedShellControls() {
+        page.navigate(baseUrl() + "/login");
+
+        assertThat(page.locator("vaadin-login-form")).isVisible();
+        org.assertj.core.api.Assertions.assertThat(page.getByLabel("当前用户菜单").count()).isZero();
+        org.assertj.core.api.Assertions.assertThat(page.locator("vaadin-side-nav").count()).isZero();
+    }
+
+    @Test
     void unassignedUserCannotOpenUsersRoute() {
         createUser("unassigned", "unassigned-password");
 

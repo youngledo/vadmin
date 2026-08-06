@@ -32,31 +32,35 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     private final Span currentLocation = new Span("工作台");
     private final MenuItem themeModeItem;
+    private final boolean authenticated;
 
     public MainLayout(PageRegistry pages, SecurityContextCurrentUserProvider currentUser,
                       AuthorizationService authorization) {
-        setPrimarySection(Section.DRAWER);
-        setDrawerOpened(true);
-
-        var toggle = new DrawerToggle();
-        toggle.setAriaLabel("切换导航");
-        toggle.setTooltipText("切换导航");
         var productMark = new Span(VaadinIcon.CUBE.create());
         productMark.addClassName("admin-product-mark");
         var productName = new Span("Vaadin Admin Starter");
         productName.addClassName("admin-shell-brand");
         currentLocation.addClassName("admin-shell-location");
 
-        var user = currentUser.currentUser().orElseThrow();
+        var currentUserValue = currentUser.currentUser();
+        authenticated = currentUserValue.isPresent();
+        if (!authenticated) {
+            themeModeItem = null;
+            addHeader(productMark, productName);
+            return;
+        }
+
+        setPrimarySection(Section.DRAWER);
+        setDrawerOpened(true);
+        var toggle = new DrawerToggle();
+        toggle.setAriaLabel("切换导航");
+        toggle.setTooltipText("切换导航");
+        var user = currentUserValue.orElseThrow();
         var userMenu = createUserMenu(user.username());
         themeModeItem = userMenu.getItems().getFirst().getSubMenu().addItem("", event -> toggleThemeMode());
         updateThemeModeItem();
 
-        var header = new HorizontalLayout(toggle, productMark, productName, currentLocation, userMenu);
-        header.setWidthFull();
-        header.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        header.addClassName("admin-shell-header");
-        addToNavbar(header);
+        addHeader(toggle, productMark, productName, currentLocation, userMenu);
 
         var visiblePages = pages.visibleTo(user, authorization);
         var drawer = new VerticalLayout();
@@ -73,8 +77,19 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         addToDrawer(drawer);
     }
 
+    private void addHeader(Component... components) {
+        var header = new HorizontalLayout(components);
+        header.setWidthFull();
+        header.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        header.addClassName("admin-shell-header");
+        addToNavbar(header);
+    }
+
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
+        if (!authenticated) {
+            return;
+        }
         var path = event.getLocation().getPath();
         currentLocation.setText(titleForRoute(path));
         Component content = getContent();
