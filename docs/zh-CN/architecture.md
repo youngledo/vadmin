@@ -67,6 +67,7 @@ ApplicationShell (@Theme("admin-theme"))
        -> PageRegistry.visibleTo(currentUser, authorization)
        -> protected Flow views
             -> PageHeader / PageToolbar / DataWorkspace / EditorDialog
+            -> DetailDialog / ConfirmationDialog / OperationFeedback
 ```
 
 `ApplicationShell` 是 Flow 的 `AppShellConfigurator`；它是放置应用级 `@Theme` 注解的
@@ -83,6 +84,14 @@ ApplicationShell (@Theme("admin-theme"))
 `admin-platform`，但不得导入 Spring Framework、Spring Boot、Spring Security、JPA、Flyway、
 参考应用或其业务类型。ArchUnit 强制执行这一边界中关于框架导入的部分；模块依赖方向使
 参考应用位于可复用模块之外。
+
+Phase 2 在 `admin-flow` 中新增三个仅使用 Java 的交互模式。`DetailDialog` 通过响应式、
+只读表单呈现已经完成授权的实体数据。`ConfirmationDialog` 让具有后果的命令必须经由显式
+确认，并在忙碌期间保持命令和关闭控件不可用，同时呈现本地命令失败。`OperationFeedback`
+在本地呈现成功命令；它只将校验失败交给调用方提供的本地处理器，其他失败均原样重新抛出，
+以便 `FlowErrorMapper` 继续拥有全局错误处理职责。这些模式不决定权限，也不调用用例、
+持久化、Spring API 或参考应用的业务类型。组合应用中的视图在其外部提供授权、命令和领域
+文案。
 
 ## 3. 授权和导航
 

@@ -71,6 +71,7 @@ ApplicationShell (@Theme("admin-theme"))
        -> PageRegistry.visibleTo(currentUser, authorization)
        -> protected Flow views
             -> PageHeader / PageToolbar / DataWorkspace / EditorDialog
+            -> DetailDialog / ConfirmationDialog / OperationFeedback
 ```
 
 `ApplicationShell` is the Flow `AppShellConfigurator`; it is the required
@@ -94,6 +95,18 @@ Spring Boot, Spring Security, JPA, Flyway, the reference application, or its
 business types. ArchUnit enforces the framework-import portion of this
 boundary; module dependency direction keeps the reference application outside
 the reusable modules.
+
+Phase 2 adds three Java-only interaction patterns to `admin-flow`.
+`DetailDialog` presents already-authorized entity data in a responsive,
+read-only form. `ConfirmationDialog` makes consequential commands explicit,
+keeps command and close controls unavailable while busy, and reports local
+command failures. `OperationFeedback` presents successful commands locally;
+it delegates only validation failures to a supplied local handler and rethrows
+all other failures unchanged so `FlowErrorMapper` retains global error-handling
+ownership. These patterns neither decide permissions nor invoke use cases,
+persistence, Spring APIs, or reference-application business types. Views in
+the composition application provide the authorization, command, and domain
+copy around them.
 
 ## 3. Authorization and Navigation
 
