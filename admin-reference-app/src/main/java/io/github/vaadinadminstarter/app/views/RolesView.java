@@ -66,6 +66,7 @@ public final class RolesView extends SecuredView {
         dialog.getCloseAction().setText("关闭");
         dialog.addField("角色代码", role.code());
         dialog.addField("权限数量", Long.toString(role.permissionCount()));
+        dialog.addField("已授予权限", String.join(", ", role.permissionCodes()));
         dialog.open();
     }
 

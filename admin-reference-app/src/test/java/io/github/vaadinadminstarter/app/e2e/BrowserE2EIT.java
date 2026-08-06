@@ -305,6 +305,7 @@ class BrowserE2EIT {
         var details = page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("角色详情"));
         assertThat(details.getByLabel("角色代码")).hasValue("role-details");
         assertThat(details.getByLabel("权限数量")).hasValue("1");
+        assertThat(details.getByLabel("已授予权限")).hasValue("system:user:read");
     }
 
     @Test

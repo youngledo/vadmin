@@ -40,22 +40,27 @@ public class AdministrationQueryService {
     @Transactional(readOnly = true)
     public List<RoleRow> roles() {
         return jdbcTemplate.query("""
-                select role.id, role.code, count(grant_item.permission_id) as permission_count
+                select role.id, role.code, count(grant_item.permission_id) as permission_count,
+                       coalesce(string_agg(permission.code, ',' order by permission.code), '') as permission_codes
                 from roles role left join role_permissions grant_item on grant_item.role_id = role.id
+                left join permissions permission on permission.id = grant_item.permission_id
                 group by role.id, role.code order by role.code
                 """, (result, row) -> new RoleRow(result.getObject("id", UUID.class), result.getString("code"),
-                result.getLong("permission_count")));
+                result.getLong("permission_count"), permissionCodes(result.getString("permission_codes"))));
     }
 
     @Transactional(readOnly = true)
     public PagedResult<RoleRow> roles(PagedQuery query) {
         var total = jdbcTemplate.queryForObject("select count(*) from roles", Long.class);
         var items = jdbcTemplate.query("""
-                        select role.id, role.code, count(grant_item.permission_id) as permission_count
+                        select role.id, role.code, count(grant_item.permission_id) as permission_count,
+                               coalesce(string_agg(permission.code, ',' order by permission.code), '') as permission_codes
                         from roles role left join role_permissions grant_item on grant_item.role_id = role.id
+                        left join permissions permission on permission.id = grant_item.permission_id
                         group by role.id, role.code order by role.code limit ? offset ?
                         """, (result, row) -> new RoleRow(result.getObject("id", UUID.class), result.getString("code"),
-                        result.getLong("permission_count")), query.pageSize(), offset(query));
+                        result.getLong("permission_count"), permissionCodes(result.getString("permission_codes"))),
+                query.pageSize(), offset(query));
         return new PagedResult<>(items, total);
     }
 
@@ -100,8 +105,16 @@ public class AdministrationQueryService {
         return Math.multiplyExact(query.page(), query.pageSize());
     }
 
+    private static List<String> permissionCodes(String commaSeparatedCodes) {
+        return commaSeparatedCodes.isBlank() ? List.of() : List.of(commaSeparatedCodes.split(","));
+    }
+
     public record UserRow(UUID id, String username, boolean enabled, long authVersion) { }
-    public record RoleRow(UUID id, String code, long permissionCount) { }
+    public record RoleRow(UUID id, String code, long permissionCount, List<String> permissionCodes) {
+        public RoleRow {
+            permissionCodes = List.copyOf(permissionCodes);
+        }
+    }
     public record PermissionRow(String code, boolean systemManaged) { }
     public record AuditRow(Instant occurredAt, String action, String targetType, String targetId, String outcome,
                            String correlationId) { }
