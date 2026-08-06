@@ -10,7 +10,7 @@ Chinese-speaking Java teams without mixing languages inside a document body.
 
 ## Language Model
 
-- English is the canonical documentation language under `docs/`.
+- English is the canonical documentation language under `docs/en/`.
 - Simplified Chinese is a complete user-documentation mirror under
   `docs/zh-CN/`.
 - The repository-root `README.md` is a concise bilingual entry point. It links
@@ -25,13 +25,13 @@ The user-facing documentation set is translated and kept structurally paired:
 
 | English source | Chinese mirror |
 | --- | --- |
-| `docs/architecture.md` | `docs/zh-CN/architecture.md` |
-| `docs/quick-start.md` | `docs/zh-CN/quick-start.md` |
-| `docs/extension-guide.md` | `docs/zh-CN/extension-guide.md` |
-| `docs/deployment.md` | `docs/zh-CN/deployment.md` |
-| `docs/security.md` | `docs/zh-CN/security.md` |
-| `docs/contributing.md` | `docs/zh-CN/contributing.md` |
-| `docs/requirements.md` | `docs/zh-CN/requirements.md` |
+| `docs/en/architecture.md` | `docs/zh-CN/architecture.md` |
+| `docs/en/quick-start.md` | `docs/zh-CN/quick-start.md` |
+| `docs/en/extension-guide.md` | `docs/zh-CN/extension-guide.md` |
+| `docs/en/deployment.md` | `docs/zh-CN/deployment.md` |
+| `docs/en/security.md` | `docs/zh-CN/security.md` |
+| `docs/en/contributing.md` | `docs/zh-CN/contributing.md` |
+| `docs/en/requirements.md` | `docs/zh-CN/requirements.md` |
 
 Architecture diagrams remain shared assets in `docs/diagrams/`. They are not
 copied for each language. Their surrounding explanatory prose is translated.
@@ -66,7 +66,9 @@ documentation navigation and are not translated in this migration.
    language link.
 2. The README provides clear bilingual entry navigation.
 3. Included document bodies do not mix English and Chinese explanatory prose.
-4. Internal Markdown links and diagram references resolve from both language
+4. User-facing documents are stored only in `docs/en/` and `docs/zh-CN/`, not
+   alongside shared assets and engineering history at the `docs/` root.
+5. Internal Markdown links and diagram references resolve from both language
    trees.
-5. Existing Maven, Compose, security, architecture, and extension instructions
+6. Existing Maven, Compose, security, architecture, and extension instructions
    remain technically accurate.
