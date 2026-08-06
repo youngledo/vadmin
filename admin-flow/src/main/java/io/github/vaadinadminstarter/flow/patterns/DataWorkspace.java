@@ -43,7 +43,9 @@ public final class DataWorkspace<T> extends VerticalLayout {
         status.getElement().setAttribute("aria-live", "polite");
         status.setVisible(false);
         grid.setSizeFull();
-        grid.addSelectionListener(event -> updateSelection(event.getAllSelectedItems().size()));
+        if (grid.getSelectionMode() != Grid.SelectionMode.NONE) {
+            grid.addSelectionListener(event -> updateSelection(event.getAllSelectedItems().size()));
+        }
         add(selectionBar, status, grid);
         updateSelection(0);
     }

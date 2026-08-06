@@ -164,5 +164,16 @@ class DataWorkspaceTest {
         assertThat(workspace.isSelectionBarVisible()).isFalse();
     }
 
+    @Test
+    void supportsNonSelectableGridsWithoutSelectionState() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
+
+        var workspace = new DataWorkspace<>(grid);
+
+        assertThat(workspace.getSelectedItemCount()).isZero();
+        assertThat(workspace.getSelectionSummary()).isEqualTo("0 selected");
+    }
+
     private record Row(String name) { }
 }
