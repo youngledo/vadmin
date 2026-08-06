@@ -189,7 +189,7 @@ points.
 | Test layer | Scope |
 |---|---|
 | Unit | contracts and platform authorization, RBAC invariants, audit event construction |
-| Architecture | ArchUnit checks that core modules do not import Spring, JPA, Flyway, or concrete adapters |
+| Architecture | ArchUnit checks that core modules do not import Spring, JPA, Flyway, or the Spring JPA adapter package |
 | Integration | Testcontainers PostgreSQL validates Flyway, JPA ports, authentication adapters, transactions, and audit writes |
 | Browser E2E | login, desktop and narrow shell navigation, session theme switching, menu filtering, direct route denial, validation and failure presentation, permission change, and sample CRUD path |
 
@@ -211,7 +211,7 @@ catalog, platform use cases, or Flow UI patterns.
 
 The following are project policies and are enforced with tests:
 
-1. Core modules do not import Spring, JPA, Flyway, or adapter packages.
+1. Core modules do not import Spring, JPA, Flyway, or the Spring JPA adapter package.
 2. Flow views call platform use cases, never JPA repositories.
 3. Every protected page and action uses a catalog permission code.
 4. Every platform mutation checks authorization and produces an audit outcome.
