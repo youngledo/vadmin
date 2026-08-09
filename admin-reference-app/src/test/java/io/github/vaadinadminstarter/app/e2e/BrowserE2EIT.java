@@ -283,6 +283,31 @@ class BrowserE2EIT {
         org.assertj.core.api.Assertions.assertThat(darkSurface).isNotEqualTo(lightSurface);
         org.assertj.core.api.Assertions.assertThat(darkText).isNotEqualTo(lightText);
         org.assertj.core.api.Assertions.assertThat(darkSurface).isNotEqualTo(darkText);
+        assertWorkspaceUsesThemeSurface(workspace);
+    }
+
+    @Test
+    void refreshedUsersAndOrdersKeepHeaderControlsAndWorkspacesInVerticalOrder() {
+        signInAs("admin", "change-me");
+
+        page.navigate(baseUrl() + "/users");
+        assertWorkbenchGeometry(true);
+        assertWorkspaceUsesThemeSurface(page.getByTestId("users-workspace"));
+
+        page.navigate(baseUrl() + "/orders");
+        assertWorkbenchGeometry(false);
+        assertWorkspaceUsesThemeSurface(page.getByTestId("orders-workspace"));
+    }
+
+    @Test
+    void emptyWorkspaceRetainsThePageFrameWidth() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/customers");
+
+        var frame = page.locator(".admin-page-frame");
+        var workspace = page.getByTestId("customers-workspace");
+        assertThat(workspace.getByText("暂无数据", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(workspace).hasCSS("width", frame.evaluate("element => getComputedStyle(element).width").toString());
     }
 
     @Test
@@ -609,6 +634,56 @@ class BrowserE2EIT {
         } else {
             assertThat(frame.locator(".admin-page-controls")).hasCount(0);
         }
+    }
+
+    private void assertWorkbenchGeometry(boolean hasControls) {
+        var frame = page.locator(".admin-page-frame");
+        var header = frame.locator(".admin-page-header");
+        var workspace = frame.locator(".admin-page-workspace");
+        var headerBox = header.boundingBox();
+        var workspaceBox = workspace.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(headerBox).as("page header bounding box").isNotNull();
+        org.assertj.core.api.Assertions.assertThat(workspaceBox).as("workspace bounding box").isNotNull();
+        org.assertj.core.api.Assertions.assertThat(headerBox.y + headerBox.height)
+                .as("page header must finish before the workspace begins")
+                .isLessThanOrEqualTo(workspaceBox.y + 1);
+        if (hasControls) {
+            var controlsBox = frame.locator(".admin-page-controls").boundingBox();
+            org.assertj.core.api.Assertions.assertThat(controlsBox).as("page controls bounding box").isNotNull();
+            org.assertj.core.api.Assertions.assertThat(headerBox.y + headerBox.height)
+                    .as("page header must finish before page controls begin")
+                    .isLessThanOrEqualTo(controlsBox.y + 1);
+            org.assertj.core.api.Assertions.assertThat(controlsBox.y + controlsBox.height)
+                    .as("page controls must finish before the workspace begins")
+                    .isLessThanOrEqualTo(workspaceBox.y + 1);
+        }
+    }
+
+    private void assertWorkspaceUsesThemeSurface(Locator workspace) {
+        var expectedSurface = computedThemeColor("background-color", "--admin-surface");
+        var expectedText = computedThemeColor("color", "--admin-text-primary");
+        var background = workspace.evaluate("element => getComputedStyle(element).backgroundColor").toString();
+        var foreground = workspace.evaluate("element => getComputedStyle(element).color").toString();
+        org.assertj.core.api.Assertions.assertThat(background)
+                .as("workspace background")
+                .isEqualTo(expectedSurface);
+        org.assertj.core.api.Assertions.assertThat(foreground)
+                .as("workspace foreground")
+                .isEqualTo(expectedText)
+                .isNotEqualTo(background);
+    }
+
+    private String computedThemeColor(String property, String token) {
+        return page.locator("body").evaluate("""
+                (element, values) => {
+                    const probe = document.createElement('div');
+                    probe.style.setProperty(values.property, `var(${values.token})`);
+                    element.append(probe);
+                    const value = getComputedStyle(probe).getPropertyValue(values.property);
+                    probe.remove();
+                    return value;
+                }
+                """, Map.of("property", property, "token", token)).toString();
     }
 
     private void assertNavigationGroupHeadingOccursOnce(String heading) {

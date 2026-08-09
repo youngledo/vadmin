@@ -31,9 +31,12 @@ its meaning, never for a particular color or size.
 | `--admin-font-family` | Application font stack. |
 | `--admin-space-sm` | Compact, related spacing. |
 | `--admin-space-md` | Standard layout and control spacing. |
+| `--admin-space-lg` | Content-canvas spacing and larger layout separation. |
 | `--admin-utility-size` | Stable square dimension for compact shell utility controls. |
 | `--admin-radius-control` | Standard interactive-control corner radius. |
+| `--admin-radius-surface` | Corner radius for contained work surfaces. |
 | `--admin-elevation-raised` | Shadow for raised application chrome. |
+| `--admin-elevation-workspace` | Reserved elevation for a data workspace surface. |
 
 The reference theme maps Vaadin Lumo variables from these semantic tokens.
 In particular, `--lumo-font-family` is mapped from `--admin-font-family`, and

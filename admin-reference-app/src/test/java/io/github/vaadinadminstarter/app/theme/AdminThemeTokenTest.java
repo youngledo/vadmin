@@ -26,9 +26,12 @@ class AdminThemeTokenTest {
             "font-family",
             "space-sm",
             "space-md",
+            "space-lg",
             "utility-size",
             "radius-control",
-            "elevation-raised");
+            "radius-surface",
+            "elevation-raised",
+            "elevation-workspace");
 
     @Test
     void declaresEverySemanticTokenForLightAndDarkThemes() throws IOException {
@@ -61,6 +64,19 @@ class AdminThemeTokenTest {
         REQUIRED_TOKENS.forEach(token -> assertThat(documentation)
                 .as("documented token %s", token)
                 .contains("`--admin-" + token + "`"));
+    }
+
+    @Test
+    void keepsLoadingEmptyAndFailureSurfacesWithinTheirDataWorkspace() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+
+        assertThat(styles).contains("""
+                .admin-page-workspace > [role="status"] {
+                  box-sizing: border-box;
+                  color: var(--admin-text-secondary);
+                  width: 100%;
+                }
+                """);
     }
 
     private void assertThemeContractMappings(String selectorBlock) {
