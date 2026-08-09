@@ -13,4 +13,10 @@ class ArchitectureTest {
             .that().resideInAnyPackage("..contracts..", "..platform..", "..flow..")
             .should().dependOnClassesThat().resideInAnyPackage(
                     "org.springframework..", "jakarta.persistence..", "org.flywaydb..", "..springjpa..");
+
+    @ArchTest
+    static final ArchRule flow_navigation_does_not_depend_on_reference_app = noClasses()
+            .that().resideInAnyPackage("..flow.navigation..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "org.springframework..", "jakarta.persistence..", "org.flywaydb..", "..app..");
 }
