@@ -5,8 +5,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
@@ -18,9 +18,8 @@ import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "", layout = MainLayout.class)
-@PageTitle("Workplace")
 @PermitAll
-public final class HomeView extends VerticalLayout implements LocaleChangeObserver {
+public final class HomeView extends VerticalLayout implements LocaleChangeObserver, HasDynamicTitle {
     private final AdminModuleRegistry pages;
     private final CurrentUser user;
     private final AuthorizationService authorization;
@@ -43,7 +42,9 @@ public final class HomeView extends VerticalLayout implements LocaleChangeObserv
         updateText();
     }
 
-    @Override public void localeChange(LocaleChangeEvent event) { updateText(); }
+    @Override public void localeChange(LocaleChangeEvent event) { updateText(); updateBrowserTitle(); }
+
+    @Override public String getPageTitle() { return getTranslation("system.home.title"); }
 
     private void updateText() {
         account.setText(getTranslation("system.home.account", user.username()));
@@ -66,4 +67,6 @@ public final class HomeView extends VerticalLayout implements LocaleChangeObserv
         shortcut.add(new Div(entryTitle, intent));
         return shortcut;
     }
+
+    private void updateBrowserTitle() { getUI().ifPresent(ui -> ui.getPage().setTitle(getPageTitle())); }
 }

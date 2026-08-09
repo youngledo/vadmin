@@ -175,6 +175,29 @@ class BrowserE2EIT {
     }
 
     @Test
+    void authenticatedAdministratorCanSwitchAnOpenUsersViewLanguageWithoutNavigation() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("用户"))).isVisible();
+        assertThat(page.getByLabel("搜索用户")).isVisible();
+        assertThat(page.getByRole(AriaRole.COLUMNHEADER, new Page.GetByRoleOptions().setName("用户名"))).isVisible();
+        assertThat(page.getByLabel("查看用户详情：admin")).isVisible();
+        assertThat(page.locator(".admin-shell-location")).hasText("用户");
+        assertThat(page).hasTitle("用户");
+
+        page.getByLabel("语言").click();
+        page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
+
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Users"))).isVisible();
+        assertThat(page.getByLabel("Search users")).isVisible();
+        assertThat(page.getByRole(AriaRole.COLUMNHEADER, new Page.GetByRoleOptions().setName("Username"))).isVisible();
+        assertThat(page.getByLabel("View user details: admin")).isVisible();
+        assertThat(page.locator(".admin-shell-location")).hasText("Users");
+        assertThat(page).hasTitle("Users");
+    }
+
+    @Test
     void narrowShellKeepsNavigationReachable() {
         useNarrowBrowser();
         signInAs("admin", "change-me");

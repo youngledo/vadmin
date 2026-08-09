@@ -1,7 +1,9 @@
 package io.github.vaadinadminstarter.app.views;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
 import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
@@ -12,19 +14,20 @@ import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
 import jakarta.annotation.security.PermitAll;
 
-@PageTitle("Permission catalog")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public final class PermissionsView extends PermissionProtectedView {
+public final class PermissionsView extends PermissionProtectedView implements LocaleChangeObserver, HasDynamicTitle {
     public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:permission:read");
+    private final Grid<AdministrationQueryService.PermissionRow> grid = new Grid<>(AdministrationQueryService.PermissionRow.class, false);
+    private final Grid.Column<AdministrationQueryService.PermissionRow> codeColumn;
+    private final Grid.Column<AdministrationQueryService.PermissionRow> sourceColumn;
 
     public PermissionsView(CurrentUserProvider currentUser, AuthorizationService authorization,
                            AdministrationQueryService queries) {
         super(currentUser, authorization);
-        var grid = new Grid<>(AdministrationQueryService.PermissionRow.class, false);
-        grid.addColumn(AdministrationQueryService.PermissionRow::code).setHeader(getTranslation("system.permissions.code")).setAutoWidth(true);
-        grid.addColumn(permission -> permission.systemManaged() ? getTranslation("system.permissions.system-managed") : getTranslation("system.permissions.custom")).setHeader(getTranslation("system.permissions.source"));
+        codeColumn = grid.addColumn(AdministrationQueryService.PermissionRow::code).setAutoWidth(true);
+        sourceColumn = grid.addColumn(permission -> permission.systemManaged() ? getTranslation("system.permissions.system-managed") : getTranslation("system.permissions.custom"));
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
         new PagedGrid<>(grid, queries::permissions, "code");
@@ -34,7 +37,19 @@ public final class PermissionsView extends PermissionProtectedView {
         workspace.getElement().setAttribute("data-testid", "read-only-workspace");
         add(header, workspace);
         expand(workspace);
+        updateText();
     }
 
     @Override protected PermissionCode requiredPermission() { return REQUIRED_PERMISSION; }
+
+    @Override public void localeChange(LocaleChangeEvent event) { updateText(); grid.getDataProvider().refreshAll(); updateBrowserTitle(); }
+
+    @Override public String getPageTitle() { return getTranslation("system.permissions.title"); }
+
+    private void updateText() {
+        codeColumn.setHeader(getTranslation("system.permissions.code"));
+        sourceColumn.setHeader(getTranslation("system.permissions.source"));
+    }
+
+    private void updateBrowserTitle() { getUI().ifPresent(ui -> ui.getPage().setTitle(getPageTitle())); }
 }

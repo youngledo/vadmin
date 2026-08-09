@@ -11,7 +11,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import io.github.vaadinadminstarter.app.customer.Customer;
@@ -36,11 +38,10 @@ import jakarta.annotation.security.PermitAll;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
-@PageTitle("Customers")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public final class CustomersView extends PermissionProtectedView {
+public final class CustomersView extends PermissionProtectedView implements LocaleChangeObserver, HasDynamicTitle {
     public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("customer:customer:read");
     private static final PermissionCode CREATE = PermissionCode.of("customer:customer:create");
     private static final PermissionCode UPDATE = PermissionCode.of("customer:customer:update");
@@ -53,6 +54,11 @@ public final class CustomersView extends PermissionProtectedView {
     private final TextField filter = new TextField();
     private final PagedGrid<Customer> pages;
     private final OperationFeedback feedback = new OperationFeedback();
+    private final Grid.Column<Customer> nameColumn;
+    private final Grid.Column<Customer> emailColumn;
+    private final Grid.Column<Customer> statusColumn;
+    private final Grid.Column<Customer> actionsColumn;
+    private final Button createAction;
 
     public CustomersView(CurrentUserProvider currentUser, AuthorizationService authorization,
                          CustomerService customers, FileStorage fileStorage) {
@@ -64,10 +70,10 @@ public final class CustomersView extends PermissionProtectedView {
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(ValueChangeMode.EAGER);
 
-        grid.addColumn(Customer::name).setHeader(getTranslation("customers.name")).setAutoWidth(true);
-        grid.addColumn(Customer::email).setHeader(getTranslation("customers.email")).setAutoWidth(true);
-        grid.addColumn(customer -> customer.active() ? getTranslation("customers.enabled") : getTranslation("customers.disabled")).setHeader(getTranslation("customers.status"));
-        grid.addComponentColumn(customer -> actions(customer, authorization)).setHeader(getTranslation("customers.actions")).setAutoWidth(true);
+        nameColumn = grid.addColumn(Customer::name).setAutoWidth(true);
+        emailColumn = grid.addColumn(Customer::email).setAutoWidth(true);
+        statusColumn = grid.addColumn(customer -> customer.active() ? getTranslation("customers.enabled") : getTranslation("customers.disabled"));
+        actionsColumn = grid.addComponentColumn(customer -> actions(customer, authorization)).setAutoWidth(true);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
         pages = new PagedGrid<>(grid, query -> customers.page(requireCurrentUser(), query),
@@ -78,15 +84,16 @@ public final class CustomersView extends PermissionProtectedView {
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "customers-toolbar");
         toolbar.addFilter(filter);
-        var create = new Button(getTranslation("customers.create"), VaadinIcon.PLUS.create(), event -> edit(null));
-        create.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
-        toolbar.setPrimaryAction(create);
+        createAction = new Button(VaadinIcon.PLUS.create(), event -> edit(null));
+        createAction.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
+        toolbar.setPrimaryAction(createAction);
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "customers-workspace");
 
         add(header, toolbar, workspace);
         expand(workspace);
+        updateText();
     }
 
     @Override
@@ -205,4 +212,20 @@ public final class CustomersView extends PermissionProtectedView {
         }
         return getTranslation("customers.save-failed");
     }
+
+    @Override public void localeChange(LocaleChangeEvent event) { updateText(); pages.refresh(); updateBrowserTitle(); }
+
+    @Override public String getPageTitle() { return getTranslation("customers.customers.title"); }
+
+    private void updateText() {
+        filter.setLabel(getTranslation("customers.filter"));
+        filter.setPlaceholder(getTranslation("customers.filter-placeholder"));
+        nameColumn.setHeader(getTranslation("customers.name"));
+        emailColumn.setHeader(getTranslation("customers.email"));
+        statusColumn.setHeader(getTranslation("customers.status"));
+        actionsColumn.setHeader(getTranslation("customers.actions"));
+        createAction.setText(getTranslation("customers.create"));
+    }
+
+    private void updateBrowserTitle() { getUI().ifPresent(ui -> ui.getPage().setTitle(getPageTitle())); }
 }

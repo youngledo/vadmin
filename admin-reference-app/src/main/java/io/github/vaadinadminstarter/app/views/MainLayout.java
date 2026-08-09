@@ -49,6 +49,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private final MenuBar userMenu;
     private final Select<Locale> languageSelector;
     private final boolean authenticated;
+    private String currentRoute = "";
 
     public MainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
@@ -103,9 +104,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         if (!authenticated) return;
-        var route = event.getLocation().getPath();
-        currentLocation.setText(modules.pages().stream().filter(page -> page.route().equals(route)).findFirst()
-                .map(this::titleFor).orElse(text("system.shell.home")));
+        currentRoute = event.getLocation().getPath();
+        updateCurrentLocation();
         getContent().addClassName("admin-content-canvas");
     }
 
@@ -120,6 +120,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         if (!authenticated) return;
         updateHeaderText();
         rebuildDrawer();
+        updateCurrentLocation();
     }
 
     private MenuBar createUserMenu(String username) {
@@ -198,6 +199,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         languageSelector.setItemLabelGenerator(locale -> text("system.shell.language." + locale.toLanguageTag()));
         languageSelector.setValue(UI.getCurrent().getLocale());
         updateThemeModeItem();
+    }
+
+    private void updateCurrentLocation() {
+        currentLocation.setText(modules.pages().stream().filter(page -> page.route().equals(currentRoute)).findFirst()
+                .map(this::titleFor).orElse(text("system.shell.home")));
     }
 
     private void updateThemeModeItem() {

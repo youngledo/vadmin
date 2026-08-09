@@ -7,7 +7,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
 import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.app.administration.UserAdministrationService;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
@@ -28,11 +30,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@PageTitle("Users")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public final class UsersView extends PermissionProtectedView {
+public final class UsersView extends PermissionProtectedView implements LocaleChangeObserver, HasDynamicTitle {
     public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:user:read");
     private static final PermissionCode CREATE = PermissionCode.of("system:user:create");
     private static final PermissionCode UPDATE = PermissionCode.of("system:user:update");
@@ -42,6 +43,13 @@ public final class UsersView extends PermissionProtectedView {
     private final TextField filter = new TextField();
     private final PagedGrid<AdministrationQueryService.UserRow> pages;
     private final OperationFeedback feedback = new OperationFeedback();
+    private final Grid.Column<AdministrationQueryService.UserRow> usernameColumn;
+    private final Grid.Column<AdministrationQueryService.UserRow> statusColumn;
+    private final Grid.Column<AdministrationQueryService.UserRow> authVersionColumn;
+    private final Grid.Column<AdministrationQueryService.UserRow> actionsColumn;
+    private final Button createAction;
+    private final Button enableSelectedAction;
+    private final Button disableSelectedAction;
 
     public UsersView(CurrentUserProvider currentUser, AuthorizationService authorization,
                      AdministrationQueryService queries, UserAdministrationService commands) {
@@ -51,10 +59,10 @@ public final class UsersView extends PermissionProtectedView {
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(ValueChangeMode.EAGER);
 
-        grid.addColumn(AdministrationQueryService.UserRow::username).setHeader(getTranslation("system.users.username")).setAutoWidth(true);
-        grid.addColumn(user -> user.enabled() ? getTranslation("system.users.enabled") : getTranslation("system.users.disabled")).setHeader(getTranslation("system.users.status"));
-        grid.addColumn(AdministrationQueryService.UserRow::authVersion).setHeader(getTranslation("system.users.auth-version"));
-        grid.addComponentColumn(user -> action(user, authorization)).setHeader(getTranslation("system.users.actions"));
+        usernameColumn = grid.addColumn(AdministrationQueryService.UserRow::username).setAutoWidth(true);
+        statusColumn = grid.addColumn(user -> user.enabled() ? getTranslation("system.users.enabled") : getTranslation("system.users.disabled"));
+        authVersionColumn = grid.addColumn(AdministrationQueryService.UserRow::authVersion);
+        actionsColumn = grid.addComponentColumn(user -> action(user, authorization));
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.setSizeFull();
         pages = new PagedGrid<>(grid, queries::users, () -> Map.of("q", filter.getValue()), "username");
@@ -64,20 +72,21 @@ public final class UsersView extends PermissionProtectedView {
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "users-toolbar");
         toolbar.addFilter(filter);
-        var create = new Button(getTranslation("system.users.create"), VaadinIcon.PLUS.create(), event -> createUser());
-        create.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
-        toolbar.setPrimaryAction(create);
+        createAction = new Button(VaadinIcon.PLUS.create(), event -> createUser());
+        createAction.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
+        toolbar.setPrimaryAction(createAction);
 
         var workspace = new DataWorkspace<>(grid);
         workspace.getElement().setAttribute("data-testid", "users-workspace");
-        var enableSelected = bulkAction(VaadinIcon.PLAY, getTranslation("system.users.enable-selected"), true, authorization);
-        var disableSelected = bulkAction(VaadinIcon.PAUSE, getTranslation("system.users.disable-selected"), false, authorization);
+        enableSelectedAction = bulkAction(VaadinIcon.PLAY, true, authorization);
+        disableSelectedAction = bulkAction(VaadinIcon.PAUSE, false, authorization);
         var canUpdate = authorization.hasPermission(requireCurrentUser(), UPDATE);
-        workspace.addBulkAction(enableSelected, () -> canUpdate);
-        workspace.addBulkAction(disableSelected, () -> canUpdate);
+        workspace.addBulkAction(enableSelectedAction, () -> canUpdate);
+        workspace.addBulkAction(disableSelectedAction, () -> canUpdate);
 
         add(header, toolbar, workspace);
         expand(workspace);
+        updateText();
     }
 
     @Override
@@ -101,12 +110,10 @@ public final class UsersView extends PermissionProtectedView {
         return actions;
     }
 
-    private Button bulkAction(VaadinIcon icon, String label, boolean enabled, AuthorizationService authorization) {
+    private Button bulkAction(VaadinIcon icon, boolean enabled, AuthorizationService authorization) {
         var action = new Button(icon.create(), event -> confirmStatusChange(grid.getSelectedItems().stream()
                 .map(AdministrationQueryService.UserRow::id)
                 .collect(Collectors.toSet()), !enabled));
-        action.setTooltipText(label);
-        action.setAriaLabel(label);
         action.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
         return action;
     }
@@ -162,4 +169,27 @@ public final class UsersView extends PermissionProtectedView {
         }
         return getTranslation("system.users.required");
     }
+
+    @Override public void localeChange(LocaleChangeEvent event) { updateText(); pages.refresh(); updateBrowserTitle(); }
+
+    @Override public String getPageTitle() { return getTranslation("system.users.title"); }
+
+    private void updateText() {
+        filter.setLabel(getTranslation("system.users.filter"));
+        usernameColumn.setHeader(getTranslation("system.users.username"));
+        statusColumn.setHeader(getTranslation("system.users.status"));
+        authVersionColumn.setHeader(getTranslation("system.users.auth-version"));
+        actionsColumn.setHeader(getTranslation("system.users.actions"));
+        createAction.setText(getTranslation("system.users.create"));
+        setActionText(enableSelectedAction, "system.users.enable-selected");
+        setActionText(disableSelectedAction, "system.users.disable-selected");
+    }
+
+    private void setActionText(Button action, String key) {
+        var label = getTranslation(key);
+        action.setTooltipText(label);
+        action.setAriaLabel(label);
+    }
+
+    private void updateBrowserTitle() { getUI().ifPresent(ui -> ui.getPage().setTitle(getPageTitle())); }
 }
