@@ -136,8 +136,8 @@ var orders = AdminModule.of("orders",
         List.of(new AdminNavigationGroup("business", "nav.business", 200)),
         List.of(new AdminPage("orders.list", "business", "orders.list.title",
                 "orders.list.intent", "briefcase", 100, "orders",
-                PermissionCode.of("orders:read"), TestView.class)),
-        Set.of(PermissionCode.of("orders:read")),
+                PermissionCode.of("orders:order:read"), TestView.class)),
+        Set.of(PermissionCode.of("orders:order:read")),
         List.of(new AdminMessageBundle("orders", "orders.i18n.messages")));
 
 assertThat(registry.visibleTo(userWithOrdersRead, authorization))
@@ -345,7 +345,7 @@ assertThat(registry.pagesVisibleTo(administrator, new SpringAuthorizationService
         .extracting(AdminPage::route)
         .containsExactly("users", "roles", "permissions", "audit", "customers", "orders");
 assertThat(registry.permissionCatalog())
-        .contains(PermissionCode.of("orders:read"));
+        .contains(PermissionCode.of("orders:order:read"));
 ```
 
 Run: `./mvnw -B -ntp -pl admin-reference-app -am test -Dtest=ApplicationContextIT`
@@ -572,11 +572,11 @@ git commit -m "feat: publish Flow admin theme tokens"
 - [ ] **Step 1: Write failing descriptor and view tests**
 
 Assert the descriptor has module ID `orders`, group key `orders.nav.group`,
-route `orders`, permission `orders:read`, external view type, and two message
+route `orders`, permission `orders:order:read`, external view type, and two message
 bundle locales. Assert the deterministic query service returns rows that the
 view can display through `DataWorkspace`.
 
-Run: `./mvnw -B -ntp -pl admin-example-orders -am test -Dtest=OrdersAdminModuleTest`
+Run: `./mvnw -B -ntp -pl admin-example-orders -am test -Dtest=OrdersAdminModuleTest -Dsurefire.failIfNoSpecifiedTests=false`
 
 Expected: FAIL because the example module does not exist.
 
@@ -595,7 +595,7 @@ public class OrdersAutoConfiguration {
 
 `OrdersView` must extend `PermissionProtectedView`, inject only
 `CurrentUserProvider`, `AuthorizationService`, and its own query service,
-return `PermissionCode.of("orders:read")` from `requiredPermission()`, render a
+return `PermissionCode.of("orders:order:read")` from `requiredPermission()`, render a
 read-only grid and detail action, and implement locale changes for visible
 text. It must use
 `admin-*` CSS tokens only through existing pattern class names and contain no
