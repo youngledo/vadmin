@@ -173,17 +173,16 @@ class BrowserE2EIT {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/users");
 
-        var userMenu = page.getByLabel("当前用户菜单");
-        userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
-        page.getByText("切换至深色模式", new Page.GetByTextOptions().setExact(true)).click();
+        openShellMenu("admin-appearance-menu");
+        page.getByText("深色模式", new Page.GetByTextOptions().setExact(true)).click();
 
         assertThat(page.locator("body")).hasAttribute("theme", "dark");
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--lumo-primary-color")).isEqualTo("#52b6e8");
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--lumo-body-text-color")).isEqualTo("#edf2f7");
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--lumo-success-color")).isEqualTo("#62c78f");
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--vaadin-focus-ring-color")).isEqualTo("#7cc8ef");
-        userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
-        assertThat(page.getByText("切换至浅色模式", new Page.GetByTextOptions().setExact(true))).isVisible();
+        openShellMenu("admin-appearance-menu");
+        assertThat(page.getByText("深色模式", new Page.GetByTextOptions().setExact(true))).isVisible();
     }
 
     @Test
@@ -191,7 +190,7 @@ class BrowserE2EIT {
         signInAs("admin", "change-me");
 
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("工作台"))).isVisible();
-        page.getByLabel("语言").click();
+        openShellMenu("admin-language-menu");
         page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
 
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Workplace"))).isVisible();
@@ -213,7 +212,7 @@ class BrowserE2EIT {
         assertThat(page.locator(".admin-shell-location")).hasText("用户");
         assertThat(page).hasTitle("用户");
 
-        page.getByLabel("语言").click();
+        openShellMenu("admin-language-menu");
         page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
 
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Users"))).isVisible();
@@ -235,7 +234,7 @@ class BrowserE2EIT {
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("订单"))).isVisible();
         assertThat(page.getByRole(AriaRole.COLUMNHEADER, new Page.GetByRoleOptions().setName("操作"))).isVisible();
 
-        page.getByLabel("语言").click();
+        openShellMenu("admin-language-menu");
         page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
 
         assertThat(page.getByLabel("Current user menu")).isVisible();
@@ -257,9 +256,8 @@ class BrowserE2EIT {
         var lightText = computedThemeVariable("--admin-text-primary");
         org.assertj.core.api.Assertions.assertThat(lightSurface).isNotEqualTo(lightText);
 
-        var userMenu = page.getByLabel("当前用户菜单");
-        userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
-        page.getByText("切换至深色模式", new Page.GetByTextOptions().setExact(true)).click();
+        openShellMenu("admin-appearance-menu");
+        page.getByText("深色模式", new Page.GetByTextOptions().setExact(true)).click();
 
         assertThat(page.locator("body")).hasAttribute("theme", "dark");
         assertThat(workspace).isVisible();
@@ -278,12 +276,24 @@ class BrowserE2EIT {
         page.navigate(baseUrl() + "/users");
 
         assertThat(page.getByLabel("切换导航")).isVisible();
+        assertThat(page.getByRole(AriaRole.MENUBAR,
+                new Page.GetByRoleOptions().setName("语言选项"))).isVisible();
+        assertThat(shellUtilityMenu("admin-language-menu").getByLabel("语言")).isVisible();
+        assertThat(page.getByRole(AriaRole.MENUBAR,
+                new Page.GetByRoleOptions().setName("外观选项"))).isVisible();
+        assertThat(shellUtilityMenu("admin-appearance-menu").getByLabel("外观")).isVisible();
         assertThat(page.getByLabel("当前用户菜单")).isVisible();
-        page.getByLabel("切换导航").click();
-        assertThat(page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("客户"))).isVisible();
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("客户")).click();
+        openShellMenu("admin-language-menu");
+        page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
+        assertThat(page.getByRole(AriaRole.MENUBAR,
+                new Page.GetByRoleOptions().setName("Language options"))).isVisible();
+        assertThat(shellUtilityMenu("admin-language-menu").getByLabel("Language")).isVisible();
+        assertThat(page.getByLabel("Toggle navigation")).isVisible();
+        page.getByLabel("Toggle navigation").click();
+        assertThat(page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Customers"))).isVisible();
+        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Customers")).click();
         page.waitForURL(baseUrl() + "/customers");
-        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("客户"))).isVisible();
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Customers"))).isVisible();
     }
 
     @Test
@@ -523,6 +533,14 @@ class BrowserE2EIT {
                 .setIsMobile(true));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
+    }
+
+    private void openShellMenu(String utilityClass) {
+        page.locator("vaadin-menu-bar." + utilityClass).locator("vaadin-menu-bar-button:not([hidden])").click();
+    }
+
+    private Locator shellUtilityMenu(String utilityClass) {
+        return page.locator("vaadin-menu-bar." + utilityClass);
     }
 
     private void assertReadOnlyWorkspace(String route, String title) {

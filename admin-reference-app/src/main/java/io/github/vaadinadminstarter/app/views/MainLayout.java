@@ -13,7 +13,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.i18n.I18NProvider;
@@ -51,11 +50,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private final AdminLocalePreference localePreference;
     private final I18NProvider translations;
     private final Span currentLocation = new Span();
-    private final MenuItem themeModeItem;
     private final VerticalLayout drawer = new VerticalLayout();
     private final DrawerToggle toggle = new DrawerToggle();
     private final MenuBar userMenu;
-    private final Select<Locale> languageSelector;
+    private final MenuBar languageMenu;
+    private final MenuBar appearanceMenu;
     private final boolean authenticated;
     private String currentRoute = "";
 
@@ -76,9 +75,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         authenticated = currentUserValue.isPresent();
         if (!authenticated) {
             user = null;
-            themeModeItem = null;
             userMenu = null;
-            languageSelector = null;
+            languageMenu = null;
+            appearanceMenu = null;
             addHeader(productMark, productName);
             return;
         }
@@ -89,10 +88,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
         userMenu = createUserMenu(user.username());
-        themeModeItem = userMenu.getItems().getFirst().getSubMenu().addItem("", event -> toggleThemeMode());
-        languageSelector = createLanguageSelector();
+        languageMenu = createUtilityMenu("admin-language-menu");
+        appearanceMenu = createUtilityMenu("admin-appearance-menu");
         updateHeaderText();
-        addHeader(toggle, productMark, productName, currentLocation, languageSelector, userMenu);
+        addHeader(toggle, productMark, productName, currentLocation, createUtilityControls());
 
         drawer.setPadding(false);
         drawer.setSpacing(false);
@@ -146,18 +145,20 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         return menu;
     }
 
-    private Select<Locale> createLanguageSelector() {
-        var selector = new Select<Locale>();
-        selector.setItems(translations.getProvidedLocales());
-        selector.setValue(UI.getCurrent().getLocale());
-        selector.addValueChangeListener(event -> {
-            if (event.isFromClient() && event.getValue() != null) {
-                localePreference.select(UI.getCurrent(), event.getValue());
-            }
-        });
-        selector.setVisible(translations.getProvidedLocales().size() > 1);
-        selector.addClassName("admin-language-control");
-        return selector;
+    private MenuBar createUtilityMenu(String className) {
+        var menu = new MenuBar();
+        menu.setOpenOnHover(false);
+        menu.addClassNames("admin-shell-utility", className);
+        return menu;
+    }
+
+    private HorizontalLayout createUtilityControls() {
+        var utilities = new HorizontalLayout(languageMenu, appearanceMenu, userMenu);
+        utilities.setPadding(false);
+        utilities.setSpacing(false);
+        utilities.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        utilities.addClassName("admin-shell-utilities");
+        return utilities;
     }
 
     private void rebuildDrawer() {
@@ -185,11 +186,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         return new Component[]{section, navigation};
     }
 
-    private void toggleThemeMode() {
-        var nextMode = sessionThemeMode().equals("dark") ? "light" : "dark";
-        VaadinSession.getCurrent().setAttribute(THEME_MODE_KEY, nextMode);
-        applyTheme(nextMode);
-        updateThemeModeItem();
+    private void selectThemeMode(String themeMode) {
+        VaadinSession.getCurrent().setAttribute(THEME_MODE_KEY, themeMode);
+        applyTheme(themeMode);
+        updateAppearanceMenu();
     }
 
     private String sessionThemeMode() {
@@ -203,10 +203,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
         userMenu.getElement().setAttribute("aria-label", text("system.shell.current-user"));
-        languageSelector.setLabel(text("system.shell.language"));
-        languageSelector.setItemLabelGenerator(locale -> text("system.shell.language." + locale.toLanguageTag()));
-        languageSelector.setValue(UI.getCurrent().getLocale());
-        updateThemeModeItem();
+        updateLanguageMenu();
+        updateAppearanceMenu();
     }
 
     private void updateCurrentLocation() {
@@ -214,9 +212,40 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
                 .map(this::titleFor).orElse(text("system.shell.home")));
     }
 
-    private void updateThemeModeItem() {
-        themeModeItem.setText(text(sessionThemeMode().equals("dark") ? "system.shell.theme-light" : "system.shell.theme-dark"));
-        themeModeItem.setAriaLabel(text("system.shell.theme-toggle"));
+    private void updateLanguageMenu() {
+        languageMenu.removeAll();
+        languageMenu.getElement().setAttribute("aria-label", text("system.shell.language-menu"));
+        languageMenu.setVisible(translations.getProvidedLocales().size() > 1);
+        var trigger = languageMenu.addItem(VaadinIcon.GLOBE.create());
+        trigger.setAriaLabel(text("system.shell.language"));
+        trigger.setTooltipText(text("system.shell.language"));
+        translations.getProvidedLocales().forEach(locale -> addLanguageChoice(trigger, locale));
+    }
+
+    private void addLanguageChoice(MenuItem trigger, Locale locale) {
+        var choice = trigger.getSubMenu().addItem(text("system.shell.language." + locale.toLanguageTag()), event -> {
+            if (event.isFromClient()) localePreference.select(UI.getCurrent(), locale);
+        });
+        choice.setCheckable(true);
+        choice.setChecked(locale.equals(UI.getCurrent().getLocale()));
+    }
+
+    private void updateAppearanceMenu() {
+        appearanceMenu.removeAll();
+        appearanceMenu.getElement().setAttribute("aria-label", text("system.shell.appearance-menu"));
+        var trigger = appearanceMenu.addItem(VaadinIcon.PALETTE.create());
+        trigger.setAriaLabel(text("system.shell.appearance"));
+        trigger.setTooltipText(text("system.shell.appearance"));
+        addThemeChoice(trigger, "light");
+        addThemeChoice(trigger, "dark");
+    }
+
+    private void addThemeChoice(MenuItem trigger, String themeMode) {
+        var choice = trigger.getSubMenu().addItem(text("system.shell.appearance." + themeMode), event -> {
+            if (event.isFromClient()) selectThemeMode(themeMode);
+        });
+        choice.setCheckable(true);
+        choice.setChecked(sessionThemeMode().equals(themeMode));
     }
 
     private String titleFor(AdminPage page) { return text(page.titleKey()); }
