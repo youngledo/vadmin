@@ -311,6 +311,17 @@ class BrowserE2EIT {
     }
 
     @Test
+    void realDataWorkspaceBusyAndFailureSurfacesRetainTheWorkspaceWidth() {
+        signInAs("admin", "change-me");
+
+        page.navigate(baseUrl() + "/workspace-states?state=busy");
+        assertWorkspaceStateSurfacesFillContentWidth(1);
+
+        page.navigate(baseUrl() + "/workspace-states?state=failure");
+        assertWorkspaceStateSurfacesFillContentWidth(2);
+    }
+
+    @Test
     void narrowShellKeepsNavigationReachable() {
         useNarrowBrowser();
         signInAs("admin", "change-me");
@@ -671,6 +682,26 @@ class BrowserE2EIT {
                 .as("workspace foreground")
                 .isEqualTo(expectedText)
                 .isNotEqualTo(background);
+    }
+
+    private void assertWorkspaceStateSurfacesFillContentWidth(int expectedSurfaceCount) {
+        var workspace = page.getByTestId("workspace-state-workspace");
+        var stateSurfaces = workspace.locator(":scope > [role=status]");
+        assertThat(workspace).isVisible();
+        org.assertj.core.api.Assertions.assertThat(stateSurfaces.count()).isEqualTo(expectedSurfaceCount);
+        var surfacesFillWorkspace = (Boolean) workspace.evaluate("""
+                element => {
+                    const computed = getComputedStyle(element);
+                    const contentWidth = element.clientWidth
+                        - parseFloat(computed.paddingLeft)
+                        - parseFloat(computed.paddingRight);
+                    return Array.from(element.querySelectorAll(':scope > [role="status"]'))
+                        .every(surface => Math.abs(surface.getBoundingClientRect().width - contentWidth) <= 1);
+                }
+                """);
+        org.assertj.core.api.Assertions.assertThat(surfacesFillWorkspace)
+                .as("workspace state surfaces must fill the workspace content width")
+                .isTrue();
     }
 
     private String computedThemeColor(String property, String token) {
