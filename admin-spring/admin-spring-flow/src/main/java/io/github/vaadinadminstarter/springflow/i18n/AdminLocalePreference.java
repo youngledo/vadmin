@@ -1,5 +1,6 @@
 package io.github.vaadinadminstarter.springflow.i18n;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -11,11 +12,23 @@ public final class AdminLocalePreference {
     public static final String LOCALE_SESSION_KEY = "io.github.vaadinadminstarter.springflow.locale";
 
     public Locale selectInitialLocale(Locale browserLocale) {
+        return selectInitialLocale(browserLocale == null ? List.of() : List.of(browserLocale));
+    }
+
+    /** Returns a stored locale first, then the first browser locale supported by the host. */
+    public Locale selectInitialLocale(Iterable<Locale> browserLocales) {
         var session = VaadinSession.getCurrent();
         if (session != null) {
             var storedLocale = session.getAttribute(LOCALE_SESSION_KEY);
             if (storedLocale instanceof Locale locale && isSupported(locale)) {
                 return locale;
+            }
+        }
+        if (browserLocales != null) {
+            for (var browserLocale : browserLocales) {
+                if (isSupported(browserLocale)) {
+                    return browserLocale;
+                }
             }
         }
         return CompositeAdminI18NProvider.ZH_CN;

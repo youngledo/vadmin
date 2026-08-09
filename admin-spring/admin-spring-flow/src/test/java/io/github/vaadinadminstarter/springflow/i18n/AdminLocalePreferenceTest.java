@@ -2,6 +2,7 @@ package io.github.vaadinadminstarter.springflow.i18n;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +34,12 @@ class AdminLocalePreferenceTest {
     }
 
     @Test
-    void defaultsToChineseWhenTheSessionHasNoLocalePreference() {
-        assertThat(preference.selectInitialLocale(EN_US)).isEqualTo(ZH_CN);
+    void selectsTheFirstSupportedBrowserLocaleWhenTheSessionHasNoLocalePreference() {
+        assertThat(preference.selectInitialLocale(List.of(Locale.GERMANY, EN_US, ZH_CN))).isEqualTo(EN_US);
+    }
+
+    @Test
+    void defaultsToChineseWhenNoBrowserLocaleIsSupported() {
+        assertThat(preference.selectInitialLocale(List.of(Locale.GERMANY, Locale.JAPAN))).isEqualTo(ZH_CN);
     }
 }

@@ -36,6 +36,23 @@ class AdminFlowAutoConfigurationTest {
                         .hasMessageContaining("adminModulePermissionCatalog"));
     }
 
+    @Test
+    void rejectsAMessageBundleWithoutAChineseDefaultResourceAtStartup() {
+        contextRunner.withUserConfiguration(MissingBundleConfiguration.class).run(context ->
+                assertThat(context.getStartupFailure())
+                        .hasMessageContaining("module 'missing'")
+                        .hasMessageContaining("base name 'i18n.missing'"));
+    }
+
+    @Test
+    void rejectsAMetadataKeyMissingFromTheChineseDefaultResourceAtStartup() {
+        contextRunner.withUserConfiguration(IncompleteBundleConfiguration.class).run(context ->
+                assertThat(context.getStartupFailure())
+                        .hasMessageContaining("module 'incomplete'")
+                        .hasMessageContaining("key 'incomplete.list.title'")
+                        .hasMessageContaining("base name 'i18n.incomplete'"));
+    }
+
     @Configuration(proxyBeanMethods = false)
     static class ModuleConfiguration {
         @Bean
@@ -50,7 +67,7 @@ class AdminFlowAutoConfigurationTest {
                     List.of(new AdminPage("orders.list", "business", "orders.list.title", "orders.list.intent",
                             "briefcase", 100, "orders", PermissionCode.of("orders:order:read"), TestView.class)),
                     Set.of(PermissionCode.of("orders:order:read")),
-                    List.of(new AdminMessageBundle("orders", "orders.i18n.messages")));
+                    List.of(new AdminMessageBundle("orders", "i18n.orders")));
         }
     }
 
@@ -60,6 +77,31 @@ class AdminFlowAutoConfigurationTest {
         PermissionCatalog legacyPermissionCatalog() {
             return new PermissionCatalog(Set.of(PermissionCode.of("legacy:catalog:read")));
         }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class MissingBundleConfiguration {
+        @Bean
+        AdminModule missingModule() {
+            return module("missing", "i18n.missing");
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class IncompleteBundleConfiguration {
+        @Bean
+        AdminModule incompleteModule() {
+            return module("incomplete", "i18n.incomplete");
+        }
+    }
+
+    private static AdminModule module(String moduleId, String bundleBaseName) {
+        var permission = PermissionCode.of(moduleId + ":order:read");
+        return new AdminModule(moduleId,
+                List.of(new AdminNavigationGroup("business-" + moduleId, moduleId + ".navigation", 100)),
+                List.of(new AdminPage(moduleId + ".list", "business-" + moduleId, moduleId + ".list.title",
+                        moduleId + ".list.intent", "briefcase", 100, moduleId, permission, TestView.class)),
+                Set.of(permission), List.of(new AdminMessageBundle(moduleId, bundleBaseName)));
     }
 
     static final class TestLayout extends VerticalLayout implements RouterLayout {

@@ -87,6 +87,27 @@ AdminHostLayout adminHostLayout() {
 }
 ```
 
+### Production Frontend Anchor
+
+Dynamic registration makes a view routable at runtime, but the Vaadin
+production frontend build cannot discover that view from a route annotation.
+The host must therefore add one static `@Uses` annotation for every dynamically
+registered module view to its composed `@Layout` class. This is a required
+host-side production-bundle anchor; it does not replace the module descriptor,
+and the module view still must not declare `@Route`:
+
+```java
+@Layout
+@Uses(OrdersView.class)
+public final class MainLayout extends AppLayout {
+    // The host's common shell.
+}
+```
+
+When the host composes additional module pages, add their view types here as
+well. Keep the annotations in the host, rather than placing them in the module,
+because the host decides which Maven modules are part of its production build.
+
 ### Translation Resources
 
 The module declares its resource-bundle base name and provides both supported
@@ -116,6 +137,22 @@ depending on discovery order.
 `briefcase`, `clock`, `history`, `key`, `shield`, `shopping-cart`, and `users`.
 Choose one of these stable keys; unknown strings are configuration errors and
 do not silently fall back to a generic icon.
+
+### Adoption Checklist
+
+- Add the module artifact as a normal Maven dependency in the host.
+- Contribute exactly one `AdminModule` bean from the module's Boot
+  auto-configuration, plus Spring-managed prototype view beans as needed.
+- Do not declare `@Route` on a contributed view and do not define a host
+  `PermissionCatalog`.
+- Register the host `AdminHostLayout` and add `@Uses(ModuleView.class)` for
+  every dynamically registered module view on that host layout.
+- Package each declared message bundle with a complete `zh-CN` default
+  resource. The startup validator also requires each navigation-group title,
+  page title, and page intent key declared by the module. Add `en-US` for the
+  second supported locale; its missing keys retain deterministic `zh-CN`
+  fallback behavior.
+- Run the host's production build after changing the composed view set.
 
 ## Use The Flow Design System
 

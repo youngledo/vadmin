@@ -1,6 +1,8 @@
 package io.github.vaadinadminstarter.springflow;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.spring.SpringBootAutoConfiguration;
 
@@ -22,6 +25,7 @@ import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.springflow.navigation.AdminModuleRouteRegistrar;
 import io.github.vaadinadminstarter.springflow.navigation.SpringAdminModuleAssembler;
 import io.github.vaadinadminstarter.springflow.i18n.AdminLocalePreference;
+import io.github.vaadinadminstarter.springflow.i18n.AdminMessageBundleValidator;
 import io.github.vaadinadminstarter.springflow.i18n.CompositeAdminI18NProvider;
 
 /** Spring Boot assembly for Flow administration modules hosted by an application layout. */
@@ -68,10 +72,11 @@ public class AdminFlowAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    I18NProvider adminI18NProvider(AdminModuleRegistry modules) {
+    I18NProvider adminI18NProvider(AdminModuleRegistry modules, List<AdminModule> moduleDescriptors) {
         var bundles = new java.util.ArrayList<AdminMessageBundle>();
         bundles.add(new AdminMessageBundle("flow", "i18n.flow"));
         bundles.addAll(modules.messageBundles());
+        AdminMessageBundleValidator.validate(bundles, moduleDescriptors);
         return new CompositeAdminI18NProvider(bundles);
     }
 
@@ -94,8 +99,22 @@ public class AdminFlowAutoConfiguration {
             registrar.register(event.getSource().getContext());
             event.getSource().addUIInitListener(uiEvent -> {
                 var ui = uiEvent.getUI();
-                ui.setLocale(localePreference.selectInitialLocale(ui.getLocale()));
+                ui.setLocale(localePreference.selectInitialLocale(browserLocales(ui.getLocale())));
             });
         };
+    }
+
+    private static List<Locale> browserLocales(Locale uiLocale) {
+        var request = VaadinServletRequest.getCurrent();
+        if (request != null) {
+            var requestedLocales = request.getLocales();
+            if (requestedLocales != null) {
+                var locales = Collections.list(requestedLocales);
+                if (!locales.isEmpty()) {
+                    return locales;
+                }
+            }
+        }
+        return uiLocale == null ? List.of() : List.of(uiLocale);
     }
 }
