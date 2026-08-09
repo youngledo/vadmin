@@ -126,6 +126,27 @@ class BrowserE2EIT {
     }
 
     @Test
+    void ordersOnlyUserSeesTheExternalModuleAndCanOpenItsProtectedRoute() {
+        var roleId = createRole("orders-readers", "orders:order:read");
+        createUser("orders-reader", "orders-password", roleId);
+
+        signInAs("orders-reader", "orders-password");
+
+        assertThat(page.getByLabel("业务管理").getByRole(AriaRole.LINK,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("订单"))).isVisible();
+        assertThat(page.getByLabel("系统管理")).not().isVisible();
+        assertThat(page.getByLabel("客户管理")).not().isVisible();
+        var shortcuts = page.locator("[data-testid=workplace-shortcuts]");
+        assertThat(shortcuts.getByRole(AriaRole.LINK,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("订单"))).isVisible();
+        assertThat(shortcuts.locator("[data-testid=workplace-entry]")).hasCount(1);
+
+        page.navigate(baseUrl() + "/orders");
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("订单"))).isVisible();
+        assertThat(page.getByTestId("orders-workspace").locator("vaadin-grid")).isVisible();
+    }
+
+    @Test
     void readOnlyWorkspacesUseSharedPageHeaderAndGridFrame() {
         signInAs("admin", "change-me");
 
@@ -202,6 +223,52 @@ class BrowserE2EIT {
     }
 
     @Test
+    void ordersWorkspaceRefreshesShellAndOperationLabelsAfterLanguageSelection() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/orders");
+
+        assertThat(page.getByLabel("当前用户菜单")).isVisible();
+        assertThat(page.getByLabel("业务管理").getByRole(AriaRole.LINK,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("订单"))).isVisible();
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("订单"))).isVisible();
+        assertThat(page.getByRole(AriaRole.COLUMNHEADER, new Page.GetByRoleOptions().setName("操作"))).isVisible();
+
+        page.getByLabel("语言").click();
+        page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
+
+        assertThat(page.getByLabel("Current user menu")).isVisible();
+        assertThat(page.getByLabel("Business administration").getByRole(AriaRole.LINK,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Orders"))).isVisible();
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Orders"))).isVisible();
+        assertThat(page.getByRole(AriaRole.COLUMNHEADER, new Page.GetByRoleOptions().setName("Actions"))).isVisible();
+        assertThat(page).hasTitle("Orders");
+    }
+
+    @Test
+    void ordersWorkspaceRemainsVisibleWithDistinctDarkThemeTokens() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/orders");
+
+        var workspace = page.getByTestId("orders-workspace");
+        assertThat(workspace).isVisible();
+        var lightSurface = computedThemeVariable("--admin-surface");
+        var lightText = computedThemeVariable("--admin-text-primary");
+        org.assertj.core.api.Assertions.assertThat(lightSurface).isNotEqualTo(lightText);
+
+        var userMenu = page.getByLabel("当前用户菜单");
+        userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
+        page.getByText("切换至深色模式", new Page.GetByTextOptions().setExact(true)).click();
+
+        assertThat(page.locator("body")).hasAttribute("theme", "dark");
+        assertThat(workspace).isVisible();
+        var darkSurface = computedThemeVariable("--admin-surface");
+        var darkText = computedThemeVariable("--admin-text-primary");
+        org.assertj.core.api.Assertions.assertThat(darkSurface).isNotEqualTo(lightSurface);
+        org.assertj.core.api.Assertions.assertThat(darkText).isNotEqualTo(lightText);
+        org.assertj.core.api.Assertions.assertThat(darkSurface).isNotEqualTo(darkText);
+    }
+
+    @Test
     void narrowShellKeepsNavigationReachable() {
         useNarrowBrowser();
         signInAs("admin", "change-me");
@@ -220,11 +287,12 @@ class BrowserE2EIT {
     void authenticatedAdministratorSeesEachNavigationGroupHeadingOnce() {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/users");
-        assertThat(page.locator("vaadin-side-nav")).hasCount(3);
+        assertThat(page.locator("vaadin-side-nav")).hasCount(4);
 
         assertNavigationGroupHeadingOccursOnce("工作空间");
         assertNavigationGroupHeadingOccursOnce("系统管理");
         assertNavigationGroupHeadingOccursOnce("客户管理");
+        assertNavigationGroupHeadingOccursOnce("业务管理");
     }
 
     @Test
@@ -488,7 +556,9 @@ class BrowserE2EIT {
         var dialog = page.getByRole(AriaRole.DIALOG);
         dialog.getByLabel("角色").click();
         page.getByRole(AriaRole.OPTION, new Page.GetByRoleOptions().setName(roleCode)).click();
-        dialog.getByLabel("权限").click();
+        var permission = dialog.getByLabel("权限");
+        permission.click();
+        permission.pressSequentially(permissionCode);
         page.getByRole(AriaRole.OPTION, new Page.GetByRoleOptions().setName(permissionCode)).click();
         dialog.getByRole(AriaRole.BUTTON,
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("保存授权")).click();

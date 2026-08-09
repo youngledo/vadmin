@@ -12,6 +12,12 @@ programming model in scope; Hilla, React, and TypeScript are not included.
 Spring Boot is the current runtime, while `contracts` and `platform` remain
 independent of Spring to preserve future runtime-adapter options.
 
+The repository also includes `admin-example-orders`, an independently packaged
+Flow administration module that demonstrates the supported Maven adoption
+path. A host composes such modules at build time; it does not install runtime
+plugins. See the English [Extension Guide](docs/en/extension-guide.md) for the
+module, translation, icon, and theme contracts.
+
 Java, Maven, Spring Boot, and Vaadin upgrades require a separate pull request
 and full CI verification. See [CHANGELOG.md](CHANGELOG.md) for release notes
 and the compatibility policy.

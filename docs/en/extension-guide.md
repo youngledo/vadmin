@@ -1,31 +1,121 @@
 # Extension Guide
 
-English | [简体中文](../zh-CN/extension-guide.md)
+This guide describes the supported Spring Boot adoption path for independently
+packaged Vaadin Flow administration modules. The current runtime is Spring
+Boot only. It is compile-time Maven composition, not runtime plugin
+installation: the host selects modules through normal Maven dependencies and
+Spring Boot discovers each module's auto-configuration at startup.
 
-This project is a modular monolith. `admin-contracts` defines Java-level ports
-and shared models, while `admin-platform` defines authorized business use
-cases. Flow, Spring Security, JPA, and Spring Boot belong to the adapter layer;
-`admin-reference-app` is the composition root and sample business module.
-Organize new business capabilities along this dependency direction. Do not let
-Flow views call JPA repositories directly.
+`admin-contracts` and `admin-platform` remain Java-first and independent of
+Spring. `admin-flow` owns Flow patterns and the Spring-free administration
+module contract. `admin-spring-flow` is the Spring Boot adapter that aggregates
+module descriptors, permissions, translation resources, and dynamic Flow
+routes. The host owns its application layout and theme.
 
-## Add Permissions And Pages
+## Add An Administration Module
 
-First, add a stable permission code to
-`ApplicationConfiguration.permissionCatalog()`, for example
-`orders:order:read`. Then add a `PageDefinition` in the same configuration
-class. It supplies a stable `pageId`, a Chinese title key, icon, order, route,
-and required permission. At startup, the catalog is synchronized to the
-database; an administrator must still explicitly grant the new permission to
-existing roles.
+Use the independent orders example in
+`admin-examples/admin-example-orders` as the complete working reference. A
+host adopts that artifact with one Maven dependency:
 
-Register Flow pages with `@Route` and check the same permission as the page
-definition before entering the page. Protected pages in the reference
-application perform this check through `SecuredView`. New pages should follow
-the same redirect policy: unauthenticated users go to the login view, and users
-without permission go to `access-denied`. Buttons on pages are only
-user-experience controls. Platform use cases for creation, updates, deletion,
-and other mutations must call `AuthorizationService` again.
+```xml
+<dependency>
+  <groupId>io.github.vaadinadminstarter</groupId>
+  <artifactId>admin-example-orders</artifactId>
+  <version>${vaadin-admin-starter.version}</version>
+</dependency>
+```
+
+The module itself depends on `admin-flow`, `admin-contracts`,
+`spring-boot-autoconfigure`, and `vaadin-spring`. It must not depend on
+`admin-reference-app`. The reference app includes the orders artifact solely
+as a host-composition and acceptance-test example.
+
+Every module contributes one `AdminModule` bean from a Boot auto-configuration.
+The descriptor is the single source of truth for its navigation, route,
+permission, and translation metadata:
+
+```java
+@AutoConfiguration
+public class OrdersAutoConfiguration {
+  @Bean
+  AdminModule ordersAdminModule() {
+    return AdminModule.of("orders",
+        List.of(new AdminNavigationGroup("business", "orders.nav.group", 300)),
+        List.of(new AdminPage("orders.list", "business", "orders.title",
+            "orders.intent", "shopping-cart", 100, "orders",
+            PermissionCode.of("orders:order:read"), OrdersView.class)),
+        Set.of(PermissionCode.of("orders:order:read")),
+        List.of(new AdminMessageBundle("orders", "orders.i18n.messages")));
+  }
+
+  @Bean
+  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+  OrdersView ordersView(CurrentUserProvider currentUser,
+                         AuthorizationService authorization,
+                         OrderQueryService orders) {
+    return new OrdersView(currentUser, authorization, orders);
+  }
+}
+```
+
+Use stable identifiers. The module ID, group ID, page ID, route, permission
+code, and message-bundle base name are public configuration identifiers. Page
+title and intent keys must be prefixed with the module ID, for example
+`orders.title` and `orders.intent`.
+
+Do not add `@Route` to a contributed page. `admin-spring-flow` registers the
+declared view type through Flow's public route configuration API, including the
+host layout. A protected view extends `PermissionProtectedView` and returns the
+same permission declared by its `AdminPage`; anonymous requests are rerouted to
+`login`, and unauthorized requests are rerouted to `access-denied`.
+
+The assembled catalog is authoritative. Do not define a host
+`PermissionCatalog` bean. `admin-spring-flow` derives it from every enabled
+`AdminModule`, synchronizes it through the existing host integration, and the
+host administrator grants new permissions to existing roles in the normal way.
+
+### Host Layout
+
+The host declares its router layout once. Modules never import a concrete host
+layout such as the reference app's `MainLayout`:
+
+```java
+@Bean
+AdminHostLayout adminHostLayout() {
+  return new AdminHostLayout(MainLayout.class);
+}
+```
+
+### Translation Resources
+
+The module declares its resource-bundle base name and provides both supported
+locales in its own artifact:
+
+```text
+src/main/resources/
+  orders/i18n/messages_zh_CN.properties
+  orders/i18n/messages_en_US.properties
+```
+
+The composite provider resolves the selected `zh-CN` or `en-US` resource first,
+then falls back to `zh-CN`; an unresolved key is logged and rendered as an
+explicit marker. Use `LocaleChangeObserver` for visible view text that must
+refresh after the user changes language. Navigation and workplace entries are
+resolved from the descriptor's translation keys automatically.
+
+### Collisions And Icons
+
+Startup rejects duplicate module IDs, page IDs, routes, permission codes, and
+message-bundle base names. A navigation group may be shared only when every
+contribution has identical ID, title key, and order; the first declaration owns
+its title key. Correct collisions in the contributing module rather than
+depending on discovery order.
+
+`iconKey` is validated at startup. The current `AdminIconCatalog` keys are
+`briefcase`, `clock`, `history`, `key`, `shield`, `shopping-cart`, and `users`.
+Choose one of these stable keys; unknown strings are configuration errors and
+do not silently fall back to a generic icon.
 
 ## Use The Flow Design System
 
@@ -90,20 +180,18 @@ successful grid, and do not place domain copy or permission decisions in
 reusable patterns. The page provides bulk-action eligibility; when eligibility
 changes, the page calls `workspace.refreshBulkActions()`.
 
-Themes belong to the application layer. The reference application uses
-`ApplicationShell` and `@Theme("admin-theme")` to register
-`src/main/frontend/themes/admin-theme/theme.json` and `styles.css`. A new
-application should copy or create its own named theme and override the
-`--admin-*` semantic variables instead of modifying `admin-flow`. The
-light/dark mode in the current-user menu is stored only in the Vaadin session;
-it is not an account preference.
+Themes belong to the host application. It alone declares `@Theme` and controls
+light/dark selection. Modules use the documented semantic `--admin-*` tokens
+or existing Flow pattern classes, never a global theme or a competing brand
+stylesheet. The canonical token contract covers surface, text, border, accent,
+success, warning, danger, focus, spacing, typography, radius, and elevation;
+see [Theme Tokens](theme-tokens.md). A module may add narrowly scoped CSS for
+genuinely module-specific presentation, using those tokens.
 
-The reference application's `MainLayout` composes the application shell. It
-uses `AppLayout`, `PageRegistry.visibleTo(...)`, and the authorization service
-to create grouped navigation, and keeps navigation reachable on narrow screens
-through `DrawerToggle`. Extension pages should reuse this layout or implement
-the same permission filtering and direct-route protection. Hidden navigation
-does not replace use-case-level authorization.
+The host's `MainLayout` renders grouped, permission-filtered navigation from
+the assembled `AdminModuleRegistry`, and uses the same metadata for workplace
+entries. Hidden navigation is not authorization: mutating use cases must check
+`AuthorizationService` again.
 
 ## Add A Business Module
 
@@ -136,16 +224,6 @@ composition root and configure its credentials and storage location. If the
 adapter introduces new transaction, consistency, retry, deletion-delay, or
 security semantics, document the architecture decision first and add
 integration tests for failure and recovery paths.
-
-## Chinese-First UI And Branding
-
-The current reference UI is Chinese-first. Provide Chinese text first for new
-pages, validation messages, and navigation titles. When other languages are
-needed, use message keys and Spring `MessageSource`; do not bind business rules
-to presentation text. The application layer owns brand names, main-layout
-titles, navigation copy, and theme variables. Retain Vaadin accessibility and
-light/dark-theme conventions, and do not modify reusable modules to hard-code a
-specific organization's name or colors.
 
 ## HTTP Errors And Observability
 

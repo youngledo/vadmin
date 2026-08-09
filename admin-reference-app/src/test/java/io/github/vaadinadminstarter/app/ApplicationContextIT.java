@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.orders.admin.OrderQueryService;
+import com.example.orders.admin.OrdersAdminModule;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
@@ -82,6 +84,23 @@ class ApplicationContextIT {
         assertThat(modules.permissionCatalog()).contains(
                 PermissionCode.of("system:user:read"),
                 PermissionCode.of("customer:attachment:upload"));
+    }
+
+    @Test
+    void assemblesTheIndependentOrdersModuleIntoTheHostPermissionCatalog() {
+        var ordersReader = new CurrentUser(UUID.randomUUID(), "orders-reader", Set.of(
+                PermissionCode.of("orders:order:read")), 0);
+
+        assertThat(modules.groupsVisibleTo(ordersReader, new SpringAuthorizationService()))
+                .extracting(group -> group.id())
+                .containsExactly("business");
+        assertThat(modules.pagesVisibleTo(ordersReader, new SpringAuthorizationService()))
+                .extracting(page -> page.route())
+                .containsExactly("orders");
+        assertThat(modules.permissionCatalog()).contains(OrdersAdminModule.ORDERS_READ);
+        assertThat(applicationContext.getBean(OrderQueryService.class).orders(
+                new io.github.vaadinadminstarter.contracts.navigation.PagedQuery(0, 10, "number", true, java.util.Map.of()))
+                .items()).isNotEmpty();
     }
 
     @Test
