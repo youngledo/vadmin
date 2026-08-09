@@ -70,9 +70,10 @@ and application composition in `admin-reference-app`:
 ApplicationShell (@Theme("admin-theme"))
   -> admin-theme/theme.json + styles.css
   -> MainLayout (AppLayout)
-       -> PageRegistry.visibleTo(currentUser, authorization)
+       -> AdminModuleRegistry.pagesVisibleTo(currentUser, authorization)
        -> protected Flow views
-            -> PageHeader / PageToolbar / DataWorkspace / EditorDialog
+            -> AdminPageFrame
+                 -> PageHeader / PageToolbar / DataWorkspace / EditorDialog
             -> DetailDialog / ConfirmationDialog / OperationFeedback
 ```
 
@@ -86,10 +87,22 @@ navigation.
 The named `admin-theme` lives at
 `admin-reference-app/src/main/frontend/themes/admin-theme/`. Its CSS owns
 semantic light and dark color tokens, density, focus, shell, canvas, and narrow
-viewport rules. The current-user menu stores the selected light/dark mode in
+viewport rules. The appearance utility stores the selected light/dark mode in
 the Vaadin session and applies it to the Flow UI root. It is intentionally not
 a persisted account preference in Phase 1. A consuming application can create
 its own app shell and named theme without modifying `admin-flow`.
+
+The completed Flow administration design refresh keeps this ownership model.
+`MainLayout` provides the compact shell: navigation access, product identity,
+current location, and a right-aligned utility area. Language and appearance
+are separate accessible icon menus with visible selected state; the user menu
+is reserved for account context. `AdminPageFrame` is a Spring-free
+`admin-flow` pattern that composes a `PageHeader`, optional `PageToolbar`, and
+workspace in a stable semantic order. The host theme supplies their visual
+treatment through the public `admin-*` tokens. Built-in administration views
+and the independently packaged orders module use that same frame, so external
+modules receive the host shell and shared page composition without depending on
+the reference application.
 
 `admin-flow` remains Spring-free: it may depend on Vaadin Flow,
 `admin-contracts`, and `admin-platform`, but must not import Spring Framework,
@@ -240,6 +253,12 @@ points.
 CI runs formatting and static checks, all test layers, a production build, and a
 Docker image build. Releases publish the compatibility baseline and treat a new
 Java, Spring Boot, or Vaadin major version as dedicated upgrade work.
+
+The completed Flow administration design refresh was verified with
+`./mvnw -B -ntp -pl :admin-reference-app -am verify`: Browser E2E reported
+31/31 tests, `ApplicationContextIT` 8/8, and `ReferenceLocaleIT` 1/1. The full
+production reactor verification, `./mvnw -B -ntp -Pproduction verify`, also
+succeeded.
 
 ## 8. Evolution Boundaries
 

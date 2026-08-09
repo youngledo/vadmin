@@ -2,9 +2,8 @@
 
 ## Status
 
-Proposed design for the next product-improvement phase. It follows the
-completed extensibility foundation and applies only to the Flow administration
-experience.
+Completed on 2026-08-10. This design follows the completed extensibility
+foundation and applies only to the Flow administration experience.
 
 ## Goal
 
@@ -145,6 +144,21 @@ theme and extension documentation only where public contracts change.
   quality as built-in pages.
 - Browser tests cover the refreshed shell and representative read-only and
   mutating workflows; production verification remains green.
+
+## Implementation Outcome
+
+- `MainLayout` now separates navigation, location, icon-triggered language and
+  appearance utilities, and account context. Language and appearance menus
+  expose the selected state and update the active UI in place.
+- `admin-flow` owns `AdminPageFrame`, which composes the shared page header,
+  optional controls, and workspace without importing Spring or host types.
+  The host theme retains ownership of global shell and pattern styling.
+- Built-in administration pages and the independently packaged orders module
+  adopt the same page frame and host visual system.
+- `./mvnw -B -ntp -pl :admin-reference-app -am verify` succeeded with Browser
+  E2E 31/31, `ApplicationContextIT` 8/8, and `ReferenceLocaleIT` 1/1. The
+  full production reactor verification, `./mvnw -B -ntp -Pproduction verify`,
+  also succeeded.
 
 ## Non-Goals
 
