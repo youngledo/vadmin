@@ -279,6 +279,19 @@ vaadin-menu-bar-button:focus-visible {
     gap: var(--admin-space-sm);
   }
 
+  .admin-user-control {
+    min-width: 0;
+  }
+
+  .admin-user-menu-label {
+    display: block;
+    max-width: 4.5rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .admin-content-canvas {
     padding: var(--admin-space-md);
   }

@@ -201,6 +201,21 @@ class BrowserE2EIT {
     }
 
     @Test
+    void selectingTheCurrentLanguageRetainsItsCheckedMenuState() {
+        signInAs("admin", "change-me");
+
+        openShellMenu("admin-language-menu");
+        var chinese = page.getByRole(AriaRole.MENUITEM,
+                new Page.GetByRoleOptions().setName("简体中文"));
+        assertThat(chinese).hasAttribute("menu-item-checked", "");
+        chinese.click();
+
+        openShellMenu("admin-language-menu");
+        assertThat(page.getByRole(AriaRole.MENUITEM,
+                new Page.GetByRoleOptions().setName("简体中文"))).hasAttribute("menu-item-checked", "");
+    }
+
+    @Test
     void authenticatedAdministratorCanSwitchAnOpenUsersViewLanguageWithoutNavigation() {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/users");
@@ -294,6 +309,21 @@ class BrowserE2EIT {
         page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Customers")).click();
         page.waitForURL(baseUrl() + "/customers");
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Customers"))).isVisible();
+    }
+
+    @Test
+    void narrowShellConstrainsLongAccountNamesWithoutHidingUtilities() {
+        var username = "very-long-administration-account-name";
+        createUser(username, "long-account-password");
+        useNarrowBrowser(320);
+        signInAs(username, "long-account-password");
+
+        assertThat(page.getByLabel("切换导航")).isVisible();
+        assertThat(shellUtilityMenu("admin-language-menu").getByLabel("语言")).isVisible();
+        assertThat(shellUtilityMenu("admin-appearance-menu").getByLabel("外观")).isVisible();
+        assertThat(page.getByLabel("当前用户菜单")).isVisible();
+        assertThat(page.locator(".admin-user-menu-label")).hasAttribute("title", username);
+        assertHeaderFitsViewport();
     }
 
     @Test
@@ -527,9 +557,13 @@ class BrowserE2EIT {
     }
 
     private void useNarrowBrowser() {
+        useNarrowBrowser(390);
+    }
+
+    private void useNarrowBrowser(int width) {
         browserContext.close();
         browserContext = browser.newContext(new Browser.NewContextOptions()
-                .setViewportSize(new ViewportSize(390, 844))
+                .setViewportSize(new ViewportSize(width, 844))
                 .setIsMobile(true));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
@@ -591,6 +625,15 @@ class BrowserE2EIT {
         org.assertj.core.api.Assertions.assertThat(boxesOverlap(firstBox, secondBox, 2.0))
                 .as("%s must not overlap %s", firstName, secondName)
                 .isFalse();
+    }
+
+    private void assertHeaderFitsViewport() {
+        var headerBox = page.locator(".admin-shell-header").boundingBox();
+        org.assertj.core.api.Assertions.assertThat(headerBox).as("shell header bounding box").isNotNull();
+        var viewportWidth = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
+        org.assertj.core.api.Assertions.assertThat(headerBox.x + headerBox.width)
+                .as("shell header right edge")
+                .isLessThanOrEqualTo(viewportWidth + 1);
     }
 
     private boolean boxesOverlap(BoundingBox first, BoundingBox second, double tolerance) {

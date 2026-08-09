@@ -137,10 +137,14 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         var avatar = new Avatar(username);
         avatar.setAbbreviation(username.substring(0, 1).toUpperCase());
         avatar.getElement().setAttribute("title", username);
-        var userControl = new HorizontalLayout(avatar, new Span(username));
+        var userLabel = new Span(username);
+        userLabel.addClassName("admin-user-menu-label");
+        userLabel.getElement().setAttribute("title", username);
+        var userControl = new HorizontalLayout(avatar, userLabel);
         userControl.setPadding(false);
         userControl.setSpacing(true);
         userControl.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        userControl.addClassName("admin-user-control");
         menu.addItem(userControl);
         return menu;
     }
@@ -224,10 +228,15 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     private void addLanguageChoice(MenuItem trigger, Locale locale) {
         var choice = trigger.getSubMenu().addItem(text("system.shell.language." + locale.toLanguageTag()), event -> {
-            if (event.isFromClient()) localePreference.select(UI.getCurrent(), locale);
+            if (event.isFromClient()) selectLanguage(locale);
         });
         choice.setCheckable(true);
         choice.setChecked(locale.equals(UI.getCurrent().getLocale()));
+    }
+
+    private void selectLanguage(Locale locale) {
+        localePreference.select(UI.getCurrent(), locale);
+        updateLanguageMenu();
     }
 
     private void updateAppearanceMenu() {
