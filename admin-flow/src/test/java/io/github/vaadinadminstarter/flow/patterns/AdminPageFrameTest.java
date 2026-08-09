@@ -22,6 +22,7 @@ class AdminPageFrameTest {
         assertThat(header.getClassNames()).contains("admin-page-header");
         assertThat(controls.getClassNames()).contains("admin-page-controls");
         assertThat(workspace.getClassNames()).contains("admin-page-workspace");
+        assertThat(frame.getFlexGrow(workspace)).isEqualTo(1.0);
     }
 
     @Test

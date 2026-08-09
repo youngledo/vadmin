@@ -21,5 +21,6 @@ public final class AdminPageFrame extends VerticalLayout {
             add(controls);
         }
         add(pageWorkspace);
+        expand(pageWorkspace);
     }
 }
