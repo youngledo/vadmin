@@ -510,7 +510,7 @@ in the root and the dark selector: `surface`, `surface-raised`, `text-primary`,
 `text-secondary`, `border`, `accent`, `success`, `warning`, `danger`, `focus`,
 `space-sm`, `space-md`, `radius-control`, and `elevation-raised`.
 
-Run: `./mvnw -B -ntp -pl admin-reference-app -am test -Dtest=AdminThemeTokenTest`
+Run: `./mvnw -B -ntp -pl admin-reference-app -am test -Dtest=AdminThemeTokenTest -Dsurefire.failIfNoSpecifiedTests=false`
 
 Expected: FAIL because the legacy names do not yet provide the documented
 semantic contract.
@@ -545,7 +545,7 @@ of this new content.
 
 - [ ] **Step 4: Verify and commit the token contract**
 
-Run: `./mvnw -B -ntp -pl admin-reference-app -am test -Dtest=AdminThemeTokenTest`
+Run: `./mvnw -B -ntp -pl admin-reference-app -am test -Dtest=AdminThemeTokenTest -Dsurefire.failIfNoSpecifiedTests=false`
 
 Expected: PASS.
 
