@@ -5,10 +5,12 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Response;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.BoundingBox;
 import com.microsoft.playwright.options.FilePayload;
 import com.microsoft.playwright.options.ViewportSize;
 import java.nio.charset.StandardCharsets;
@@ -261,6 +263,7 @@ class BrowserE2EIT {
 
         assertThat(page.locator("body")).hasAttribute("theme", "dark");
         assertThat(workspace).isVisible();
+        assertOrdersWorkspaceIsOutsideShellChrome(workspace);
         var darkSurface = computedThemeVariable("--admin-surface");
         var darkText = computedThemeVariable("--admin-text-primary");
         org.assertj.core.api.Assertions.assertThat(darkSurface).isNotEqualTo(lightSurface);
@@ -549,6 +552,34 @@ class BrowserE2EIT {
     private String computedThemeVariable(String name) {
         return (String) page.locator("body")
                 .evaluate("(element, name) => getComputedStyle(element).getPropertyValue(name).trim()", name);
+    }
+
+    private void assertOrdersWorkspaceIsOutsideShellChrome(Locator workspace) {
+        var contentCanvas = page.locator(".admin-content-canvas");
+        var header = page.locator(".admin-shell-header");
+        var drawer = page.locator(".admin-drawer-content");
+
+        assertNoVisualOverlap(header, contentCanvas, "shell header", "content canvas");
+        assertNoVisualOverlap(header, workspace, "shell header", "orders workspace");
+        assertNoVisualOverlap(drawer, contentCanvas, "navigation drawer", "content canvas");
+        assertNoVisualOverlap(drawer, workspace, "navigation drawer", "orders workspace");
+    }
+
+    private void assertNoVisualOverlap(Locator first, Locator second, String firstName, String secondName) {
+        var firstBox = first.boundingBox();
+        var secondBox = second.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(firstBox).as("%s bounding box", firstName).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(secondBox).as("%s bounding box", secondName).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(boxesOverlap(firstBox, secondBox, 2.0))
+                .as("%s must not overlap %s", firstName, secondName)
+                .isFalse();
+    }
+
+    private boolean boxesOverlap(BoundingBox first, BoundingBox second, double tolerance) {
+        return first.x < second.x + second.width - tolerance
+                && first.x + first.width > second.x + tolerance
+                && first.y < second.y + second.height - tolerance
+                && first.y + first.height > second.y + tolerance;
     }
 
     private void grantPermission(String roleCode, String permissionCode) {
