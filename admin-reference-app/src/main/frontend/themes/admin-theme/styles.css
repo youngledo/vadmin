@@ -283,6 +283,12 @@ vaadin-menu-bar-button:focus-visible {
     min-width: 0;
   }
 
+  .admin-user-menu,
+  .admin-user-menu vaadin-menu-bar-button {
+    max-width: 7rem;
+    min-width: 0;
+  }
+
   .admin-user-menu-label {
     display: block;
     max-width: 4.5rem;

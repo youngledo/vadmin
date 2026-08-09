@@ -318,12 +318,16 @@ class BrowserE2EIT {
         useNarrowBrowser(320);
         signInAs(username, "long-account-password");
 
-        assertThat(page.getByLabel("切换导航")).isVisible();
-        assertThat(shellUtilityMenu("admin-language-menu").getByLabel("语言")).isVisible();
-        assertThat(shellUtilityMenu("admin-appearance-menu").getByLabel("外观")).isVisible();
-        assertThat(page.getByLabel("当前用户菜单")).isVisible();
+        var navigationToggle = page.getByLabel("切换导航");
+        var languageControl = shellUtilityMenu("admin-language-menu").getByLabel("语言");
+        var appearanceControl = shellUtilityMenu("admin-appearance-menu").getByLabel("外观");
+        var accountControl = page.getByLabel("当前用户菜单");
+        assertThat(navigationToggle).isVisible();
+        assertThat(languageControl).isVisible();
+        assertThat(appearanceControl).isVisible();
+        assertThat(accountControl).isVisible();
         assertThat(page.locator(".admin-user-menu-label")).hasAttribute("title", username);
-        assertHeaderFitsViewport();
+        assertNarrowShellDoesNotOverflow(navigationToggle, languageControl, appearanceControl, accountControl);
     }
 
     @Test
@@ -627,13 +631,21 @@ class BrowserE2EIT {
                 .isFalse();
     }
 
-    private void assertHeaderFitsViewport() {
-        var headerBox = page.locator(".admin-shell-header").boundingBox();
-        org.assertj.core.api.Assertions.assertThat(headerBox).as("shell header bounding box").isNotNull();
+    private void assertNarrowShellDoesNotOverflow(Locator... controls) {
+        var header = page.locator(".admin-shell-header");
         var viewportWidth = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
-        org.assertj.core.api.Assertions.assertThat(headerBox.x + headerBox.width)
-                .as("shell header right edge")
+        var headerScrollWidth = ((Number) header.evaluate("element => element.scrollWidth")).doubleValue();
+        org.assertj.core.api.Assertions.assertThat(headerScrollWidth)
+                .as("shell header scroll width")
                 .isLessThanOrEqualTo(viewportWidth + 1);
+        for (var control : controls) {
+            var controlBox = control.boundingBox();
+            org.assertj.core.api.Assertions.assertThat(controlBox).as("shell control bounding box").isNotNull();
+            org.assertj.core.api.Assertions.assertThat(controlBox.x).as("shell control left edge")
+                    .isGreaterThanOrEqualTo(-1);
+            org.assertj.core.api.Assertions.assertThat(controlBox.x + controlBox.width).as("shell control right edge")
+                    .isLessThanOrEqualTo(viewportWidth + 1);
+        }
     }
 
     private boolean boxesOverlap(BoundingBox first, BoundingBox second, double tolerance) {
