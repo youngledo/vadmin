@@ -23,18 +23,18 @@ class AdminModuleRegistryTest {
     @Test
     void returnsOnlyAccessibleGroupsAndPagesInDeterministicOrder() {
         var registry = new AdminModuleRegistry(List.of(
-                module("orders", new AdminNavigationGroup("business", "navigation.business", 200),
-                        page("orders.list", "business", 200, "orders", ORDERS_READ), ORDERS_READ),
-                module("invoices", new AdminNavigationGroup("finance", "navigation.finance", 100),
-                        page("invoices.list", "finance", 100, "invoices", INVOICES_READ), INVOICES_READ),
-                module("returns", new AdminNavigationGroup("business", "navigation.business", 200),
-                        page("returns.list", "business", 100, "returns", RETURNS_READ), RETURNS_READ)));
+                module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 200),
+                        page("orders.list", "orders.business", 200, "orders", ORDERS_READ), ORDERS_READ),
+                module("invoices", new AdminNavigationGroup("invoices.finance", "invoices.navigation.finance", 100),
+                        page("invoices.list", "invoices.finance", 100, "invoices", INVOICES_READ), INVOICES_READ),
+                module("returns", new AdminNavigationGroup("returns.business", "returns.navigation.business", 100),
+                        page("returns.list", "returns.business", 100, "returns", RETURNS_READ), RETURNS_READ)));
 
         var user = userWith(ORDERS_READ, RETURNS_READ);
 
         assertThat(registry.groupsVisibleTo(user, authorization()))
                 .extracting(AdminNavigationGroup::id)
-                .containsExactly("business");
+                .containsExactly("returns.business", "orders.business");
         assertThat(registry.pagesVisibleTo(user, authorization()))
                 .extracting(AdminPage::route)
                 .containsExactly("returns", "orders");
@@ -45,35 +45,106 @@ class AdminModuleRegistryTest {
     @Test
     void reportsBothModulesWhenRoutesCollide() {
         assertThatIllegalArgumentException().isThrownBy(() -> new AdminModuleRegistry(List.of(
-                module("orders", new AdminNavigationGroup("business", "navigation.business", 100),
-                        page("orders.list", "business", 100, "work", ORDERS_READ), ORDERS_READ),
-                module("invoices", new AdminNavigationGroup("finance", "navigation.finance", 100),
-                        page("invoices.list", "finance", 100, "work", INVOICES_READ), INVOICES_READ))))
+                module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),
+                        page("orders.list", "orders.business", 100, "work", ORDERS_READ), ORDERS_READ),
+                module("invoices", new AdminNavigationGroup("invoices.finance", "invoices.navigation.finance", 100),
+                        page("invoices.list", "invoices.finance", 100, "work", INVOICES_READ), INVOICES_READ))))
                 .withMessageContaining("work")
                 .withMessageContaining("orders")
                 .withMessageContaining("invoices");
     }
 
     @Test
-    void rejectsIncompatibleNavigationGroupReuse() {
+    void rejectsNavigationGroupReuseAcrossModules() {
         assertThatIllegalArgumentException().isThrownBy(() -> new AdminModuleRegistry(List.of(
-                module("orders", new AdminNavigationGroup("business", "navigation.business", 100),
+                module("orders", new AdminNavigationGroup("business", "orders.navigation.business", 100),
                         page("orders.list", "business", 100, "orders", ORDERS_READ), ORDERS_READ),
-                module("invoices", new AdminNavigationGroup("business", "navigation.finance", 100),
+                module("invoices", new AdminNavigationGroup("business", "invoices.navigation.business", 100),
                         page("invoices.list", "business", 100, "invoices", INVOICES_READ), INVOICES_READ))))
                 .withMessageContaining("business")
                 .withMessageContaining("orders")
                 .withMessageContaining("invoices");
     }
 
+    @Test
+    void rejectsTranslationKeysOutsideTheModuleNamespace() {
+        assertThatIllegalArgumentException().isThrownBy(() -> new AdminModule("orders",
+                List.of(new AdminNavigationGroup("orders.business", "navigation.business", 100)),
+                List.of(page("orders.list", "orders.business", 100, "orders", ORDERS_READ)),
+                Set.of(ORDERS_READ), List.of(new AdminMessageBundle("orders", "orders.i18n.messages"))))
+                .withMessageContaining("orders")
+                .withMessageContaining("navigation.business");
+    }
+
+    @Test
+    void reportsBothModulesWhenModuleIdsCollide() {
+        assertCollision("orders", () -> new AdminModuleRegistry(List.of(
+                module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),
+                        page("orders.list", "orders.business", 100, "orders", ORDERS_READ), ORDERS_READ),
+                module("orders", new AdminNavigationGroup("orders.billing", "orders.navigation.billing", 200),
+                        page("orders.billing", "orders.billing", 100, "orders-billing", INVOICES_READ), INVOICES_READ))),
+                "orders", "orders");
+    }
+
+    @Test
+    void reportsBothModulesWhenPageIdsCollide() {
+        assertCollision("shared.page", () -> new AdminModuleRegistry(List.of(
+                module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),
+                        pageFor("orders", "shared.page", "orders.business", 100, "orders", ORDERS_READ), ORDERS_READ),
+                module("invoices", new AdminNavigationGroup("invoices.finance", "invoices.navigation.finance", 100),
+                        pageFor("invoices", "shared.page", "invoices.finance", 100, "invoices", INVOICES_READ), INVOICES_READ))),
+                "orders", "invoices");
+    }
+
+    @Test
+    void reportsBothModulesWhenOwnedPermissionsCollide() {
+        assertCollision("orders:order:read", () -> new AdminModuleRegistry(List.of(
+                module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),
+                        page("orders.list", "orders.business", 100, "orders", ORDERS_READ), ORDERS_READ),
+                module("invoices", new AdminNavigationGroup("invoices.finance", "invoices.navigation.finance", 100),
+                        page("invoices.list", "invoices.finance", 100, "invoices", ORDERS_READ), ORDERS_READ))),
+                "orders", "invoices");
+    }
+
+    @Test
+    void reportsBothModulesWhenMessageBundleDescriptorsCollide() {
+        assertCollision("shared.i18n.messages", () -> new AdminModuleRegistry(List.of(
+                module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),
+                        page("orders.list", "orders.business", 100, "orders", ORDERS_READ), ORDERS_READ,
+                        "shared.i18n.messages"),
+                module("invoices", new AdminNavigationGroup("invoices.finance", "invoices.navigation.finance", 100),
+                        page("invoices.list", "invoices.finance", 100, "invoices", INVOICES_READ), INVOICES_READ,
+                        "shared.i18n.messages"))), "orders", "invoices");
+    }
+
     private static AdminModule module(String id, AdminNavigationGroup group, AdminPage page, PermissionCode permission) {
+        return module(id, group, page, permission, id + ".i18n.messages");
+    }
+
+    private static AdminModule module(String id, AdminNavigationGroup group, AdminPage page, PermissionCode permission,
+                                      String messageBundleBaseName) {
         return AdminModule.of(id, List.of(group), List.of(page), Set.of(permission),
-                List.of(new AdminMessageBundle(id, id + ".i18n.messages")));
+                List.of(new AdminMessageBundle(id, messageBundleBaseName)));
     }
 
     private static AdminPage page(String id, String groupId, int order, String route, PermissionCode permission) {
-        return new AdminPage(id, groupId, id + ".title", id + ".intent", "briefcase", order, route, permission,
+        var moduleId = id.substring(0, id.indexOf('.'));
+        return pageFor(moduleId, id, groupId, order, route, permission);
+    }
+
+    private static AdminPage pageFor(String moduleId, String id, String groupId, int order, String route,
+                                     PermissionCode permission) {
+        return new AdminPage(id, groupId, moduleId + ".page." + id.replace('.', '-') + ".title",
+                moduleId + ".page." + id.replace('.', '-') + ".intent", "briefcase", order, route, permission,
                 TestView.class);
+    }
+
+    private static void assertCollision(String value, org.assertj.core.api.ThrowableAssert.ThrowingCallable action,
+                                        String firstModuleId, String secondModuleId) {
+        assertThatIllegalArgumentException().isThrownBy(action)
+                .withMessageContaining(value)
+                .withMessageContaining(firstModuleId)
+                .withMessageContaining(secondModuleId);
     }
 
     private static CurrentUser userWith(PermissionCode... permissions) {

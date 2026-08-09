@@ -39,10 +39,25 @@ public record AdminModule(String moduleId, List<AdminNavigationGroup> navigation
         if (messageBundles.stream().anyMatch(bundle -> !declaredModuleId.equals(bundle.moduleId()))) {
             throw new IllegalArgumentException("Module '" + moduleId + "' has a message bundle for a different module");
         }
+        var namespace = moduleId + ".";
+        for (var group : navigationGroups) {
+            requireModuleKey(moduleId, namespace, "group title key", group.titleKey());
+        }
+        for (var page : pages) {
+            requireModuleKey(moduleId, namespace, "page title key", page.titleKey());
+            requireModuleKey(moduleId, namespace, "page intent key", page.intentKey());
+        }
     }
 
     public static AdminModule of(String moduleId, List<AdminNavigationGroup> navigationGroups, List<AdminPage> pages,
                                  Set<PermissionCode> permissions, List<AdminMessageBundle> messageBundles) {
         return new AdminModule(moduleId, navigationGroups, pages, permissions, messageBundles);
+    }
+
+    private static void requireModuleKey(String moduleId, String namespace, String kind, String key) {
+        if (!key.startsWith(namespace)) {
+            throw new IllegalArgumentException("Module '" + moduleId + "' has " + kind + " '" + key
+                    + "' outside namespace '" + namespace + "'");
+        }
     }
 }
