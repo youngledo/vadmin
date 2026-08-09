@@ -24,6 +24,7 @@ class PageToolbarTest {
         assertThat(toolbar.getResetAction()).isSameAs(reset);
         assertThat(toolbar.getPrimaryAction()).isSameAs(create);
         assertThat(toolbar.getActions().getChildren()).contains(export, create);
+        assertThat(toolbar.getClassNames()).contains("admin-page-controls");
     }
 
     @Test

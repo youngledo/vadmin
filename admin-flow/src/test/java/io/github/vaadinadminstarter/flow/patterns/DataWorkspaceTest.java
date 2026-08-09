@@ -125,6 +125,7 @@ class DataWorkspaceTest {
         workspace.setBusy(true);
         assertThat(workspace.getState()).isEqualTo(DataWorkspace.State.BUSY);
         assertThat(workspace.getStatusMessage()).isEqualTo("Loading data");
+        assertThat(workspace.getClassNames()).contains("admin-page-workspace");
 
         workspace.showEmpty(new EmptyState("No users", "Create a user to begin."));
         assertThat(workspace.getState()).isEqualTo(DataWorkspace.State.EMPTY);

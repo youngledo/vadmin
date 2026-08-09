@@ -21,6 +21,7 @@ public final class PageToolbar extends HorizontalLayout {
         setPadding(false);
         setAlignItems(Alignment.END);
         setJustifyContentMode(JustifyContentMode.BETWEEN);
+        addClassName("admin-page-controls");
         filters.setPadding(false);
         filters.setSpacing(true);
         actions.setPadding(false);

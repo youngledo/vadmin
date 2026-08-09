@@ -20,5 +20,6 @@ class PageHeaderTest {
         assertThat(header.getDescription()).isEqualTo("Manage application users");
         assertThat(header.getLocation()).isSameAs(location);
         assertThat(header.getActions().getChildren()).contains(create);
+        assertThat(header.getClassNames()).contains("admin-page-header");
     }
 }
