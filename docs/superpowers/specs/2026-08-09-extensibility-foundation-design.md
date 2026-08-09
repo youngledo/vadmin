@@ -38,6 +38,12 @@ those framework dependencies in its own Spring Boot adapter, but its
 `AdminModule` descriptor cannot expose framework-specific services or
 configuration types.
 
+`admin-contracts` adds a `CurrentUserProvider` port. `admin-flow` provides a
+public permission-protected Flow view base that uses that port and the existing
+`AuthorizationService`. External modules use this base (or an equivalent
+public contract) for direct-route protection; they never depend on the
+reference application's package-private view classes.
+
 ### Spring Boot Host Assembly
 
 Spring Boot is the only supported host runtime in this phase. A business module
