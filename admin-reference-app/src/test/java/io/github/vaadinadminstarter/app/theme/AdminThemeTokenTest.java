@@ -48,12 +48,25 @@ class AdminThemeTokenTest {
     @Test
     void mapsStateTokensToLumoAndVaadinComponentVariables() throws IOException {
         var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
-        var root = extractBlock(styles, ":root");
 
-        assertThat(root).contains("--lumo-success-color: var(--admin-success);");
-        assertThat(root).contains("--lumo-warning-color: var(--admin-warning);");
-        assertThat(root).contains("--lumo-error-color: var(--admin-danger);");
-        assertThat(root).contains("--vaadin-focus-ring-color: var(--admin-focus);");
+        assertThemeContractMappings(extractBlock(styles, ":root"));
+        assertThemeContractMappings(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"));
+    }
+
+    private void assertThemeContractMappings(String selectorBlock) {
+        assertThat(selectorBlock).contains("--lumo-primary-color: var(--admin-accent);");
+        assertAccentStateColorMappings(selectorBlock);
+        assertThat(selectorBlock).contains("--lumo-success-color: var(--admin-success);");
+        assertThat(selectorBlock).contains("--lumo-warning-color: var(--admin-warning);");
+        assertThat(selectorBlock).contains("--lumo-error-color: var(--admin-danger);");
+        assertThat(selectorBlock).contains("--lumo-body-text-color: var(--admin-text-primary);");
+        assertThat(selectorBlock).contains("--lumo-secondary-text-color: var(--admin-text-secondary);");
+        assertThat(selectorBlock).contains("--lumo-tertiary-text-color: var(--admin-text-muted);");
+        assertThat(selectorBlock).contains("--lumo-base-color: var(--admin-surface);");
+        assertThat(selectorBlock).contains("--lumo-contrast-10pct: var(--admin-border);");
+        assertThat(selectorBlock).contains("--lumo-border-radius-m: var(--admin-radius-control);");
+        assertThat(selectorBlock).contains("--lumo-font-family: var(--admin-font-family);");
+        assertThat(selectorBlock).contains("--vaadin-focus-ring-color: var(--admin-focus);");
     }
 
     private void assertAccentStateColorMappings(String selectorBlock) {

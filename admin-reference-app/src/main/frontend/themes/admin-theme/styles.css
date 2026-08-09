@@ -76,8 +76,20 @@ html[theme~="dark"],
   --admin-space-standard: var(--admin-space-md);
   --admin-radius: var(--admin-radius-control);
   --admin-elevation: var(--admin-elevation-raised);
+  --lumo-primary-color: var(--admin-accent);
   --lumo-primary-color-50pct: color-mix(in srgb, var(--admin-accent) 50%, transparent);
   --lumo-primary-color-10pct: color-mix(in srgb, var(--admin-accent) 10%, transparent);
+  --lumo-success-color: var(--admin-success);
+  --lumo-warning-color: var(--admin-warning);
+  --lumo-error-color: var(--admin-danger);
+  --lumo-body-text-color: var(--admin-text-primary);
+  --lumo-secondary-text-color: var(--admin-text-secondary);
+  --lumo-tertiary-text-color: var(--admin-text-muted);
+  --lumo-base-color: var(--admin-surface);
+  --lumo-contrast-10pct: var(--admin-border);
+  --lumo-border-radius-m: var(--admin-radius-control);
+  --lumo-font-family: var(--admin-font-family);
+  --vaadin-focus-ring-color: var(--admin-focus);
 }
 
 html,

@@ -155,6 +155,10 @@ class BrowserE2EIT {
         page.getByText("切换至深色模式", new Page.GetByTextOptions().setExact(true)).click();
 
         assertThat(page.locator("body")).hasAttribute("theme", "dark");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--lumo-primary-color")).isEqualTo("#52b6e8");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--lumo-body-text-color")).isEqualTo("#edf2f7");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--lumo-success-color")).isEqualTo("#62c78f");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--vaadin-focus-ring-color")).isEqualTo("#7cc8ef");
         userMenu.locator("vaadin-menu-bar-button:not([hidden])").press("Enter");
         assertThat(page.getByText("切换至浅色模式", new Page.GetByTextOptions().setExact(true))).isVisible();
     }
@@ -472,6 +476,11 @@ class BrowserE2EIT {
                 .mapToInt(text -> text.split(heading, -1).length - 1)
                 .sum();
         org.assertj.core.api.Assertions.assertThat(occurrenceCount).isEqualTo(1);
+    }
+
+    private String computedThemeVariable(String name) {
+        return (String) page.locator("body")
+                .evaluate("(element, name) => getComputedStyle(element).getPropertyValue(name).trim()", name);
     }
 
     private void grantPermission(String roleCode, String permissionCode) {

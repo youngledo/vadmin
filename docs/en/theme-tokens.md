@@ -40,6 +40,10 @@ the primary 10% and 50% Lumo state colors are derived from `--admin-accent`.
 The standard Lumo success, warning, and error colors are mapped from
 `--admin-success`, `--admin-warning`, and `--admin-danger`; Vaadin's normal
 control focus ring is mapped from `--admin-focus`.
+Flow applies the theme attribute to `body`, so the reference theme repeats its
+Lumo and Vaadin mappings in the dark selector. This ensures those variables
+resolve the dark semantic tokens instead of inheriting values computed at the
+root scope.
 Legacy `--admin-primary`, `--admin-text`, `--admin-space-compact`,
 `--admin-space-standard`, `--admin-radius`, and `--admin-elevation` aliases
 remain for compatibility. New module CSS must use the canonical names in the
