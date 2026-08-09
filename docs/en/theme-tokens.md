@@ -31,6 +31,7 @@ its meaning, never for a particular color or size.
 | `--admin-font-family` | Application font stack. |
 | `--admin-space-sm` | Compact, related spacing. |
 | `--admin-space-md` | Standard layout and control spacing. |
+| `--admin-utility-size` | Stable square dimension for compact shell utility controls. |
 | `--admin-radius-control` | Standard interactive-control corner radius. |
 | `--admin-elevation-raised` | Shadow for raised application chrome. |
 

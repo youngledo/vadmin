@@ -26,6 +26,7 @@ class AdminThemeTokenTest {
             "font-family",
             "space-sm",
             "space-md",
+            "utility-size",
             "radius-control",
             "elevation-raised");
 
@@ -51,6 +52,15 @@ class AdminThemeTokenTest {
 
         assertThemeContractMappings(extractBlock(styles, ":root"));
         assertThemeContractMappings(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"));
+    }
+
+    @Test
+    void documentsEveryRequiredSemanticToken() throws IOException {
+        var documentation = Files.readString(Path.of("../docs/en/theme-tokens.md"), StandardCharsets.UTF_8);
+
+        REQUIRED_TOKENS.forEach(token -> assertThat(documentation)
+                .as("documented token %s", token)
+                .contains("`--admin-" + token + "`"));
     }
 
     private void assertThemeContractMappings(String selectorBlock) {
