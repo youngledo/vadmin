@@ -172,6 +172,11 @@ public final class AdminModuleRegistry {
 }
 ```
 
+An `AdminNavigationGroup` may be contributed by multiple modules only when its
+metadata is exactly equal. Its title key is owned by the first declaration and
+reused unchanged; every `AdminPage` title and intent key remains prefixed by
+the page module ID.
+
 Keep `PageRegistry` as a deprecated compatibility facade only if a caller
 remains after the reference-app migration; otherwise remove it and migrate its
 single test in the same commit. Do not make this API depend on Spring classes.

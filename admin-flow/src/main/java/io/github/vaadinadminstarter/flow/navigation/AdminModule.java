@@ -40,9 +40,6 @@ public record AdminModule(String moduleId, List<AdminNavigationGroup> navigation
             throw new IllegalArgumentException("Module '" + moduleId + "' has a message bundle for a different module");
         }
         var namespace = moduleId + ".";
-        for (var group : navigationGroups) {
-            requireModuleKey(moduleId, namespace, "group title key", group.titleKey());
-        }
         for (var page : pages) {
             requireModuleKey(moduleId, namespace, "page title key", page.titleKey());
             requireModuleKey(moduleId, namespace, "page intent key", page.intentKey());

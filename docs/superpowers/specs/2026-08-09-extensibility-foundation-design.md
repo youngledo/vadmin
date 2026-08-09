@@ -29,8 +29,11 @@ dynamic plugin platform or introducing another runtime.
 
 An `AdminPage` belongs to exactly one `AdminNavigationGroup`. Module IDs, group
 IDs, page IDs, routes, and translation-key namespaces are stable public
-identifiers. A module must use its module ID as the prefix of its translation
-keys, for example `orders.page.list.title`.
+identifiers. Every page title and intent key must use its module ID as the
+prefix, for example `orders.page.list.title`. Navigation groups may be shared
+by modules only when their metadata is exactly equal; the translation key is
+owned by the module that first declares the group and is reused unchanged by
+later modules.
 
 `admin-flow` and `admin-contracts` remain free of Spring Boot, Spring Security,
 JPA, Flyway, and reference-application dependencies. A business module can use
@@ -64,9 +67,11 @@ route registration becomes a supported extension contract.
 
 The assembled registry rejects, during startup, duplicate module IDs,
 navigation-group IDs with incompatible metadata, page IDs, routes, permission
-codes, and translation-bundle descriptors. The failure describes the colliding
-values and both module IDs. Startup failures are configuration errors; they
-must not be silently resolved by ordering.
+codes, and translation-bundle descriptors. A navigation group with exactly
+matching metadata is shared, retaining the translation key supplied by its
+initial declaration. The failure describes the colliding values and both module
+IDs. Startup failures are configuration errors; they must not be silently
+resolved by ordering.
 
 ### Navigation And Permission Contribution
 

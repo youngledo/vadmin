@@ -51,7 +51,7 @@ public final class AdminModuleRegistry {
                 var existing = groupMetadata.putIfAbsent(group.id(), group);
                 if (existing == null) {
                     groupOwners.put(group.id(), module.moduleId());
-                } else {
+                } else if (!existing.equals(group)) {
                     throw collision("navigation group", group.id(), groupOwners.get(group.id()), module.moduleId());
                 }
             }

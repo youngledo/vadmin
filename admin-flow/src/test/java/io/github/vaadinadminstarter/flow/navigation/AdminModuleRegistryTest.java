@@ -43,6 +43,25 @@ class AdminModuleRegistryTest {
     }
 
     @Test
+    void combinesCompatibleSharedNavigationGroupsAndOrdersTheirPages() {
+        var sharedGroup = new AdminNavigationGroup("business", "navigation.business", 100);
+        var registry = new AdminModuleRegistry(List.of(
+                module("orders", sharedGroup,
+                        page("orders.list", "business", 200, "orders", ORDERS_READ), ORDERS_READ),
+                module("returns", sharedGroup,
+                        page("returns.list", "business", 100, "returns", RETURNS_READ), RETURNS_READ)));
+
+        var user = userWith(ORDERS_READ, RETURNS_READ);
+
+        assertThat(registry.groupsVisibleTo(user, authorization()))
+                .extracting(AdminNavigationGroup::id)
+                .containsExactly("business");
+        assertThat(registry.pagesVisibleTo(user, authorization()))
+                .extracting(AdminPage::route)
+                .containsExactly("returns", "orders");
+    }
+
+    @Test
     void reportsBothModulesWhenRoutesCollide() {
         assertThatIllegalArgumentException().isThrownBy(() -> new AdminModuleRegistry(List.of(
                 module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),
@@ -55,11 +74,11 @@ class AdminModuleRegistryTest {
     }
 
     @Test
-    void rejectsNavigationGroupReuseAcrossModules() {
+    void rejectsIncompatibleNavigationGroupReuse() {
         assertThatIllegalArgumentException().isThrownBy(() -> new AdminModuleRegistry(List.of(
-                module("orders", new AdminNavigationGroup("business", "orders.navigation.business", 100),
+                module("orders", new AdminNavigationGroup("business", "navigation.business", 100),
                         page("orders.list", "business", 100, "orders", ORDERS_READ), ORDERS_READ),
-                module("invoices", new AdminNavigationGroup("business", "invoices.navigation.business", 100),
+                module("invoices", new AdminNavigationGroup("business", "navigation.finance", 100),
                         page("invoices.list", "business", 100, "invoices", INVOICES_READ), INVOICES_READ))))
                 .withMessageContaining("business")
                 .withMessageContaining("orders")
@@ -70,10 +89,11 @@ class AdminModuleRegistryTest {
     void rejectsTranslationKeysOutsideTheModuleNamespace() {
         assertThatIllegalArgumentException().isThrownBy(() -> new AdminModule("orders",
                 List.of(new AdminNavigationGroup("orders.business", "navigation.business", 100)),
-                List.of(page("orders.list", "orders.business", 100, "orders", ORDERS_READ)),
+                List.of(new AdminPage("orders.list", "orders.business", "outside.page.title", "orders.page.intent",
+                        "briefcase", 100, "orders", ORDERS_READ, TestView.class)),
                 Set.of(ORDERS_READ), List.of(new AdminMessageBundle("orders", "orders.i18n.messages"))))
                 .withMessageContaining("orders")
-                .withMessageContaining("navigation.business");
+                .withMessageContaining("outside.page.title");
     }
 
     @Test
