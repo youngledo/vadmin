@@ -28,12 +28,15 @@ its meaning, never for a particular color or size.
 | `--admin-warning` | Warning outcome. |
 | `--admin-danger` | Destructive action or error outcome. |
 | `--admin-focus` | Keyboard focus indicator. |
+| `--admin-font-family` | Application font stack. |
 | `--admin-space-sm` | Compact, related spacing. |
 | `--admin-space-md` | Standard layout and control spacing. |
 | `--admin-radius-control` | Standard interactive-control corner radius. |
 | `--admin-elevation-raised` | Shadow for raised application chrome. |
 
 The reference theme maps Vaadin Lumo variables from these semantic tokens.
+In particular, `--lumo-font-family` is mapped from `--admin-font-family`, and
+the primary 10% and 50% Lumo state colors are derived from `--admin-accent`.
 Legacy `--admin-primary`, `--admin-text`, `--admin-space-compact`,
 `--admin-space-standard`, `--admin-radius`, and `--admin-elevation` aliases
 remain for compatibility. New module CSS must use the canonical names in the
@@ -49,6 +52,7 @@ value when the visual decision needs one:
 :root {
   --admin-accent: #0f766e;
   --admin-focus: #0f766e;
+  --admin-font-family: "IBM Plex Sans", sans-serif;
 }
 
 html[theme~="dark"],

@@ -23,6 +23,7 @@ class AdminThemeTokenTest {
             "warning",
             "danger",
             "focus",
+            "font-family",
             "space-sm",
             "space-md",
             "radius-control",
@@ -34,6 +35,19 @@ class AdminThemeTokenTest {
 
         assertTokenDeclarations(extractBlock(styles, ":root"));
         assertTokenDeclarations(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"));
+    }
+
+    @Test
+    void derivesLumoPrimaryStateColorsFromTheCanonicalAccent() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+
+        assertAccentStateColorMappings(extractBlock(styles, ":root"));
+        assertAccentStateColorMappings(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"));
+    }
+
+    private void assertAccentStateColorMappings(String selectorBlock) {
+        assertThat(selectorBlock).contains("--lumo-primary-color-50pct: color-mix(in srgb, var(--admin-accent) 50%, transparent);");
+        assertThat(selectorBlock).contains("--lumo-primary-color-10pct: color-mix(in srgb, var(--admin-accent) 10%, transparent);");
     }
 
     private void assertTokenDeclarations(String selectorBlock) {
