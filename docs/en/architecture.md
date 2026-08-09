@@ -80,7 +80,7 @@ ApplicationShell (@Theme("admin-theme"))
 `ApplicationShell` is the Flow `AppShellConfigurator`; it is the required
 place for the application-wide `@Theme` annotation. `MainLayout` is an
 application composition class, not a reusable Spring adapter. It obtains the
-permission-filtered page projection from `PageRegistry`, supplies the product
+permission-filtered page projection from `AdminModuleRegistry`, supplies the product
 header and grouped navigation, and updates the current route title after
 navigation.
 

@@ -20,7 +20,7 @@
 - Modify: `admin-reference-app/src/test/java/io/github/vaadinadminstarter/app/ApplicationShellTest.java`
 - Modify: `admin-reference-app/src/test/java/io/github/vaadinadminstarter/app/e2e/BrowserE2EIT.java`
 
-- [ ] **Step 1: Write shell contract tests before changing the shell**
+- [x] **Step 1: Write shell contract tests before changing the shell**
 
 Add tests proving the authenticated shell exposes dedicated, accessible language
 and appearance utility controls and that the account menu does not own those
@@ -37,7 +37,7 @@ Run: `./mvnw -B -ntp -pl :admin-reference-app -am test -Dtest=ApplicationShellTe
 
 Expected: FAIL because the shell still owns a `Select<Locale>` control.
 
-- [ ] **Step 2: Implement icon-triggered preference controls**
+- [x] **Step 2: Implement icon-triggered preference controls**
 
 Replace the language `Select` with a `MenuBar`/icon trigger using
 `VaadinIcon.GLOBE` and an accessible label. Present locale choices in its
@@ -52,7 +52,7 @@ languageButton.setAriaLabel(text("system.shell.language"));
 languageButton.setTooltipText(text("system.shell.language"));
 ```
 
-- [ ] **Step 3: Refine shell CSS only through semantic tokens**
+- [x] **Step 3: Refine shell CSS only through semantic tokens**
 
 Add compact utility-control, active-navigation, drawer-group, and content
 canvas rules to `styles.css`. Keep `--admin-*` semantic tokens as the source of
@@ -60,13 +60,13 @@ all new colors, spacing, radius, and elevation. Mirror any new token required
 by both themes in the dark selector and extend `AdminThemeTokenTest` if the
 public token contract changes.
 
-- [ ] **Step 4: Verify shell behavior**
+- [x] **Step 4: Verify shell behavior**
 
 Run: `./mvnw -B -ntp -pl :admin-reference-app -am verify`
 
 Expected: PASS, including language/theme/narrow-shell browser coverage.
 
-- [ ] **Step 5: Commit the shell refresh**
+- [x] **Step 5: Commit the shell refresh**
 
 ```bash
 git add admin-reference-app/src/main admin-reference-app/src/test
@@ -83,7 +83,7 @@ git commit -m "feat: refine Flow administration shell"
 - Create: `admin-flow/src/test/java/io/github/vaadinadminstarter/flow/patterns/AdminPageFrameTest.java`
 - Modify: existing pattern tests under `admin-flow/src/test/java/io/github/vaadinadminstarter/flow/patterns/`
 
-- [ ] **Step 1: Write failing composition tests**
+- [x] **Step 1: Write failing composition tests**
 
 Define `AdminPageFrame` as a Spring-free Flow component accepting a
 `PageHeader`, optional `PageToolbar`, and one main work component. Test that it
@@ -100,27 +100,27 @@ Run: `./mvnw -B -ntp -pl :admin-flow test -Dtest=AdminPageFrameTest`
 
 Expected: FAIL because `AdminPageFrame` does not exist.
 
-- [ ] **Step 2: Implement the minimal page frame**
+- [x] **Step 2: Implement the minimal page frame**
 
 Create a `VerticalLayout` with `setPadding(false)`, `setSpacing(false)`, and
 stable `admin-page-frame`, `admin-page-header`, `admin-page-controls`, and
 `admin-page-workspace` classes. Do not add Spring, module, authorization, or
 reference-application types.
 
-- [ ] **Step 3: Refine existing patterns without API expansion**
+- [x] **Step 3: Refine existing patterns without API expansion**
 
 Give `PageHeader`, `PageToolbar`, and `DataWorkspace` stable component classes
 for the theme. Preserve their public behavior and locale contracts. Add only
 layout classes needed by the page frame; do not add universal component
 wrappers or new business actions.
 
-- [ ] **Step 4: Verify reusable patterns**
+- [x] **Step 4: Verify reusable patterns**
 
 Run: `./mvnw -B -ntp -pl :admin-flow test`
 
 Expected: PASS with all existing pattern tests and the new frame test.
 
-- [ ] **Step 5: Commit the shared workbench API**
+- [x] **Step 5: Commit the shared workbench API**
 
 ```bash
 git add admin-flow
@@ -139,7 +139,7 @@ git commit -m "feat: add Flow administration page frame"
 - Modify: `admin-examples/admin-example-orders/src/main/java/com/example/orders/admin/OrdersView.java`
 - Modify: `admin-reference-app/src/test/java/io/github/vaadinadminstarter/app/e2e/BrowserE2EIT.java`
 
-- [ ] **Step 1: Add failing representative page assertions**
+- [x] **Step 1: Add failing representative page assertions**
 
 Extend browser tests for Users, Customers, Audit, and Orders to require one
 `admin-page-frame` with header, controls where applicable, and workspace. Add
@@ -155,19 +155,19 @@ Run: `./mvnw -B -ntp -pl :admin-reference-app -am verify -DskipTests=false`
 Expected: FAIL because pages still add header, toolbar, and workspace as loose
 siblings.
 
-- [ ] **Step 2: Migrate built-in pages**
+- [x] **Step 2: Migrate built-in pages**
 
 Replace each page's loose `add(header, toolbar, workspace)` composition with
 `AdminPageFrame`. Keep the current service calls, permissions, data test IDs,
 dialogs, and locale observers unchanged. Use `AdminPageFrame(header, null,
 workspace)` for read-only pages.
 
-- [ ] **Step 3: Migrate the external Orders page**
+- [x] **Step 3: Migrate the external Orders page**
 
 Use the same Spring-free frame in `OrdersView`. Do not add a dependency on
 `admin-reference-app`, `MainLayout`, global CSS, or `@Route`.
 
-- [ ] **Step 4: Verify adoption and independence**
+- [x] **Step 4: Verify adoption and independence**
 
 Run:
 `./mvnw -B -ntp -pl :admin-example-orders -am test`
@@ -178,7 +178,7 @@ Run:
 Expected: PASS; Orders still appears through module metadata and all existing
 browser workflows remain functional.
 
-- [ ] **Step 5: Commit reference-page adoption**
+- [x] **Step 5: Commit reference-page adoption**
 
 ```bash
 git add admin-reference-app admin-examples/admin-example-orders
@@ -193,7 +193,7 @@ git commit -m "feat: adopt Flow workbench page composition"
 - Modify: `admin-reference-app/src/test/java/io/github/vaadinadminstarter/app/e2e/BrowserE2EIT.java`
 - Modify: `docs/en/theme-tokens.md` only if the public token table changes
 
-- [ ] **Step 1: Write failing geometry and state tests**
+- [x] **Step 1: Write failing geometry and state tests**
 
 Add browser assertions for the refreshed Users and Orders pages: header,
 toolbar, and workspace have non-overlapping vertical geometry; a dark workspace
@@ -205,28 +205,28 @@ Run: `./mvnw -B -ntp -pl :admin-reference-app -am verify -DskipTests=false`
 
 Expected: FAIL until the page-frame classes receive layout rules.
 
-- [ ] **Step 2: Implement scoped page-pattern CSS**
+- [x] **Step 2: Implement scoped page-pattern CSS**
 
 Style only shell and `.admin-page-*` pattern classes. Use a compact vertical
 rhythm, surface separation for data work, controlled borders/elevation, and
 responsive control wrapping. Do not add gradients, oversized headings,
 decorative cards, or literal colors already represented by tokens.
 
-- [ ] **Step 3: Validate themes and responsiveness**
+- [x] **Step 3: Validate themes and responsiveness**
 
 Run: `./mvnw -B -ntp -pl :admin-reference-app -am verify`
 
 Expected: PASS, including dark, locale, narrow-shell, geometry, and Orders
 browser cases.
 
-- [ ] **Step 4: Run production verification**
+- [x] **Step 4: Run production verification**
 
 Run: `./mvnw -B -ntp -Pproduction verify`
 
 Expected: PASS. Dynamic view `@Uses` anchors remain intact so every refreshed
 component is available in the optimized frontend bundle.
 
-- [ ] **Step 5: Commit visual-system refinement**
+- [x] **Step 5: Commit visual-system refinement**
 
 ```bash
 git add admin-reference-app/src/main admin-reference-app/src/test docs/en/theme-tokens.md
@@ -239,19 +239,19 @@ git commit -m "feat: refine Flow administration workbench visual system"
 - Modify: `docs/en/architecture.md`
 - Modify: `docs/superpowers/specs/2026-08-10-flow-admin-design-refresh-design.md`
 
-- [ ] **Step 1: Record implemented boundaries and evidence**
+- [x] **Step 1: Record implemented boundaries and evidence**
 
 Document the shell utility model, page-frame ownership, external-module
 adoption, and the exact normal/production verification evidence. Change the
 design status from proposed to completed only after Task 4 passes.
 
-- [ ] **Step 2: Check documentation consistency**
+- [x] **Step 2: Check documentation consistency**
 
 Run: `git diff --check`
 
 Expected: PASS with no whitespace errors.
 
-- [ ] **Step 3: Commit the outcome**
+- [x] **Step 3: Commit the outcome**
 
 ```bash
 git add docs/en/architecture.md docs/superpowers/specs/2026-08-10-flow-admin-design-refresh-design.md
