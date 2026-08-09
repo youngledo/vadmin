@@ -51,7 +51,9 @@ depends on it.
 | `admin-spring-security` | local account authentication and `CurrentUser`/authorization adapters | Spring Security, contracts, platform |
 | `admin-spring-jpa` | PostgreSQL JPA mappings, RBAC/audit port implementations, Flyway integration | Spring/JPA/Flyway, contracts, platform |
 | `admin-spring-boot` | auto-configuration, HTTP error mapping, logging and observability wiring | Spring Boot, all adapter-facing modules |
-| `admin-reference-app` | Spring Boot launcher, deployment configuration, sample domain module | reusable modules |
+| `admin-spring-flow` | Spring Boot assembly of Flow administration modules, dynamic route registration, composite translations, and session locale preference | Spring Boot, Vaadin Flow, `admin-flow`, contracts |
+| `admin-example-orders` | independently packaged, read-only Flow module that demonstrates the supported extension contract | `admin-flow`, contracts, Spring Boot auto-configuration |
+| `admin-reference-app` | Spring Boot launcher, host layout/theme, built-in modules, and composition of the orders example | reusable modules |
 
 `admin-spring` is an organizational Maven parent and reactor aggregator; it has no runtime code or runtime dependency role. Consumers continue to depend on the three leaf artifacts directly.
 
@@ -95,6 +97,33 @@ Spring Boot, Spring Security, JPA, Flyway, the reference application, or its
 business types. ArchUnit enforces the framework-import portion of this
 boundary; module dependency direction keeps the reference application outside
 the reusable modules.
+
+### 2.4 Flow Module Assembly
+
+An administration feature is an `AdminModule` that contributes page metadata,
+permissions, message bundles, and view classes. `admin-spring-flow` is the
+only Spring-specific assembly layer: it aggregates module metadata, installs
+the permission catalog and composite `I18NProvider`, and registers routes with
+Flow at startup. Modules do not declare `@Route`, depend on `MainLayout`, or
+provide a host `PermissionCatalog`.
+
+Spring Boot is the sole supported host runtime. The reference application
+demonstrates compile-time Maven composition through `admin-example-orders`; it
+is not a runtime plugin system. Route, permission, message-bundle, and
+navigation-group collisions fail during startup validation.
+
+The supported UI locales are `zh-CN` and `en-US`. The locale preference is
+session-scoped and defaults to `zh-CN`; visible shell, page-pattern, and
+module-view text refresh when the locale changes. The host owns `@Theme` and
+the `admin-*` semantic token contract for both light and dark modes. Modules
+consume scoped pattern classes and tokens but do not register a theme or alter
+global Lumo variables.
+
+Dynamic module routes require a static production frontend dependency anchor.
+The host declares each composed view through Flow `@Uses`, allowing the Vaadin
+production scanner to include all components reachable from runtime-registered
+views. This is a host composition responsibility, not a module-side global
+style or runtime scanning mechanism.
 
 Phase 2 adds three Java-only interaction patterns to `admin-flow`.
 `DetailDialog` presents already-authorized entity data in a responsive,
@@ -206,7 +235,7 @@ points.
 | Unit | contracts and platform authorization, RBAC invariants, audit event construction |
 | Architecture | ArchUnit checks that core modules do not import Spring, JPA, Flyway, or the Spring JPA adapter package |
 | Integration | Testcontainers PostgreSQL validates Flyway, JPA ports, authentication adapters, transactions, and audit writes |
-| Browser E2E | login, desktop and narrow shell navigation, session theme switching, menu filtering, direct route denial, validation and failure presentation, permission change, and sample CRUD path |
+| Browser E2E | login, desktop and narrow shell navigation, session theme and locale switching, menu filtering, direct route denial, validation and failure presentation, permission change, sample CRUD, and independent-orders module adoption |
 
 CI runs formatting and static checks, all test layers, a production build, and a
 Docker image build. Releases publish the compatibility baseline and treat a new

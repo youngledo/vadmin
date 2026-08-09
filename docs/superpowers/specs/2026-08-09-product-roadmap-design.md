@@ -30,19 +30,20 @@ change.
 | Foundation | Java 25, Spring Boot 4, Vaadin Flow 25, contracts/platform/adapters, RBAC, audit, Problem Details, Testcontainers, and reference application. |
 | Flow Design System Phase 1 | Theme, shell, Java-only page patterns, responsive administration views, and automated browser coverage. |
 | Flow Design System Phase 2 | Detail, confirmation, and operation-feedback patterns; completed administration workflows and permission-filtered workplace entries. |
+| Phase 3: Extensibility And Delivery Maturity | Completed: Spring Flow module assembly, module i18n/theme-token contracts, independently packaged orders example, adoption E2E and architecture coverage, normal and production verification. |
 
 ## Forward Roadmap
 
-### Phase 3: Extensibility And Delivery Maturity
+### Phase 3: Extensibility And Delivery Maturity (Completed)
 
 **Goal:** Make the starter easier to adapt, package, operate, and release
 without adding a second runtime.
 
-**Likely outcomes:** documented extension points for independently packaged
-navigation and page modules; internationalized UI and theme-token contracts;
-release/versioning policy; dependency and compatibility checks; improved local
-demo-data/bootstrap experience; structured operational guidance; CI delivery
-hardening.
+**Delivered outcomes:** documented extension points for independently packaged
+navigation and page modules; `zh-CN` and `en-US` UI contracts; host-owned
+light/dark theme tokens; Spring Flow module assembly; an independent orders
+example; architecture and browser adoption coverage; and normal/production
+verification. The delivery remains Spring Boot only.
 
 **Non-goals:** non-Spring runtime, multi-tenancy, external identity provider,
 new business vertical, dashboard analytics.
