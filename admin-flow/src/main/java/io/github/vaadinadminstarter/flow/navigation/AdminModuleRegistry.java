@@ -56,6 +56,10 @@ public final class AdminModuleRegistry {
                 }
             }
             for (var page : module.pages()) {
+                if (!AdminIconCatalog.isSupported(page.iconKey())) {
+                    throw new IllegalArgumentException("Unsupported administration icon key '" + page.iconKey()
+                            + "' on page '" + page.pageId() + "' contributed by module '" + module.moduleId() + "'");
+                }
                 rejectDuplicate(pageOwners, page.pageId(), module.moduleId(), "page id");
                 rejectDuplicate(routeOwners, page.route(), module.moduleId(), "route");
                 allPages.add(page);

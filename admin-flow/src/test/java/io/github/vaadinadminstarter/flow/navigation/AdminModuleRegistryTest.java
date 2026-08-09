@@ -105,6 +105,31 @@ class AdminModuleRegistryTest {
     }
 
     @Test
+    void acceptsSupportedIconsForExternalModules() {
+        var page = new AdminPage("orders.list", "orders.business", "orders.page.title", "orders.page.intent",
+                "shopping-cart", 100, "orders", ORDERS_READ, TestView.class);
+
+        var registry = new AdminModuleRegistry(List.of(module("orders",
+                new AdminNavigationGroup("orders.business", "orders.navigation.business", 100), page, ORDERS_READ)));
+
+        assertThat(registry.pages()).containsExactly(page);
+        assertThat(AdminIconCatalog.create("shopping-cart")).isNotNull();
+    }
+
+    @Test
+    void rejectsUnsupportedIconsWithTheContributingModuleAndPage() {
+        var invalidPage = new AdminPage("orders.list", "orders.business", "orders.page.title",
+                "orders.page.intent", "spaceship", 100, "orders", ORDERS_READ, TestView.class);
+
+        assertThatIllegalArgumentException().isThrownBy(() -> new AdminModuleRegistry(List.of(module("orders",
+                new AdminNavigationGroup("orders.business", "orders.navigation.business", 100), invalidPage,
+                ORDERS_READ))))
+                .withMessageContaining("orders")
+                .withMessageContaining("orders.list")
+                .withMessageContaining("spaceship");
+    }
+
+    @Test
     void reportsBothModulesWhenModuleIdsCollide() {
         assertCollision("orders", () -> new AdminModuleRegistry(List.of(
                 module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 100),

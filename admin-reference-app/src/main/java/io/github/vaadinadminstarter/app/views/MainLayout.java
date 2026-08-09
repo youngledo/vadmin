@@ -21,6 +21,7 @@ import com.vaadin.flow.server.VaadinSession;
 import io.github.vaadinadminstarter.app.modules.ReferenceAdminModules;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconCatalog;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.flow.navigation.AdminPage;
 import jakarta.annotation.security.PermitAll;
@@ -124,7 +125,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private void addNavigationGroup(VerticalLayout drawer, String label, java.util.List<AdminPage> pages) {
         if (!pages.isEmpty()) {
             drawer.add(navigationGroup(label, pages.stream()
-                    .map(page -> new SideNavItem(titleFor(page), page.route(), iconFor(page.iconKey())))
+                    .map(page -> new SideNavItem(titleFor(page), page.route(), AdminIconCatalog.create(page.iconKey())))
                     .toArray(SideNavItem[]::new)));
         }
     }
@@ -164,14 +165,4 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         return ReferenceAdminModules.legacyLabel(page.titleKey());
     }
 
-    private Component iconFor(String iconKey) {
-        return switch (iconKey) {
-            case "users" -> VaadinIcon.USERS.create();
-            case "shield" -> VaadinIcon.SHIELD.create();
-            case "key" -> VaadinIcon.KEY.create();
-            case "clock" -> VaadinIcon.CLOCK.create();
-            case "briefcase" -> VaadinIcon.BRIEFCASE.create();
-            default -> VaadinIcon.FILE.create();
-        };
-    }
 }
