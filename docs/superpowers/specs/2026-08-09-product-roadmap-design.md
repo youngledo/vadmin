@@ -38,10 +38,11 @@ change.
 **Goal:** Make the starter easier to adapt, package, operate, and release
 without adding a second runtime.
 
-**Likely outcomes:** documented extension points for navigation and page
-patterns; release/versioning policy; dependency and compatibility checks;
-improved local demo-data/bootstrap experience; structured operational guidance;
-CI delivery hardening.
+**Likely outcomes:** documented extension points for independently packaged
+navigation and page modules; internationalized UI and theme-token contracts;
+release/versioning policy; dependency and compatibility checks; improved local
+demo-data/bootstrap experience; structured operational guidance; CI delivery
+hardening.
 
 **Non-goals:** non-Spring runtime, multi-tenancy, external identity provider,
 new business vertical, dashboard analytics.
@@ -49,8 +50,9 @@ new business vertical, dashboard analytics.
 **Entry criteria:** Phase 2 verification remains green and the public extension
 surface is reviewed for real consumer use.
 
-**Exit criteria:** a new Java team can adapt navigation, theme, and a sample
-module from documented extension points; release verification is repeatable.
+**Exit criteria:** a new Java team can adapt navigation, UI language, theme,
+and a sample module from documented extension points; release verification is
+repeatable.
 
 ### Phase 4: Identity And Enterprise Integration Readiness
 
