@@ -8,6 +8,7 @@ import io.github.vaadinadminstarter.app.administration.AdministrationQueryServic
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
@@ -35,8 +36,9 @@ public final class PermissionsView extends PermissionProtectedView implements Lo
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "read-only-workspace");
-        add(header, workspace);
-        expand(workspace);
+        var frame = new AdminPageFrame(header, null, workspace);
+        add(frame);
+        expand(frame);
         updateText();
     }
 

@@ -14,6 +14,7 @@ import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.flow.navigation.AdminPage;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import jakarta.annotation.security.PermitAll;
 
@@ -38,7 +39,9 @@ public final class HomeView extends VerticalLayout implements LocaleChangeObserv
         shortcuts.setPadding(false);
         shortcuts.setSpacing(true);
         shortcuts.getElement().setAttribute("data-testid", "workplace-shortcuts");
-        add(header, shortcuts);
+        var frame = new AdminPageFrame(header, null, shortcuts);
+        add(frame);
+        expand(frame);
         updateText();
     }
 

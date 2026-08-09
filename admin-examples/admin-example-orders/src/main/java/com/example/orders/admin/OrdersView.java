@@ -15,6 +15,7 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
 import io.github.vaadinadminstarter.flow.patterns.OperationFeedback;
@@ -50,8 +51,9 @@ public final class OrdersView extends PermissionProtectedView implements LocaleC
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "orders-workspace");
-        add(header, workspace);
-        expand(workspace);
+        var frame = new AdminPageFrame(header, null, workspace);
+        add(frame);
+        expand(frame);
         updateText();
     }
 

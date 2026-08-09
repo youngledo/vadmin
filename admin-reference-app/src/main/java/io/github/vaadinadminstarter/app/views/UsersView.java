@@ -16,6 +16,7 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.error.BusinessFailure;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.ConfirmationDialog;
 import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
@@ -84,8 +85,9 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
         workspace.addBulkAction(enableSelectedAction, () -> canUpdate);
         workspace.addBulkAction(disableSelectedAction, () -> canUpdate);
 
-        add(header, toolbar, workspace);
-        expand(workspace);
+        var frame = new AdminPageFrame(header, toolbar, workspace);
+        add(frame);
+        expand(frame);
         updateText();
     }
 

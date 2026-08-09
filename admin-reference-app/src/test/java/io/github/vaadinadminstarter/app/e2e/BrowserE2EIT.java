@@ -145,6 +145,7 @@ class BrowserE2EIT {
 
         page.navigate(baseUrl() + "/orders");
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("订单"))).isVisible();
+        assertSharedPageFrame(false);
         assertThat(page.getByTestId("orders-workspace").locator("vaadin-grid")).isVisible();
     }
 
@@ -584,6 +585,7 @@ class BrowserE2EIT {
     private void assertReadOnlyWorkspace(String route, String title) {
         page.navigate(baseUrl() + "/" + route);
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(title))).isVisible();
+        assertSharedPageFrame(false);
         assertThat(page.locator("[data-testid=read-only-workspace] vaadin-grid")).isVisible();
         assertThat(page.locator("[data-testid=read-only-workspace]").getByText("0 selected",
                 new com.microsoft.playwright.Locator.GetByTextOptions().setExact(true))).not().isVisible();
@@ -592,8 +594,21 @@ class BrowserE2EIT {
     private void assertMutatingWorkspace(String route, String title) {
         page.navigate(baseUrl() + "/" + route);
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(title))).isVisible();
+        assertSharedPageFrame(true);
         assertThat(page.locator("[data-testid=" + route + "-toolbar]")).isVisible();
         assertThat(page.locator("[data-testid=" + route + "-workspace] vaadin-grid")).isVisible();
+    }
+
+    private void assertSharedPageFrame(boolean hasControls) {
+        var frame = page.locator(".admin-page-frame");
+        assertThat(frame).hasCount(1);
+        assertThat(frame.locator(".admin-page-header")).isVisible();
+        assertThat(frame.locator(".admin-page-workspace")).isVisible();
+        if (hasControls) {
+            assertThat(frame.locator(".admin-page-controls")).isVisible();
+        } else {
+            assertThat(frame.locator(".admin-page-controls")).hasCount(0);
+        }
     }
 
     private void assertNavigationGroupHeadingOccursOnce(String heading) {

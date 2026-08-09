@@ -12,6 +12,7 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
 import io.github.vaadinadminstarter.flow.patterns.EditorDialog;
@@ -60,8 +61,9 @@ public final class RolesView extends PermissionProtectedView implements LocaleCh
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "roles-workspace");
 
-        add(header, toolbar, workspace);
-        expand(workspace);
+        var frame = new AdminPageFrame(header, toolbar, workspace);
+        add(frame);
+        expand(frame);
         updateText();
     }
 

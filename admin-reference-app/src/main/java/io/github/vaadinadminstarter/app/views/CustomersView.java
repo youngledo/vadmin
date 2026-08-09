@@ -24,6 +24,7 @@ import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.error.BusinessFailure;
 import io.github.vaadinadminstarter.contracts.file.FileStorage;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.ConfirmationDialog;
 import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
@@ -91,8 +92,9 @@ public final class CustomersView extends PermissionProtectedView implements Loca
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "customers-workspace");
 
-        add(header, toolbar, workspace);
-        expand(workspace);
+        var frame = new AdminPageFrame(header, toolbar, workspace);
+        add(frame);
+        expand(frame);
         updateText();
     }
 

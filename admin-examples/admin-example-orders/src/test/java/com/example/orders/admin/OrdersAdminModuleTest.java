@@ -19,6 +19,7 @@ import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.flow.navigation.AdminModule;
 import io.github.vaadinadminstarter.contracts.navigation.PagedQuery;
+import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 
 class OrdersAdminModuleTest {
@@ -76,7 +77,10 @@ class OrdersAdminModuleTest {
         };
         var view = new OrdersView(() -> Optional.of(currentUser), authorization, orders);
 
-        assertThat(view.getChildren()).anyMatch(DataWorkspace.class::isInstance);
+        assertThat(view.getChildren())
+                .singleElement()
+                .isInstanceOfSatisfying(AdminPageFrame.class,
+                        frame -> assertThat(frame.getChildren()).anyMatch(DataWorkspace.class::isInstance));
     }
 
     @Test
