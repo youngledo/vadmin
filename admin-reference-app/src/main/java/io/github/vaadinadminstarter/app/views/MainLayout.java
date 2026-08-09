@@ -7,6 +7,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
+import com.example.orders.admin.OrdersView;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
@@ -34,6 +36,12 @@ import java.util.Locale;
 
 @Layout
 @PermitAll
+@Uses(UsersView.class)
+@Uses(RolesView.class)
+@Uses(PermissionsView.class)
+@Uses(AuditView.class)
+@Uses(CustomersView.class)
+@Uses(OrdersView.class)
 public final class MainLayout extends AppLayout implements AfterNavigationObserver, LocaleChangeObserver {
     private static final String THEME_MODE_KEY = MainLayout.class.getName() + ".theme-mode";
 
