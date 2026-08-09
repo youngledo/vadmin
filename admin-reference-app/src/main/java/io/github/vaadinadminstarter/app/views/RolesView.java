@@ -5,9 +5,9 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
@@ -19,15 +19,19 @@ import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionCommand;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionUseCase;
-import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
+import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import jakarta.annotation.security.PermitAll;
 import java.util.Comparator;
 
-@Route(value = "roles", layout = MainLayout.class)
 @PageTitle("角色")
-public final class RolesView extends SecuredView {
+@PermitAll
+@org.springframework.stereotype.Component
+@org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public final class RolesView extends PermissionProtectedView {
+    public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:role:read");
     private static final PermissionCode GRANT = PermissionCode.of("system:role:grant");
 
-    public RolesView(SecurityContextCurrentUserProvider currentUser, AuthorizationService authorization,
+    public RolesView(CurrentUserProvider currentUser, AuthorizationService authorization,
                      AdministrationQueryService queries, PermissionCatalog catalog, GrantPermissionUseCase grants) {
         super(currentUser, authorization);
         var grid = new Grid<>(AdministrationQueryService.RoleRow.class, false);
@@ -71,8 +75,8 @@ public final class RolesView extends SecuredView {
     }
 
     @Override
-    PermissionCode requiredPermission() {
-        return PermissionCode.of("system:role:read");
+    protected PermissionCode requiredPermission() {
+        return REQUIRED_PERMISSION;
     }
 
     private EditorDialog grantDialog(AdministrationQueryService queries, PermissionCatalog catalog,

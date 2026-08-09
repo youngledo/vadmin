@@ -6,11 +6,10 @@ import io.github.vaadinadminstarter.contracts.audit.AuditSink;
 import io.github.vaadinadminstarter.contracts.audit.CorrelationIdProvider;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
-import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.file.FileStorage;
 import io.github.vaadinadminstarter.app.file.LocalFileStorage;
-import io.github.vaadinadminstarter.flow.navigation.PageDefinition;
-import io.github.vaadinadminstarter.flow.navigation.PageRegistry;
+import io.github.vaadinadminstarter.app.views.MainLayout;
+import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
 import io.github.vaadinadminstarter.platform.access.AccessControlRepository;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionService;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionUseCase;
@@ -20,7 +19,6 @@ import java.time.Instant;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -34,43 +32,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Configuration(proxyBeanMethods = false)
 public class ApplicationConfiguration {
     @Bean
-    PermissionCatalog permissionCatalog() {
-        return new PermissionCatalog(Set.of(
-                PermissionCode.of("system:user:read"),
-                PermissionCode.of("system:user:create"),
-                PermissionCode.of("system:user:update"),
-                PermissionCode.of("system:role:read"),
-                PermissionCode.of("system:role:grant"),
-                PermissionCode.of("system:permission:read"),
-                PermissionCode.of("system:audit:read"),
-                PermissionCode.of("customer:customer:read"),
-                PermissionCode.of("customer:customer:create"),
-                PermissionCode.of("customer:customer:update"),
-                PermissionCode.of("customer:customer:delete"),
-                PermissionCode.of("customer:attachment:upload")));
+    AdminHostLayout adminHostLayout() {
+        return new AdminHostLayout(MainLayout.class);
     }
 
     @Bean
     FileStorage fileStorage(Environment environment) {
         return new LocalFileStorage(Path.of(environment.getRequiredProperty("app.file-storage.directory")));
-    }
-
-    @Bean
-    PageRegistry pageRegistry() {
-        var pages = java.util.List.of(
-                new PageDefinition("system-users", "nav.users", "users", 100, "users",
-                        PermissionCode.of("system:user:read")),
-                new PageDefinition("system-roles", "nav.roles", "shield", 200, "roles",
-                        PermissionCode.of("system:role:read")),
-                new PageDefinition("system-permissions", "nav.permissions", "key", 300, "permissions",
-                        PermissionCode.of("system:permission:read")),
-                new PageDefinition("system-audit", "nav.audit", "clock", 400, "audit",
-                        PermissionCode.of("system:audit:read")),
-                new PageDefinition("customers", "nav.customers", "briefcase", 500, "customers",
-                        PermissionCode.of("customer:customer:read")));
-        var registry = new PageRegistry(pages);
-        registry.validate();
-        return registry;
     }
 
     @Bean

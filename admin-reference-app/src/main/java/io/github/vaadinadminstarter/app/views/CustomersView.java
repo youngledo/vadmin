@@ -12,13 +12,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import io.github.vaadinadminstarter.app.customer.Customer;
 import io.github.vaadinadminstarter.app.customer.CustomerAttachment;
 import io.github.vaadinadminstarter.app.customer.CustomerService;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.error.BusinessFailure;
 import io.github.vaadinadminstarter.contracts.file.FileStorage;
@@ -31,13 +31,17 @@ import io.github.vaadinadminstarter.flow.patterns.OperationFeedback;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
-import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
+import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import jakarta.annotation.security.PermitAll;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
-@Route(value = "customers", layout = MainLayout.class)
 @PageTitle("客户")
-public final class CustomersView extends SecuredView {
+@PermitAll
+@org.springframework.stereotype.Component
+@org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public final class CustomersView extends PermissionProtectedView {
+    public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("customer:customer:read");
     private static final PermissionCode CREATE = PermissionCode.of("customer:customer:create");
     private static final PermissionCode UPDATE = PermissionCode.of("customer:customer:update");
     private static final PermissionCode DELETE = PermissionCode.of("customer:customer:delete");
@@ -50,7 +54,7 @@ public final class CustomersView extends SecuredView {
     private final PagedGrid<Customer> pages;
     private final OperationFeedback feedback = new OperationFeedback();
 
-    public CustomersView(SecurityContextCurrentUserProvider currentUser, AuthorizationService authorization,
+    public CustomersView(CurrentUserProvider currentUser, AuthorizationService authorization,
                          CustomerService customers, FileStorage fileStorage) {
         super(currentUser, authorization);
         this.customers = customers;
@@ -85,8 +89,8 @@ public final class CustomersView extends SecuredView {
     }
 
     @Override
-    PermissionCode requiredPermission() {
-        return PermissionCode.of("customer:customer:read");
+    protected PermissionCode requiredPermission() {
+        return REQUIRED_PERMISSION;
     }
 
     private HorizontalLayout actions(Customer customer, AuthorizationService authorization) {

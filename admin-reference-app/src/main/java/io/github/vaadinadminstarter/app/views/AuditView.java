@@ -2,19 +2,24 @@ package io.github.vaadinadminstarter.app.views;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
-import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
+import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import jakarta.annotation.security.PermitAll;
 
-@Route(value = "audit", layout = MainLayout.class)
 @PageTitle("审计日志")
-public final class AuditView extends SecuredView {
-    public AuditView(SecurityContextCurrentUserProvider currentUser, AuthorizationService authorization,
+@PermitAll
+@org.springframework.stereotype.Component
+@org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public final class AuditView extends PermissionProtectedView {
+    public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:audit:read");
+
+    public AuditView(CurrentUserProvider currentUser, AuthorizationService authorization,
                      AdministrationQueryService queries) {
         super(currentUser, authorization);
         var grid = new Grid<>(AdministrationQueryService.AuditRow.class, false);
@@ -34,5 +39,5 @@ public final class AuditView extends SecuredView {
         expand(workspace);
     }
 
-    @Override PermissionCode requiredPermission() { return PermissionCode.of("system:audit:read"); }
+    @Override protected PermissionCode requiredPermission() { return REQUIRED_PERMISSION; }
 }

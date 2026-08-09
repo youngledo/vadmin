@@ -9,7 +9,7 @@ import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.file.FileStorage;
 import io.github.vaadinadminstarter.app.customer.CustomerService;
-import io.github.vaadinadminstarter.flow.navigation.PageRegistry;
+import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionCommand;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionUseCase;
 import io.github.vaadinadminstarter.springsecurity.auth.SpringAuthorizationService;
@@ -38,7 +38,7 @@ class ApplicationContextIT {
     private LocalUserAccountLookup accountLookup;
 
     @Autowired
-    private PageRegistry pageRegistry;
+    private AdminModuleRegistry modules;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -70,15 +70,18 @@ class ApplicationContextIT {
     }
 
     @Test
-    void registersTheAdministrationAndCustomerPages() {
+    void assemblesBuiltInAdministrationModulesAndTheirPermissionCatalog() {
         var administrator = new CurrentUser(UUID.randomUUID(), "admin", Set.of(
                 PermissionCode.of("system:user:read"), PermissionCode.of("system:role:read"),
                 PermissionCode.of("system:permission:read"), PermissionCode.of("system:audit:read"),
                 PermissionCode.of("customer:customer:read")), 0);
 
-        assertThat(pageRegistry.visibleTo(administrator, new SpringAuthorizationService()))
+        assertThat(modules.pagesVisibleTo(administrator, new SpringAuthorizationService()))
                 .extracting(page -> page.route())
                 .containsExactly("users", "roles", "permissions", "audit", "customers");
+        assertThat(modules.permissionCatalog()).contains(
+                PermissionCode.of("system:user:read"),
+                PermissionCode.of("customer:attachment:upload"));
     }
 
     @Test

@@ -2,6 +2,7 @@ package io.github.vaadinadminstarter.springsecurity;
 
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserSessionLookup;
 import io.github.vaadinadminstarter.springsecurity.auth.AuthenticationVersionFilter;
@@ -46,7 +47,7 @@ public class SpringSecurityConfiguration {
     }
 
     @Bean
-    SecurityContextCurrentUserProvider currentUserProvider() {
+    CurrentUserProvider currentUserProvider() {
         return new SecurityContextCurrentUserProvider();
     }
 

@@ -8,10 +8,10 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.app.administration.UserAdministrationService;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.error.BusinessFailure;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
@@ -22,14 +22,18 @@ import io.github.vaadinadminstarter.flow.patterns.OperationFeedback;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
-import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
+import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import jakarta.annotation.security.PermitAll;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Route(value = "users", layout = MainLayout.class)
 @PageTitle("用户")
-public final class UsersView extends SecuredView {
+@PermitAll
+@org.springframework.stereotype.Component
+@org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public final class UsersView extends PermissionProtectedView {
+    public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:user:read");
     private static final PermissionCode CREATE = PermissionCode.of("system:user:create");
     private static final PermissionCode UPDATE = PermissionCode.of("system:user:update");
 
@@ -39,7 +43,7 @@ public final class UsersView extends SecuredView {
     private final PagedGrid<AdministrationQueryService.UserRow> pages;
     private final OperationFeedback feedback = new OperationFeedback();
 
-    public UsersView(SecurityContextCurrentUserProvider currentUser, AuthorizationService authorization,
+    public UsersView(CurrentUserProvider currentUser, AuthorizationService authorization,
                      AdministrationQueryService queries, UserAdministrationService commands) {
         super(currentUser, authorization);
         this.commands = commands;
@@ -76,8 +80,8 @@ public final class UsersView extends SecuredView {
     }
 
     @Override
-    PermissionCode requiredPermission() {
-        return PermissionCode.of("system:user:read");
+    protected PermissionCode requiredPermission() {
+        return REQUIRED_PERMISSION;
     }
 
     private HorizontalLayout action(AdministrationQueryService.UserRow user, AuthorizationService authorization) {

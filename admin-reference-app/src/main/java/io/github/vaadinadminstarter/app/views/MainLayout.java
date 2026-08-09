@@ -18,24 +18,25 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
+import io.github.vaadinadminstarter.app.modules.ReferenceAdminModules;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
-import io.github.vaadinadminstarter.flow.navigation.PageDefinition;
-import io.github.vaadinadminstarter.flow.navigation.PageRegistry;
-import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
+import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
+import io.github.vaadinadminstarter.flow.navigation.AdminPage;
 import jakarta.annotation.security.PermitAll;
-import java.util.List;
 
 @Layout
 @PermitAll
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
     private static final String THEME_MODE_KEY = MainLayout.class.getName() + ".theme-mode";
 
+    private final AdminModuleRegistry modules;
     private final Span currentLocation = new Span("工作台");
     private final MenuItem themeModeItem;
     private final boolean authenticated;
 
-    public MainLayout(PageRegistry pages, SecurityContextCurrentUserProvider currentUser,
-                      AuthorizationService authorization) {
+    public MainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser, AuthorizationService authorization) {
+        this.modules = modules;
         var productMark = new Span(VaadinIcon.CUBE.create());
         productMark.addClassName("admin-product-mark");
         var productName = new Span("Vaadin Admin Starter");
@@ -62,18 +63,16 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
         addHeader(toggle, productMark, productName, currentLocation, userMenu);
 
-        var visiblePages = pages.visibleTo(user, authorization);
         var drawer = new VerticalLayout();
         drawer.setPadding(false);
         drawer.setSpacing(false);
         drawer.addClassName("admin-drawer-content");
         drawer.add(navigationGroup("工作空间", new SideNavItem("工作台", "", VaadinIcon.HOME.create())));
-        addNavigationGroup(drawer, "系统管理", visiblePages.stream()
-                .filter(page -> page.pageId().startsWith("system-"))
-                .toList());
-        addNavigationGroup(drawer, "客户管理", visiblePages.stream()
-                .filter(page -> page.pageId().equals("customers"))
-                .toList());
+        var visiblePages = modules.pagesVisibleTo(user, authorization);
+        modules.groupsVisibleTo(user, authorization).forEach(group -> addNavigationGroup(drawer,
+                ReferenceAdminModules.legacyLabel(group.titleKey()), visiblePages.stream()
+                        .filter(page -> page.groupId().equals(group.id()))
+                        .toList()));
         addToDrawer(drawer);
     }
 
@@ -90,8 +89,12 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         if (!authenticated) {
             return;
         }
-        var path = event.getLocation().getPath();
-        currentLocation.setText(titleForRoute(path));
+        var route = event.getLocation().getPath();
+        currentLocation.setText(modules.pages().stream()
+                .filter(page -> page.route().equals(route))
+                .findFirst()
+                .map(this::titleFor)
+                .orElse("工作台"));
         Component content = getContent();
         content.addClassName("admin-content-canvas");
     }
@@ -118,10 +121,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         return menu;
     }
 
-    private void addNavigationGroup(VerticalLayout drawer, String label, List<PageDefinition> pages) {
+    private void addNavigationGroup(VerticalLayout drawer, String label, java.util.List<AdminPage> pages) {
         if (!pages.isEmpty()) {
             drawer.add(navigationGroup(label, pages.stream()
-                    .map(page -> new SideNavItem(titleFor(page.pageId()), page.route(), iconFor(page.iconKey())))
+                    .map(page -> new SideNavItem(titleFor(page), page.route(), iconFor(page.iconKey())))
                     .toArray(SideNavItem[]::new)));
         }
     }
@@ -157,28 +160,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         themeModeItem.setAriaLabel("切换主题模式");
     }
 
-    private String titleForRoute(String route) {
-        return switch (route) {
-            case "" -> "工作台";
-            case "users" -> "用户";
-            case "roles" -> "角色";
-            case "permissions" -> "权限目录";
-            case "audit" -> "审计日志";
-            case "customers" -> "客户";
-            default -> "工作台";
-        };
-    }
-
-    private String titleFor(String pageId) {
-        return switch (pageId) {
-            case "workplace" -> "工作台";
-            case "system-users" -> "用户";
-            case "system-roles" -> "角色";
-            case "system-permissions" -> "权限目录";
-            case "system-audit" -> "审计日志";
-            case "customers" -> "客户";
-            default -> pageId;
-        };
+    private String titleFor(AdminPage page) {
+        return ReferenceAdminModules.legacyLabel(page.titleKey());
     }
 
     private Component iconFor(String iconKey) {

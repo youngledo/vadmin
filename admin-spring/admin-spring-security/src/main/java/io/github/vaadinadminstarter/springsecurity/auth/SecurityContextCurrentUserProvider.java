@@ -1,11 +1,13 @@
 package io.github.vaadinadminstarter.springsecurity.auth;
 
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import java.util.Optional;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /** Exposes the local Spring Security principal without leaking Spring types into application services. */
-public final class SecurityContextCurrentUserProvider {
+public final class SecurityContextCurrentUserProvider implements CurrentUserProvider {
+    @Override
     public Optional<CurrentUser> currentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
