@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 
 import com.vaadin.flow.server.VaadinServiceInitListener;
@@ -26,6 +28,8 @@ import io.github.vaadinadminstarter.springflow.i18n.CompositeAdminI18NProvider;
 @AutoConfigureBefore(SpringBootAutoConfiguration.class)
 @ConditionalOnBean(AdminHostLayout.class)
 public class AdminFlowAutoConfiguration {
+    static final String ADMIN_MODULE_PERMISSION_CATALOG_BEAN_NAME = "adminModulePermissionCatalog";
+
     @Bean
     @ConditionalOnMissingBean
     SpringAdminModuleAssembler springAdminModuleAssembler(List<AdminModule> modules) {
@@ -38,10 +42,27 @@ public class AdminFlowAutoConfiguration {
         return assembler.registry();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    PermissionCatalog permissionCatalog(SpringAdminModuleAssembler assembler) {
+    /**
+     * Publishes the authoritative permission catalog assembled from all administration modules.
+     * Hosts must remove legacy catalog beans before enabling an {@link AdminHostLayout}.
+     */
+    @Bean(name = ADMIN_MODULE_PERMISSION_CATALOG_BEAN_NAME)
+    PermissionCatalog adminModulePermissionCatalog(SpringAdminModuleAssembler assembler) {
         return assembler.permissionCatalog();
+    }
+
+    @Bean
+    static BeanFactoryPostProcessor adminModulePermissionCatalogGuard() {
+        return beanFactory -> {
+            var hostCatalogs = java.util.Arrays.stream(beanFactory.getBeanNamesForType(PermissionCatalog.class, false, false))
+                    .filter(name -> !ADMIN_MODULE_PERMISSION_CATALOG_BEAN_NAME.equals(name))
+                    .toList();
+            if (!hostCatalogs.isEmpty()) {
+                throw new BeanDefinitionStoreException("A host PermissionCatalog cannot be used with assembled Flow "
+                        + "administration modules. Remove host catalog bean(s) " + hostCatalogs
+                        + " and use '" + ADMIN_MODULE_PERMISSION_CATALOG_BEAN_NAME + "'.");
+            }
+        };
     }
 
     @Bean

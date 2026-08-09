@@ -11,18 +11,28 @@ public final class AdminLocalePreference {
     public static final String LOCALE_SESSION_KEY = "io.github.vaadinadminstarter.springflow.locale";
 
     public Locale selectInitialLocale(Locale browserLocale) {
-        return CompositeAdminI18NProvider.EN_US.equals(browserLocale) ? CompositeAdminI18NProvider.EN_US
-                : CompositeAdminI18NProvider.ZH_CN;
+        var session = VaadinSession.getCurrent();
+        if (session != null) {
+            var storedLocale = session.getAttribute(LOCALE_SESSION_KEY);
+            if (storedLocale instanceof Locale locale && isSupported(locale)) {
+                return locale;
+            }
+        }
+        return isSupported(browserLocale) ? browserLocale : CompositeAdminI18NProvider.ZH_CN;
     }
 
     public void select(UI ui, Locale locale) {
         Objects.requireNonNull(ui, "ui");
         Objects.requireNonNull(locale, "locale");
-        if (!CompositeAdminI18NProvider.ZH_CN.equals(locale) && !CompositeAdminI18NProvider.EN_US.equals(locale)) {
+        if (!isSupported(locale)) {
             throw new IllegalArgumentException("Unsupported administration locale: " + locale.toLanguageTag());
         }
         var session = Objects.requireNonNull(VaadinSession.getCurrent(), "No current VaadinSession");
         session.setAttribute(LOCALE_SESSION_KEY, locale);
         ui.setLocale(locale);
+    }
+
+    private static boolean isSupported(Locale locale) {
+        return CompositeAdminI18NProvider.ZH_CN.equals(locale) || CompositeAdminI18NProvider.EN_US.equals(locale);
     }
 }

@@ -5,7 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Locale;
 
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Test;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 import io.github.vaadinadminstarter.flow.navigation.AdminMessageBundle;
 
@@ -37,8 +42,19 @@ class CompositeAdminI18NProviderTest {
 
     @Test
     void returnsAnExplicitMarkerForAMissingKey() {
-        assertThat(provider.getTranslation("orders.missing", EN_US))
-                .isEqualTo("!en-US: orders.missing!");
+        var logger = (Logger) LoggerFactory.getLogger(CompositeAdminI18NProvider.class);
+        var events = new ListAppender<ILoggingEvent>();
+        events.start();
+        logger.addAppender(events);
+        try {
+            assertThat(provider.getTranslation("orders.missing", EN_US))
+                    .isEqualTo("!en-US: orders.missing!");
+            assertThat(events.list).extracting(ILoggingEvent::getFormattedMessage)
+                    .anySatisfy(message -> assertThat(message).contains("!en-US: orders.missing!"));
+        } finally {
+            logger.detachAppender(events);
+            events.stop();
+        }
     }
 
     @Test

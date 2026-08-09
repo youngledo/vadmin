@@ -39,8 +39,8 @@ import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.externalorders.ExternalOrdersView;
 import io.github.vaadinadminstarter.externalorders.OrdersService;
 
-@SpringBootTest(classes = AdminModuleRouteRegistrarIT.TestApplication.class)
-class AdminModuleRouteRegistrarIT {
+@SpringBootTest(classes = AdminModuleRouteRegistrarTest.TestApplication.class)
+class AdminModuleRouteRegistrarTest {
     @Autowired
     private AdminModuleRouteRegistrar registrar;
 
