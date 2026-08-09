@@ -37,6 +37,9 @@ its meaning, never for a particular color or size.
 The reference theme maps Vaadin Lumo variables from these semantic tokens.
 In particular, `--lumo-font-family` is mapped from `--admin-font-family`, and
 the primary 10% and 50% Lumo state colors are derived from `--admin-accent`.
+The standard Lumo success, warning, and error colors are mapped from
+`--admin-success`, `--admin-warning`, and `--admin-danger`; Vaadin's normal
+control focus ring is mapped from `--admin-focus`.
 Legacy `--admin-primary`, `--admin-text`, `--admin-space-compact`,
 `--admin-space-standard`, `--admin-radius`, and `--admin-elevation` aliases
 remain for compatibility. New module CSS must use the canonical names in the

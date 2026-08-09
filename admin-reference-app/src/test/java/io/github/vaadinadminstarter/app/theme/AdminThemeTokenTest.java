@@ -45,6 +45,17 @@ class AdminThemeTokenTest {
         assertAccentStateColorMappings(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"));
     }
 
+    @Test
+    void mapsStateTokensToLumoAndVaadinComponentVariables() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+        var root = extractBlock(styles, ":root");
+
+        assertThat(root).contains("--lumo-success-color: var(--admin-success);");
+        assertThat(root).contains("--lumo-warning-color: var(--admin-warning);");
+        assertThat(root).contains("--lumo-error-color: var(--admin-danger);");
+        assertThat(root).contains("--vaadin-focus-ring-color: var(--admin-focus);");
+    }
+
     private void assertAccentStateColorMappings(String selectorBlock) {
         assertThat(selectorBlock).contains("--lumo-primary-color-50pct: color-mix(in srgb, var(--admin-accent) 50%, transparent);");
         assertThat(selectorBlock).contains("--lumo-primary-color-10pct: color-mix(in srgb, var(--admin-accent) 10%, transparent);");
