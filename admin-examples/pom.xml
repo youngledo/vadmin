@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.1.0</modelVersion>
+    <parent>
+        <groupId>io.github.vaadinadminstarter</groupId>
+        <artifactId>vaadin-admin-starter</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>admin-examples</artifactId>
+    <packaging>pom</packaging>
+
+    <subprojects>
+        <subproject>admin-example-orders</subproject>
+    </subprojects>
+</project>
