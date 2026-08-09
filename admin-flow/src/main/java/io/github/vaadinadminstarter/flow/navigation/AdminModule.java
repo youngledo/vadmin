@@ -24,6 +24,9 @@ public record AdminModule(String moduleId, List<AdminNavigationGroup> navigation
                 || messageBundles.stream().anyMatch(Objects::isNull)) {
             throw new NullPointerException("module metadata must not contain null elements");
         }
+        if (navigationGroups.isEmpty()) {
+            throw new IllegalArgumentException("Module '" + moduleId + "' must declare at least one navigation group");
+        }
         var declaredModuleId = moduleId;
         var declaredPermissions = permissions;
         var groupIds = navigationGroups.stream().map(AdminNavigationGroup::id).collect(java.util.stream.Collectors.toSet());

@@ -21,6 +21,14 @@ class AdminModuleRegistryTest {
     private static final PermissionCode INVOICES_READ = PermissionCode.of("billing:invoice:read");
 
     @Test
+    void rejectsModulesWithoutNavigationGroups() {
+        assertThatIllegalArgumentException().isThrownBy(() -> new AdminModule("orders", List.of(), List.of(), Set.of(),
+                List.of()))
+                .withMessageContaining("orders")
+                .withMessageContaining("navigation group");
+    }
+
+    @Test
     void returnsOnlyAccessibleGroupsAndPagesInDeterministicOrder() {
         var registry = new AdminModuleRegistry(List.of(
                 module("orders", new AdminNavigationGroup("orders.business", "orders.navigation.business", 200),
