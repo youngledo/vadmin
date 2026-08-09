@@ -32,7 +32,7 @@ public final class PagedGrid<T> {
         this.loader = Objects.requireNonNull(loader);
         this.filters = Objects.requireNonNull(filters);
         grid.setPageSize(50);
-        grid.setEmptyStateText("暂无数据");
+        grid.setEmptyStateText(grid.getTranslation("flow.grid.empty"));
         grid.setItems(query -> load(toPagedQuery(query, defaultSortField)).items().stream(),
                 query -> Math.toIntExact(load(toPagedQuery(query, defaultSortField)).total()));
     }

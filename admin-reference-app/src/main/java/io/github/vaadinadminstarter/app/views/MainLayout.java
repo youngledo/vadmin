@@ -12,32 +12,51 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.i18n.I18NProvider;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
-import io.github.vaadinadminstarter.app.modules.ReferenceAdminModules;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.flow.navigation.AdminIconCatalog;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.flow.navigation.AdminPage;
+import io.github.vaadinadminstarter.springflow.i18n.AdminLocalePreference;
 import jakarta.annotation.security.PermitAll;
+import java.util.Locale;
 
 @Layout
 @PermitAll
-public final class MainLayout extends AppLayout implements AfterNavigationObserver {
+public final class MainLayout extends AppLayout implements AfterNavigationObserver, LocaleChangeObserver {
     private static final String THEME_MODE_KEY = MainLayout.class.getName() + ".theme-mode";
 
     private final AdminModuleRegistry modules;
-    private final Span currentLocation = new Span("工作台");
+    private final CurrentUser user;
+    private final AuthorizationService authorization;
+    private final AdminLocalePreference localePreference;
+    private final I18NProvider translations;
+    private final Span currentLocation = new Span();
     private final MenuItem themeModeItem;
+    private final VerticalLayout drawer = new VerticalLayout();
+    private final DrawerToggle toggle = new DrawerToggle();
+    private final MenuBar userMenu;
+    private final Select<Locale> languageSelector;
     private final boolean authenticated;
 
-    public MainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser, AuthorizationService authorization) {
+    public MainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
+                      AuthorizationService authorization, AdminLocalePreference localePreference,
+                      I18NProvider translations) {
         this.modules = modules;
+        this.authorization = authorization;
+        this.localePreference = localePreference;
+        this.translations = translations;
         var productMark = new Span(VaadinIcon.CUBE.create());
         productMark.addClassName("admin-product-mark");
         var productName = new Span("Vaadin Admin Starter");
@@ -47,33 +66,29 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         var currentUserValue = currentUser.currentUser();
         authenticated = currentUserValue.isPresent();
         if (!authenticated) {
+            user = null;
             themeModeItem = null;
+            userMenu = null;
+            languageSelector = null;
             addHeader(productMark, productName);
             return;
         }
 
+        user = currentUserValue.orElseThrow();
         setPrimarySection(Section.DRAWER);
         setDrawerOpened(true);
-        var toggle = new DrawerToggle();
-        toggle.setAriaLabel("切换导航");
-        toggle.setTooltipText("切换导航");
-        var user = currentUserValue.orElseThrow();
-        var userMenu = createUserMenu(user.username());
+        toggle.setAriaLabel(text("system.shell.navigation-toggle"));
+        toggle.setTooltipText(text("system.shell.navigation-toggle"));
+        userMenu = createUserMenu(user.username());
         themeModeItem = userMenu.getItems().getFirst().getSubMenu().addItem("", event -> toggleThemeMode());
-        updateThemeModeItem();
+        languageSelector = createLanguageSelector();
+        updateHeaderText();
+        addHeader(toggle, productMark, productName, currentLocation, languageSelector, userMenu);
 
-        addHeader(toggle, productMark, productName, currentLocation, userMenu);
-
-        var drawer = new VerticalLayout();
         drawer.setPadding(false);
         drawer.setSpacing(false);
         drawer.addClassName("admin-drawer-content");
-        drawer.add(navigationGroup("工作空间", new SideNavItem("工作台", "", VaadinIcon.HOME.create())));
-        var visiblePages = modules.pagesVisibleTo(user, authorization);
-        modules.groupsVisibleTo(user, authorization).forEach(group -> addNavigationGroup(drawer,
-                ReferenceAdminModules.legacyLabel(group.titleKey()), visiblePages.stream()
-                        .filter(page -> page.groupId().equals(group.id()))
-                        .toList()));
+        rebuildDrawer();
         addToDrawer(drawer);
     }
 
@@ -87,17 +102,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        if (!authenticated) {
-            return;
-        }
+        if (!authenticated) return;
         var route = event.getLocation().getPath();
-        currentLocation.setText(modules.pages().stream()
-                .filter(page -> page.route().equals(route))
-                .findFirst()
-                .map(this::titleFor)
-                .orElse("工作台"));
-        Component content = getContent();
-        content.addClassName("admin-content-canvas");
+        currentLocation.setText(modules.pages().stream().filter(page -> page.route().equals(route)).findFirst()
+                .map(this::titleFor).orElse(text("system.shell.home")));
+        getContent().addClassName("admin-content-canvas");
     }
 
     @Override
@@ -106,10 +115,16 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         applyTheme(sessionThemeMode());
     }
 
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        if (!authenticated) return;
+        updateHeaderText();
+        rebuildDrawer();
+    }
+
     private MenuBar createUserMenu(String username) {
         var menu = new MenuBar();
         menu.setOpenOnHover(false);
-        menu.getElement().setAttribute("aria-label", "当前用户菜单");
         menu.addClassName("admin-user-menu");
         var avatar = new Avatar(username);
         avatar.setAbbreviation(username.substring(0, 1).toUpperCase());
@@ -122,12 +137,33 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         return menu;
     }
 
-    private void addNavigationGroup(VerticalLayout drawer, String label, java.util.List<AdminPage> pages) {
-        if (!pages.isEmpty()) {
-            drawer.add(navigationGroup(label, pages.stream()
-                    .map(page -> new SideNavItem(titleFor(page), page.route(), AdminIconCatalog.create(page.iconKey())))
-                    .toArray(SideNavItem[]::new)));
-        }
+    private Select<Locale> createLanguageSelector() {
+        var selector = new Select<Locale>();
+        selector.setItems(translations.getProvidedLocales());
+        selector.setValue(UI.getCurrent().getLocale());
+        selector.addValueChangeListener(event -> {
+            if (event.isFromClient() && event.getValue() != null) {
+                localePreference.select(UI.getCurrent(), event.getValue());
+            }
+        });
+        selector.setVisible(translations.getProvidedLocales().size() > 1);
+        selector.addClassName("admin-language-control");
+        return selector;
+    }
+
+    private void rebuildDrawer() {
+        drawer.removeAll();
+        drawer.add(navigationGroup(text("system.shell.workspace"),
+                new SideNavItem(text("system.shell.home"), "", VaadinIcon.HOME.create())));
+        var visiblePages = modules.pagesVisibleTo(user, authorization);
+        modules.groupsVisibleTo(user, authorization).forEach(group -> addNavigationGroup(drawer, text(group.titleKey()),
+                visiblePages.stream().filter(page -> page.groupId().equals(group.id())).toList()));
+    }
+
+    private void addNavigationGroup(VerticalLayout target, String label, java.util.List<AdminPage> pages) {
+        if (!pages.isEmpty()) target.add(navigationGroup(label, pages.stream()
+                .map(page -> new SideNavItem(titleFor(page), page.route(), AdminIconCatalog.create(page.iconKey())))
+                .toArray(SideNavItem[]::new)));
     }
 
     private Component[] navigationGroup(String label, SideNavItem... items) {
@@ -152,17 +188,23 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         return "dark".equals(mode) ? "dark" : "light";
     }
 
-    private void applyTheme(String themeMode) {
-        UI.getCurrent().getElement().getThemeList().set("dark", "dark".equals(themeMode));
+    private void applyTheme(String themeMode) { UI.getCurrent().getElement().getThemeList().set("dark", "dark".equals(themeMode)); }
+
+    private void updateHeaderText() {
+        toggle.setAriaLabel(text("system.shell.navigation-toggle"));
+        toggle.setTooltipText(text("system.shell.navigation-toggle"));
+        userMenu.getElement().setAttribute("aria-label", text("system.shell.current-user"));
+        languageSelector.setLabel(text("system.shell.language"));
+        languageSelector.setItemLabelGenerator(locale -> text("system.shell.language." + locale.toLanguageTag()));
+        languageSelector.setValue(UI.getCurrent().getLocale());
+        updateThemeModeItem();
     }
 
     private void updateThemeModeItem() {
-        themeModeItem.setText(sessionThemeMode().equals("dark") ? "切换至浅色模式" : "切换至深色模式");
-        themeModeItem.setAriaLabel("切换主题模式");
+        themeModeItem.setText(text(sessionThemeMode().equals("dark") ? "system.shell.theme-light" : "system.shell.theme-dark"));
+        themeModeItem.setAriaLabel(text("system.shell.theme-toggle"));
     }
 
-    private String titleFor(AdminPage page) {
-        return ReferenceAdminModules.legacyLabel(page.titleKey());
-    }
-
+    private String titleFor(AdminPage page) { return text(page.titleKey()); }
+    private String text(String key, Object... parameters) { return getTranslation(key, parameters); }
 }

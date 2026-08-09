@@ -31,4 +31,9 @@ class AdminLocalePreferenceTest {
 
         assertThat(preference.selectInitialLocale(ZH_CN)).isEqualTo(EN_US);
     }
+
+    @Test
+    void defaultsToChineseWhenTheSessionHasNoLocalePreference() {
+        assertThat(preference.selectInitialLocale(EN_US)).isEqualTo(ZH_CN);
+    }
 }

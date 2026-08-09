@@ -23,7 +23,7 @@ import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
 import jakarta.annotation.security.PermitAll;
 import java.util.Comparator;
 
-@PageTitle("角色")
+@PageTitle("Roles")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -35,18 +35,18 @@ public final class RolesView extends PermissionProtectedView {
                      AdministrationQueryService queries, PermissionCatalog catalog, GrantPermissionUseCase grants) {
         super(currentUser, authorization);
         var grid = new Grid<>(AdministrationQueryService.RoleRow.class, false);
-        grid.addColumn(AdministrationQueryService.RoleRow::code).setHeader("角色代码").setAutoWidth(true);
-        grid.addColumn(AdministrationQueryService.RoleRow::permissionCount).setHeader("权限数量");
-        grid.addComponentColumn(this::detailsAction).setHeader("操作").setAutoWidth(true);
+        grid.addColumn(AdministrationQueryService.RoleRow::code).setHeader(getTranslation("system.roles.code")).setAutoWidth(true);
+        grid.addColumn(AdministrationQueryService.RoleRow::permissionCount).setHeader(getTranslation("system.roles.permission-count"));
+        grid.addComponentColumn(this::detailsAction).setHeader(getTranslation("system.roles.actions")).setAutoWidth(true);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
         var pages = new PagedGrid<>(grid, queries::roles, "code");
 
         var grantDialog = grantDialog(queries, catalog, grants, pages, new OperationFeedback());
-        var grant = new Button("授予权限", event -> grantDialog.open());
+        var grant = new Button(getTranslation("system.roles.grant"), event -> grantDialog.open());
         grant.setVisible(authorization.hasPermission(requireCurrentUser(), GRANT));
 
-        var header = new PageHeader("角色", "查看角色并授予已登记的系统权限。");
+        var header = PageHeader.translated("system.roles.title", "system.roles.intent");
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "roles-toolbar");
         toolbar.setPrimaryAction(grant);
@@ -60,17 +60,16 @@ public final class RolesView extends PermissionProtectedView {
 
     private Button detailsAction(AdministrationQueryService.RoleRow role) {
         var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(role));
-        details.setTooltipText("查看角色详情");
-        details.setAriaLabel("查看角色详情：" + role.code());
+        details.setTooltipText(getTranslation("system.roles.details"));
+        details.setAriaLabel(getTranslation("system.roles.details-aria", role.code()));
         return details;
     }
 
     private void showDetails(AdministrationQueryService.RoleRow role) {
-        var dialog = new DetailDialog("角色详情");
-        dialog.getCloseAction().setText("关闭");
-        dialog.addField("角色代码", role.code());
-        dialog.addField("权限数量", Long.toString(role.permissionCount()));
-        dialog.addField("已授予权限", String.join(", ", role.permissionCodes()));
+        var dialog = DetailDialog.translated("system.roles.details-title");
+        dialog.addField(getTranslation("system.roles.code"), role.code());
+        dialog.addField(getTranslation("system.roles.permission-count"), Long.toString(role.permissionCount()));
+        dialog.addField(getTranslation("system.roles.granted-permissions"), String.join(", ", role.permissionCodes()));
         dialog.open();
     }
 
@@ -82,19 +81,18 @@ public final class RolesView extends PermissionProtectedView {
     private EditorDialog grantDialog(AdministrationQueryService queries, PermissionCatalog catalog,
                                      GrantPermissionUseCase grants,
                                      PagedGrid<AdministrationQueryService.RoleRow> pages, OperationFeedback feedback) {
-        var role = new ComboBox<String>("角色");
+        var role = new ComboBox<String>(getTranslation("system.roles.role"));
         role.setItems(queries.roles().stream().map(AdministrationQueryService.RoleRow::code).toList());
-        var permission = new ComboBox<PermissionCode>("权限");
+        var permission = new ComboBox<PermissionCode>(getTranslation("system.roles.permission"));
         permission.setItems(catalog.all().stream().sorted(Comparator.comparing(PermissionCode::value)).toList());
         permission.setItemLabelGenerator(PermissionCode::value);
-        var dialog = new EditorDialog("授予权限", "保存授权", () -> { });
-        dialog.getCancelAction().setText("取消");
+        var dialog = EditorDialog.translated("system.roles.grant", "system.roles.save-grant", () -> { });
         dialog.getPrimaryAction().setEnabled(false);
         dialog.getPrimaryAction().addClickListener(event -> {
             grants.grant(requireCurrentUser(), new GrantPermissionCommand(role.getValue(), permission.getValue()));
             dialog.close();
             pages.refresh();
-            feedback.success("权限已授予。");
+            feedback.success(getTranslation("system.roles.granted-success"));
         });
         role.addValueChangeListener(event -> updateGrantAvailability(dialog, role, permission));
         permission.addValueChangeListener(event -> updateGrantAvailability(dialog, role, permission));

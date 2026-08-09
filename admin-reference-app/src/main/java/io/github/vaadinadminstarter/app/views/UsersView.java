@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@PageTitle("用户")
+@PageTitle("Users")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -39,7 +39,7 @@ public final class UsersView extends PermissionProtectedView {
 
     private final UserAdministrationService commands;
     private final Grid<AdministrationQueryService.UserRow> grid = new Grid<>();
-    private final TextField filter = new TextField("搜索用户");
+    private final TextField filter = new TextField();
     private final PagedGrid<AdministrationQueryService.UserRow> pages;
     private final OperationFeedback feedback = new OperationFeedback();
 
@@ -47,30 +47,31 @@ public final class UsersView extends PermissionProtectedView {
                      AdministrationQueryService queries, UserAdministrationService commands) {
         super(currentUser, authorization);
         this.commands = commands;
+        filter.setLabel(getTranslation("system.users.filter"));
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(ValueChangeMode.EAGER);
 
-        grid.addColumn(AdministrationQueryService.UserRow::username).setHeader("用户名").setAutoWidth(true);
-        grid.addColumn(user -> user.enabled() ? "启用" : "停用").setHeader("状态");
-        grid.addColumn(AdministrationQueryService.UserRow::authVersion).setHeader("认证版本");
-        grid.addComponentColumn(user -> action(user, authorization)).setHeader("操作");
+        grid.addColumn(AdministrationQueryService.UserRow::username).setHeader(getTranslation("system.users.username")).setAutoWidth(true);
+        grid.addColumn(user -> user.enabled() ? getTranslation("system.users.enabled") : getTranslation("system.users.disabled")).setHeader(getTranslation("system.users.status"));
+        grid.addColumn(AdministrationQueryService.UserRow::authVersion).setHeader(getTranslation("system.users.auth-version"));
+        grid.addComponentColumn(user -> action(user, authorization)).setHeader(getTranslation("system.users.actions"));
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.setSizeFull();
         pages = new PagedGrid<>(grid, queries::users, () -> Map.of("q", filter.getValue()), "username");
         filter.addValueChangeListener(event -> pages.refresh());
 
-        var header = new PageHeader("用户", "管理可登录账户及其启用状态。");
+        var header = PageHeader.translated("system.users.title", "system.users.intent");
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "users-toolbar");
         toolbar.addFilter(filter);
-        var create = new Button("新增用户", VaadinIcon.PLUS.create(), event -> createUser());
+        var create = new Button(getTranslation("system.users.create"), VaadinIcon.PLUS.create(), event -> createUser());
         create.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
         toolbar.setPrimaryAction(create);
 
         var workspace = new DataWorkspace<>(grid);
         workspace.getElement().setAttribute("data-testid", "users-workspace");
-        var enableSelected = bulkAction(VaadinIcon.PLAY, "启用所选用户", true, authorization);
-        var disableSelected = bulkAction(VaadinIcon.PAUSE, "停用所选用户", false, authorization);
+        var enableSelected = bulkAction(VaadinIcon.PLAY, getTranslation("system.users.enable-selected"), true, authorization);
+        var disableSelected = bulkAction(VaadinIcon.PAUSE, getTranslation("system.users.disable-selected"), false, authorization);
         var canUpdate = authorization.hasPermission(requireCurrentUser(), UPDATE);
         workspace.addBulkAction(enableSelected, () -> canUpdate);
         workspace.addBulkAction(disableSelected, () -> canUpdate);
@@ -86,13 +87,13 @@ public final class UsersView extends PermissionProtectedView {
 
     private HorizontalLayout action(AdministrationQueryService.UserRow user, AuthorizationService authorization) {
         var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(user));
-        details.setTooltipText("查看用户详情");
-        details.setAriaLabel("查看用户详情：" + user.username());
-        var actionLabel = user.enabled() ? "停用用户" : "启用用户";
+        details.setTooltipText(getTranslation("system.users.details"));
+        details.setAriaLabel(getTranslation("system.users.details-aria", user.username()));
+        var actionLabel = getTranslation(user.enabled() ? "system.users.disable" : "system.users.enable");
         var enabled = new Button(user.enabled() ? VaadinIcon.PAUSE.create() : VaadinIcon.PLAY.create(),
                 event -> confirmStatusChange(Set.of(user.id()), user.enabled()));
         enabled.setTooltipText(actionLabel);
-        enabled.setAriaLabel(actionLabel + "：" + user.username());
+        enabled.setAriaLabel(getTranslation(user.enabled() ? "system.users.disable-aria" : "system.users.enable-aria", user.username()));
         enabled.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
         var actions = new HorizontalLayout(details, enabled);
         actions.setPadding(false);
@@ -111,37 +112,35 @@ public final class UsersView extends PermissionProtectedView {
     }
 
     private void showDetails(AdministrationQueryService.UserRow user) {
-        var dialog = new DetailDialog("用户详情");
-        dialog.getCloseAction().setText("关闭");
-        dialog.addField("用户名", user.username());
-        dialog.addField("状态", user.enabled() ? "启用" : "停用");
-        dialog.addField("认证版本", Long.toString(user.authVersion()));
+        var dialog = DetailDialog.translated("system.users.details-title");
+        dialog.addField(getTranslation("system.users.username"), user.username());
+        dialog.addField(getTranslation("system.users.status"), getTranslation(user.enabled() ? "system.users.enabled" : "system.users.disabled"));
+        dialog.addField(getTranslation("system.users.auth-version"), Long.toString(user.authVersion()));
         dialog.open();
     }
 
     private void confirmStatusChange(Set<java.util.UUID> userIds, boolean currentlyEnabled) {
         var enabling = !currentlyEnabled;
-        var title = enabling ? "启用用户" : "停用用户";
-        var consequence = enabling ? "该用户将恢复登录权限。" : "该用户将无法登录。";
-        var confirmation = new ConfirmationDialog(title, consequence, enabling ? "启用" : "停用", () -> {
+        var confirmation = ConfirmationDialog.translated(enabling ? "system.users.enable-title" : "system.users.disable-title",
+                enabling ? "system.users.enable-consequence" : "system.users.disable-consequence",
+                enabling ? "system.users.enabled" : "system.users.disabled", () -> {
             commands.setEnabled(requireCurrentUser(), userIds, enabling);
             grid.deselectAll();
             pages.refresh();
-            feedback.success(enabling ? "用户已启用。" : "用户已停用。");
+            feedback.success(getTranslation(enabling ? "system.users.enabled-success" : "system.users.disabled-success"));
         });
-        confirmation.getCancelAction().setText("取消");
         confirmation.open();
     }
 
     private void createUser() {
-        var username = new TextField("用户名");
+        var username = new TextField(getTranslation("system.users.username"));
         username.setRequired(true);
-        var password = new PasswordField("初始密码");
+        var password = new PasswordField(getTranslation("system.users.initial-password"));
         password.setRequired(true);
-        var dialog = new EditorDialog("新增用户", "保存", () -> { });
+        var dialog = EditorDialog.translated("system.users.create", "system.users.save", () -> { });
         dialog.getPrimaryAction().addClickListener(event -> {
             if (username.getValue().isBlank() || password.getValue().isBlank()) {
-                dialog.showValidationMessage("用户名和初始密码均为必填项。");
+                dialog.showValidationMessage(getTranslation("system.users.required"));
                 return;
             }
             try {
@@ -153,15 +152,14 @@ public final class UsersView extends PermissionProtectedView {
                         validationFailure -> dialog.showValidationMessage(userValidationMessage(validationFailure)));
             }
         });
-        dialog.getCancelAction().setText("取消");
         dialog.addField(username, password);
         dialog.open();
     }
 
     private String userValidationMessage(BusinessFailure failure) {
         if ("already-exists".equals(failure.fieldErrors().get("username"))) {
-            return "用户名已存在。";
+            return getTranslation("system.users.already-exists");
         }
-        return "用户名和初始密码均为必填项。";
+        return getTranslation("system.users.required");
     }
 }

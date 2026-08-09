@@ -1,6 +1,8 @@
 package io.github.vaadinadminstarter.flow.patterns;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -15,11 +17,11 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 /** A grid frame with selection-aware bulk actions and explicit data presentation states. */
-public final class DataWorkspace<T> extends VerticalLayout {
+public final class DataWorkspace<T> extends VerticalLayout implements LocaleChangeObserver {
     public enum State { READY, BUSY, EMPTY, FAILURE }
 
     private final Grid<T> grid;
-    private final Span selectionSummary = new Span("0 selected");
+    private final Span selectionSummary = new Span();
     private final HorizontalLayout bulkActions = new HorizontalLayout();
     private final HorizontalLayout selectionBar = new HorizontalLayout(selectionSummary, bulkActions);
     private final Div status = new Div();
@@ -116,7 +118,7 @@ public final class DataWorkspace<T> extends VerticalLayout {
 
     public void setBusy(boolean busy) {
         if (busy) {
-            showState(State.BUSY, "Loading data", null);
+            showState(State.BUSY, text("flow.workspace.loading", "Loading data"), null);
         } else if (state == State.BUSY) {
             showData();
         }
@@ -128,7 +130,7 @@ public final class DataWorkspace<T> extends VerticalLayout {
 
     public void showFailure(String message) {
         showState(State.FAILURE, Objects.requireNonNull(message),
-                new EmptyState("Unable to load data", message));
+                new EmptyState(text("flow.workspace.load-failed", "Unable to load data"), message));
     }
 
     public void showData() {
@@ -161,12 +163,22 @@ public final class DataWorkspace<T> extends VerticalLayout {
 
     private void updateSelection(int count) {
         selectedItemCount = count;
-        selectionSummary.setText(count == 1 ? "1 selected" : count + " selected");
+        selectionSummary.setText(text("flow.workspace.selected", count + " selected", count));
         var enabled = count > 0 && state == State.READY;
         selectionActions.forEach(action -> updateActionAvailability(action, enabled));
     }
 
     private void updateActionAvailability(Button action, boolean selectionAvailable) {
         action.setEnabled(actionEligibility.get(action).getAsBoolean() && selectionAvailable);
+    }
+
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        updateSelection(selectedItemCount);
+        if (state == State.BUSY) status.setText(text("flow.workspace.loading", "Loading data"));
+    }
+
+    private String text(String key, String fallback, Object... parameters) {
+        return getUI().isPresent() ? getTranslation(key, parameters) : fallback;
     }
 }

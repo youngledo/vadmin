@@ -160,6 +160,21 @@ class BrowserE2EIT {
     }
 
     @Test
+    void authenticatedAdministratorCanSwitchTheShellAndWorkplaceLanguage() {
+        signInAs("admin", "change-me");
+
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("工作台"))).isVisible();
+        page.getByLabel("语言").click();
+        page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
+
+        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Workplace"))).isVisible();
+        assertThat(page.getByLabel("System administration").getByRole(AriaRole.LINK,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Users"))).isVisible();
+        assertThat(page.getByText("Manage sign-in accounts and their enabled status.",
+                new Page.GetByTextOptions().setExact(true))).isVisible();
+    }
+
+    @Test
     void narrowShellKeepsNavigationReachable() {
         useNarrowBrowser();
         signInAs("admin", "change-me");
@@ -368,12 +383,22 @@ class BrowserE2EIT {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("保存")).click();
 
         assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).isVisible();
-        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除客户")).click();
-        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("删除客户"))).isVisible();
-        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("取消")).click();
+        var customerWorkspace = page.getByTestId("customers-workspace");
+        customerWorkspace.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("删除客户")).click();
+        var deletionDialog = page.getByRole(AriaRole.DIALOG,
+                new Page.GetByRoleOptions().setName("删除客户"));
+        assertThat(deletionDialog.getByRole(AriaRole.HEADING,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("删除客户"))).isVisible();
+        deletionDialog.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("取消")).click();
+        assertThat(deletionDialog).not().isVisible();
         assertThat(page.getByText("Acme Updated", new Page.GetByTextOptions().setExact(true))).isVisible();
-        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除客户")).click();
-        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("删除").setExact(true)).click();
+        customerWorkspace.getByRole(AriaRole.BUTTON,
+                new com.microsoft.playwright.Locator.GetByRoleOptions().setName("删除客户")).click();
+        page.getByRole(AriaRole.DIALOG, new Page.GetByRoleOptions().setName("删除客户"))
+                .getByRole(AriaRole.BUTTON,
+                        new com.microsoft.playwright.Locator.GetByRoleOptions().setName("删除客户")).click();
         assertThat(page.getByText("客户已删除。", new Page.GetByTextOptions().setExact(true))).isVisible();
         org.assertj.core.api.Assertions.assertThat(page.getByRole(AriaRole.DIALOG,
                 new Page.GetByRoleOptions().setName("删除客户")).count()).isZero();

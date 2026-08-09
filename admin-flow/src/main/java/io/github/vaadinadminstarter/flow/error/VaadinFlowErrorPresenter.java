@@ -11,7 +11,7 @@ final class VaadinFlowErrorPresenter implements FlowErrorPresenter {
             return;
         }
         switch (error.presentation()) {
-            case FIELD_VALIDATION -> Notification.show("请检查输入内容");
+            case FIELD_VALIDATION -> Notification.show(ui.getTranslation("flow.error.validation"));
             case ACCESS_DENIED -> ui.navigate(AccessDeniedView.class);
             case FAILURE -> ui.navigate(SystemFailureView.class);
         }

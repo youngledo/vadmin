@@ -16,6 +16,7 @@ import com.vaadin.flow.spring.SpringBootAutoConfiguration;
 
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
 import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
+import io.github.vaadinadminstarter.flow.navigation.AdminMessageBundle;
 import io.github.vaadinadminstarter.flow.navigation.AdminModule;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.springflow.navigation.AdminModuleRouteRegistrar;
@@ -68,7 +69,10 @@ public class AdminFlowAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     I18NProvider adminI18NProvider(AdminModuleRegistry modules) {
-        return new CompositeAdminI18NProvider(modules.messageBundles());
+        var bundles = new java.util.ArrayList<AdminMessageBundle>();
+        bundles.add(new AdminMessageBundle("flow", "i18n.flow"));
+        bundles.addAll(modules.messageBundles());
+        return new CompositeAdminI18NProvider(bundles);
     }
 
     @Bean
@@ -84,7 +88,14 @@ public class AdminFlowAutoConfiguration {
     }
 
     @Bean
-    VaadinServiceInitListener adminModuleRouteRegistration(AdminModuleRouteRegistrar registrar) {
-        return event -> registrar.register(event.getSource().getContext());
+    VaadinServiceInitListener adminModuleRouteRegistration(AdminModuleRouteRegistrar registrar,
+                                                           AdminLocalePreference localePreference) {
+        return event -> {
+            registrar.register(event.getSource().getContext());
+            event.getSource().addUIInitListener(uiEvent -> {
+                var ui = uiEvent.getUI();
+                ui.setLocale(localePreference.selectInitialLocale(ui.getLocale()));
+            });
+        };
     }
 }

@@ -12,7 +12,7 @@ import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
 import jakarta.annotation.security.PermitAll;
 
-@PageTitle("权限目录")
+@PageTitle("Permission catalog")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -23,12 +23,12 @@ public final class PermissionsView extends PermissionProtectedView {
                            AdministrationQueryService queries) {
         super(currentUser, authorization);
         var grid = new Grid<>(AdministrationQueryService.PermissionRow.class, false);
-        grid.addColumn(AdministrationQueryService.PermissionRow::code).setHeader("权限代码").setAutoWidth(true);
-        grid.addColumn(permission -> permission.systemManaged() ? "系统管理" : "自定义").setHeader("来源");
+        grid.addColumn(AdministrationQueryService.PermissionRow::code).setHeader(getTranslation("system.permissions.code")).setAutoWidth(true);
+        grid.addColumn(permission -> permission.systemManaged() ? getTranslation("system.permissions.system-managed") : getTranslation("system.permissions.custom")).setHeader(getTranslation("system.permissions.source"));
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
         new PagedGrid<>(grid, queries::permissions, "code");
-        var header = new PageHeader("权限目录", "查看系统中可授予的权限及其来源。");
+        var header = PageHeader.translated("system.permissions.title", "system.permissions.intent");
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "read-only-workspace");

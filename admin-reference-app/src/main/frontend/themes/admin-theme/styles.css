@@ -208,13 +208,15 @@ vaadin-menu-bar-button:focus-visible {
   }
 
   .admin-shell-brand {
-    font-size: 0.875rem;
+    display: none;
   }
 
   .admin-shell-location {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: none;
+  }
+
+  .admin-language-control {
+    max-width: 7rem;
   }
 
   .admin-content-canvas {

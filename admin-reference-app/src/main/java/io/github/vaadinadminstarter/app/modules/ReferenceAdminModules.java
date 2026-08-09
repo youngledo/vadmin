@@ -1,7 +1,6 @@
 package io.github.vaadinadminstarter.app.modules;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.context.annotation.Bean;
@@ -21,20 +20,6 @@ import io.github.vaadinadminstarter.flow.navigation.AdminPage;
 /** Built-in module contributions owned by the reference application's host. */
 @Configuration(proxyBeanMethods = false)
 public class ReferenceAdminModules {
-    private static final Map<String, String> LEGACY_LABELS = Map.ofEntries(
-            Map.entry("system.navigation", "系统管理"),
-            Map.entry("customers.navigation", "客户管理"),
-            Map.entry("system.users.title", "用户"),
-            Map.entry("system.users.intent", "管理可登录账户及其启用状态。"),
-            Map.entry("system.roles.title", "角色"),
-            Map.entry("system.roles.intent", "查看角色并授予已登记的系统权限。"),
-            Map.entry("system.permissions.title", "权限目录"),
-            Map.entry("system.permissions.intent", "查阅受系统管理的权限目录。"),
-            Map.entry("system.audit.title", "审计日志"),
-            Map.entry("system.audit.intent", "查看已记录的管理操作审计日志。"),
-            Map.entry("customers.customers.title", "客户"),
-            Map.entry("customers.customers.intent", "维护客户档案和受控附件。"));
-
     @Bean
     public AdminModule systemAdministration() {
         return AdminModule.of("system",
@@ -73,10 +58,6 @@ public class ReferenceAdminModules {
                         PermissionCode.of("customer:customer:delete"),
                         PermissionCode.of("customer:attachment:upload")),
                 List.of(new AdminMessageBundle("customers", "i18n.customers")));
-    }
-
-    public static String legacyLabel(String key) {
-        return LEGACY_LABELS.getOrDefault(key, key);
     }
 
     private static AdminPage page(String pageId, String groupId, String titleKey, String intentKey, String iconKey,

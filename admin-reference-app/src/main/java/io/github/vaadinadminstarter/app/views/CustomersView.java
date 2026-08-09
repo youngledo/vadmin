@@ -36,7 +36,7 @@ import jakarta.annotation.security.PermitAll;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
-@PageTitle("客户")
+@PageTitle("Customers")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -50,7 +50,7 @@ public final class CustomersView extends PermissionProtectedView {
     private final CustomerService customers;
     private final FlowFileUpload fileUpload;
     private final Grid<Customer> grid = new Grid<>(Customer.class, false);
-    private final TextField filter = new TextField("搜索");
+    private final TextField filter = new TextField();
     private final PagedGrid<Customer> pages;
     private final OperationFeedback feedback = new OperationFeedback();
 
@@ -59,25 +59,26 @@ public final class CustomersView extends PermissionProtectedView {
         super(currentUser, authorization);
         this.customers = customers;
         this.fileUpload = new FlowFileUpload(authorization, fileStorage);
-        filter.setPlaceholder("名称或邮箱");
+        filter.setLabel(getTranslation("customers.filter"));
+        filter.setPlaceholder(getTranslation("customers.filter-placeholder"));
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(ValueChangeMode.EAGER);
 
-        grid.addColumn(Customer::name).setHeader("名称").setAutoWidth(true);
-        grid.addColumn(Customer::email).setHeader("邮箱").setAutoWidth(true);
-        grid.addColumn(customer -> customer.active() ? "启用" : "停用").setHeader("状态");
-        grid.addComponentColumn(customer -> actions(customer, authorization)).setHeader("操作").setAutoWidth(true);
+        grid.addColumn(Customer::name).setHeader(getTranslation("customers.name")).setAutoWidth(true);
+        grid.addColumn(Customer::email).setHeader(getTranslation("customers.email")).setAutoWidth(true);
+        grid.addColumn(customer -> customer.active() ? getTranslation("customers.enabled") : getTranslation("customers.disabled")).setHeader(getTranslation("customers.status"));
+        grid.addComponentColumn(customer -> actions(customer, authorization)).setHeader(getTranslation("customers.actions")).setAutoWidth(true);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
         pages = new PagedGrid<>(grid, query -> customers.page(requireCurrentUser(), query),
                 () -> Map.of("q", filter.getValue()), "name");
         filter.addValueChangeListener(event -> pages.refresh());
 
-        var header = new PageHeader("客户", "维护客户档案，并在需要时管理其受控附件。");
+        var header = PageHeader.translated("customers.customers.title", "customers.customers.intent");
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "customers-toolbar");
         toolbar.addFilter(filter);
-        var create = new Button("新增客户", VaadinIcon.PLUS.create(), event -> edit(null));
+        var create = new Button(getTranslation("customers.create"), VaadinIcon.PLUS.create(), event -> edit(null));
         create.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
         toolbar.setPrimaryAction(create);
         var workspace = new DataWorkspace<>(grid);
@@ -95,19 +96,19 @@ public final class CustomersView extends PermissionProtectedView {
 
     private HorizontalLayout actions(Customer customer, AuthorizationService authorization) {
         var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(customer));
-        details.setTooltipText("查看客户详情");
-        details.setAriaLabel("查看客户详情：" + customer.name());
+        details.setTooltipText(getTranslation("customers.details"));
+        details.setAriaLabel(getTranslation("customers.details-aria", customer.name()));
         var edit = new Button(VaadinIcon.EDIT.create(), event -> edit(customer));
-        edit.setTooltipText("编辑客户");
-        edit.setAriaLabel("编辑客户");
+        edit.setTooltipText(getTranslation("customers.edit"));
+        edit.setAriaLabel(getTranslation("customers.edit"));
         edit.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
         var delete = new Button(VaadinIcon.TRASH.create(), event -> confirmDelete(customer));
-        delete.setTooltipText("删除客户");
-        delete.setAriaLabel("删除客户");
+        delete.setTooltipText(getTranslation("customers.delete"));
+        delete.setAriaLabel(getTranslation("customers.delete"));
         delete.setVisible(authorization.hasPermission(requireCurrentUser(), DELETE));
         var attachments = new Button(VaadinIcon.PAPERCLIP.create(), event -> showAttachments(customer, authorization));
-        attachments.setTooltipText("客户附件");
-        attachments.setAriaLabel("客户附件");
+        attachments.setTooltipText(getTranslation("customers.attachments"));
+        attachments.setAriaLabel(getTranslation("customers.attachments"));
         var actions = new HorizontalLayout(details, edit, attachments, delete);
         actions.setPadding(false);
         actions.setSpacing(true);
@@ -115,20 +116,19 @@ public final class CustomersView extends PermissionProtectedView {
     }
 
     private void showDetails(Customer customer) {
-        var dialog = new DetailDialog("客户详情");
-        dialog.getCloseAction().setText("关闭");
-        dialog.addField("名称", customer.name());
-        dialog.addField("邮箱", customer.email());
-        dialog.addField("状态", customer.active() ? "启用" : "停用");
+        var dialog = DetailDialog.translated("customers.details-title");
+        dialog.addField(getTranslation("customers.name"), customer.name());
+        dialog.addField(getTranslation("customers.email"), customer.email());
+        dialog.addField(getTranslation("customers.status"), getTranslation(customer.active() ? "customers.enabled" : "customers.disabled"));
         dialog.open();
     }
 
     private void edit(Customer customer) {
-        var name = new TextField("名称");
+        var name = new TextField(getTranslation("customers.name"));
         name.setRequired(true);
-        var email = new TextField("邮箱");
+        var email = new TextField(getTranslation("customers.email"));
         email.setRequired(true);
-        var active = new Checkbox("启用");
+        var active = new Checkbox(getTranslation("customers.enabled"));
         if (customer != null) {
             name.setValue(customer.name());
             email.setValue(customer.email());
@@ -136,11 +136,10 @@ public final class CustomersView extends PermissionProtectedView {
         } else {
             active.setValue(true);
         }
-        var dialog = new EditorDialog(customer == null ? "新增客户" : "编辑客户", "保存", () -> { });
-        dialog.getCancelAction().setText("取消");
+        var dialog = EditorDialog.translated(customer == null ? "customers.create-title" : "customers.edit-title", "customers.save", () -> { });
         dialog.getPrimaryAction().addClickListener(event -> {
             if (name.getValue().isBlank() || email.getValue().isBlank()) {
-                dialog.showValidationMessage("名称和邮箱均为必填项。");
+                dialog.showValidationMessage(getTranslation("customers.required"));
                 return;
             }
             try {
@@ -151,7 +150,7 @@ public final class CustomersView extends PermissionProtectedView {
                 }
                 dialog.close();
                 pages.refresh();
-                feedback.success(customer == null ? "客户已创建。" : "客户已更新。");
+                feedback.success(getTranslation(customer == null ? "customers.created" : "customers.updated"));
             } catch (BusinessFailure failure) {
                 ViewBusinessFailureHandler.handle(failure,
                         validationFailure -> dialog.showValidationMessage(customerValidationMessage(validationFailure)));
@@ -162,27 +161,26 @@ public final class CustomersView extends PermissionProtectedView {
     }
 
     private void confirmDelete(Customer customer) {
-        var confirmation = new ConfirmationDialog("删除客户", "删除后无法恢复。", "删除", () -> {
+        var confirmation = ConfirmationDialog.translated("customers.delete-title", "customers.delete-consequence", "customers.delete", () -> {
             customers.delete(requireCurrentUser(), customer.id());
             pages.refresh();
-            feedback.success("客户已删除。");
+            feedback.success(getTranslation("customers.deleted"));
         });
-        confirmation.getCancelAction().setText("取消");
         confirmation.open();
     }
 
     private void showAttachments(Customer customer, AuthorizationService authorization) {
         var dialog = new Dialog();
-        dialog.setHeaderTitle("客户附件");
+        dialog.setHeaderTitle(getTranslation("customers.attachments-title"));
         var attachments = new Grid<>(CustomerAttachment.class, false);
-        attachments.addColumn(CustomerAttachment::filename).setHeader("文件名").setAutoWidth(true);
-        attachments.addColumn(CustomerAttachment::contentType).setHeader("类型");
-        attachments.addColumn(CustomerAttachment::size).setHeader("大小");
+        attachments.addColumn(CustomerAttachment::filename).setHeader(getTranslation("customers.filename")).setAutoWidth(true);
+        attachments.addColumn(CustomerAttachment::contentType).setHeader(getTranslation("customers.type"));
+        attachments.addColumn(CustomerAttachment::size).setHeader(getTranslation("customers.size"));
         attachments.addComponentColumn(attachment -> new Anchor(DownloadHandler.fromInputStream(event -> {
             var download = customers.openAttachment(requireCurrentUser(), attachment.id());
             return new DownloadResponse(download.content(), download.attachment().filename(),
                     download.attachment().contentType(), download.attachment().size());
-        }), "下载")).setHeader("操作");
+        }), getTranslation("customers.download"))).setHeader(getTranslation("customers.actions"));
         attachments.setItems(customers.attachments(requireCurrentUser(), customer.id()));
         attachments.setSizeFull();
 
@@ -191,20 +189,20 @@ public final class CustomersView extends PermissionProtectedView {
                     metadata.fileName(), metadata.contentType(), new ByteArrayInputStream(content));
             customers.attach(requireCurrentUser(), customer.id(), stored);
             attachments.setItems(customers.attachments(requireCurrentUser(), customer.id()));
-            feedback.success("附件已上传。");
+            feedback.success(getTranslation("customers.uploaded"));
         }));
         upload.setAcceptedFileTypes("text/plain", ".txt", "application/pdf", ".pdf", "image/png", ".png",
                 "image/jpeg", ".jpg", ".jpeg");
         upload.setMaxFileSize(5 * 1024 * 1024);
         upload.setVisible(authorization.hasPermission(requireCurrentUser(), ATTACHMENT_UPLOAD));
-        dialog.add(new VerticalLayout(upload, attachments, new Button("关闭", event -> dialog.close())));
+        dialog.add(new VerticalLayout(upload, attachments, new Button(getTranslation("flow.action.close"), event -> dialog.close())));
         dialog.open();
     }
 
     private String customerValidationMessage(BusinessFailure failure) {
         if (failure.fieldErrors().containsKey("name") || failure.fieldErrors().containsKey("email")) {
-            return "名称和邮箱均为必填项。";
+            return getTranslation("customers.required");
         }
-        return "无法保存客户，请检查输入后重试。";
+        return getTranslation("customers.save-failed");
     }
 }

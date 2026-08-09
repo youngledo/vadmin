@@ -12,7 +12,7 @@ import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
 import jakarta.annotation.security.PermitAll;
 
-@PageTitle("审计日志")
+@PageTitle("Audit log")
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -23,15 +23,15 @@ public final class AuditView extends PermissionProtectedView {
                      AdministrationQueryService queries) {
         super(currentUser, authorization);
         var grid = new Grid<>(AdministrationQueryService.AuditRow.class, false);
-        grid.addColumn(AdministrationQueryService.AuditRow::occurredAt).setHeader("时间").setAutoWidth(true);
-        grid.addColumn(AdministrationQueryService.AuditRow::action).setHeader("操作");
-        grid.addColumn(AdministrationQueryService.AuditRow::targetType).setHeader("对象类型");
-        grid.addColumn(AdministrationQueryService.AuditRow::targetId).setHeader("对象 ID");
-        grid.addColumn(AdministrationQueryService.AuditRow::outcome).setHeader("结果");
+        grid.addColumn(AdministrationQueryService.AuditRow::occurredAt).setHeader(getTranslation("system.audit.time")).setAutoWidth(true);
+        grid.addColumn(AdministrationQueryService.AuditRow::action).setHeader(getTranslation("system.audit.action"));
+        grid.addColumn(AdministrationQueryService.AuditRow::targetType).setHeader(getTranslation("system.audit.target-type"));
+        grid.addColumn(AdministrationQueryService.AuditRow::targetId).setHeader(getTranslation("system.audit.target-id"));
+        grid.addColumn(AdministrationQueryService.AuditRow::outcome).setHeader(getTranslation("system.audit.outcome"));
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
         new PagedGrid<>(grid, queries::audit, "occurred_at");
-        var header = new PageHeader("审计日志", "按时间查看已记录的安全与管理操作。");
+        var header = PageHeader.translated("system.audit.title", "system.audit.intent");
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "read-only-workspace");

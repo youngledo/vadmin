@@ -18,7 +18,7 @@ public final class AdminLocalePreference {
                 return locale;
             }
         }
-        return isSupported(browserLocale) ? browserLocale : CompositeAdminI18NProvider.ZH_CN;
+        return CompositeAdminI18NProvider.ZH_CN;
     }
 
     public void select(UI ui, Locale locale) {
