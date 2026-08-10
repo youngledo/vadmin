@@ -87,9 +87,33 @@ Spring Boot baseline has stabilized in real use.
 
 **Likely outcomes:** compatibility matrix; adapter feasibility spike; a
 documented decision on a second runtime such as Helidon or Quarkus; framework
-upgrade policy refinement.
+upgrade policy refinement; and an approved Flow visual-language adaptation
+roadmap.
 
-**Non-goals:** speculative ports, duplicated reference applications, or changes
+**Visual-language adaptation:** Keep Vaadin Flow and Java as the sole UI
+programming model. The starter may provide Flow-native visual-language profiles
+inspired by established administration design systems; it must not embed React
+or Vue component libraries. Ant Design-inspired visual and interaction
+patterns are the first candidate. Naive UI-inspired and Element UI-inspired
+profiles are later candidates, evaluated only when concrete adopter needs
+justify them.
+
+Visual language, color mode, and information density are independent choices:
+
+| Dimension | Initial direction |
+| --- | --- |
+| Visual language | Ant Design-inspired Flow profile, with the Vaadin baseline retained as a host choice |
+| Color mode | Light, dark, or system preference |
+| Information density | Comfortable or compact |
+
+Profiles must be implemented through the starter's semantic design tokens and
+Flow page patterns, so business Java code, routes, permissions, modules, and
+i18n remain unchanged when a host selects another profile. End-user arbitrary
+color editors are outside the initial scope; host-owned brand customization is
+an extension concern.
+
+**Non-goals:** speculative ports, duplicated reference applications, embedding
+Ant Design React, Naive UI, or Element UI as runtime dependencies, or changes
 that weaken the Java-only contracts/platform/Flow boundaries.
 
 **Entry criteria:** stable Spring Boot release baseline, Phase 4 decision, and
