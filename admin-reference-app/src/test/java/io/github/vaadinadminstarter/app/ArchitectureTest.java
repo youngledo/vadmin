@@ -1,5 +1,6 @@
 package io.github.vaadinadminstarter.app;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -34,4 +35,9 @@ class ArchitectureTest {
     static final ArchRule only_the_host_and_flow_adapter_depend_on_springflow = noClasses()
             .that().resideOutsideOfPackages("..app..", "..springflow..")
             .should().dependOnClassesThat().resideInAnyPackage("..springflow..");
+
+    @ArchTest
+    static final ArchRule configured_external_identity_mapper_uses_only_contracts_and_its_configuration = classes()
+            .that().haveSimpleName("ConfiguredExternalIdentityMapper")
+            .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "..contracts..", "..app.auth..");
 }

@@ -5,8 +5,12 @@ import io.github.vaadinadminstarter.contracts.audit.AuditOutcome;
 import io.github.vaadinadminstarter.contracts.audit.AuditSink;
 import io.github.vaadinadminstarter.contracts.audit.CorrelationIdProvider;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.ExternalIdentityMapper;
+import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
 import io.github.vaadinadminstarter.contracts.file.FileStorage;
+import io.github.vaadinadminstarter.app.auth.ConfiguredExternalIdentityMapper;
+import io.github.vaadinadminstarter.app.auth.OidcIdentityLinkProperties;
 import io.github.vaadinadminstarter.app.file.LocalFileStorage;
 import io.github.vaadinadminstarter.app.views.MainLayout;
 import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
@@ -21,6 +25,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -30,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(OidcIdentityLinkProperties.class)
 public class ApplicationConfiguration {
     @Bean
     AdminHostLayout adminHostLayout() {
@@ -39,6 +46,13 @@ public class ApplicationConfiguration {
     @Bean
     FileStorage fileStorage(Environment environment) {
         return new LocalFileStorage(Path.of(environment.getRequiredProperty("app.file-storage.directory")));
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.identity.oidc.links[0]", name = "issuer")
+    ExternalIdentityMapper configuredExternalIdentityMapper(OidcIdentityLinkProperties properties,
+                                                            LocalUserAccountLookup accountLookup) {
+        return new ConfiguredExternalIdentityMapper(properties.links(), accountLookup);
     }
 
     @Bean

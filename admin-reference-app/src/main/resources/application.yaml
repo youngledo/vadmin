@@ -15,3 +15,6 @@ app:
     password: ${APP_BOOTSTRAP_PASSWORD:}
   file-storage:
     directory: ${APP_FILE_STORAGE_DIRECTORY:./data/files}
+  identity:
+    oidc:
+      links: []
