@@ -1,0 +1,66 @@
+{
+  "realm": "vaadin-admin",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "vaadin-admin-test",
+      "name": "Vaadin Admin Starter OIDC integration test",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:*"
+      ],
+      "webOrigins": [
+        "http://localhost:*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "users": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "username": "oidc-admin",
+      "enabled": true,
+      "firstName": "OIDC",
+      "lastName": "Administrator",
+      "email": "oidc-admin@example.test",
+      "attributes": {
+        "department": [
+          "platform"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "change-me",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "username": "unmapped-user",
+      "enabled": true,
+      "firstName": "Unmapped",
+      "lastName": "User",
+      "email": "unmapped@example.test",
+      "attributes": {
+        "department": [
+          "restricted"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "change-me",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

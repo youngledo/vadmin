@@ -56,6 +56,7 @@ class LoginViewTest {
                 .singleElement()
                 .isInstanceOfSatisfying(Anchor.class, anchor -> {
                     assertThat(anchor.getHref()).isEqualTo("/oauth2/authorization/oidc");
+                    assertThat(anchor.getElement().hasAttribute("router-ignore")).isTrue();
                     assertThat(anchor.getText()).isEqualTo("Continue with single sign-on");
                 });
         assertThat(view.getChildren()).anyMatch(LoginForm.class::isInstance);

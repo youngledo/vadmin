@@ -8,20 +8,21 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 public final class OidcExternalIdentityFactory {
     public ExternalIdentity from(OidcUser oidcUser) {
         var claims = oidcUser.getClaims();
-        var issuer = requiredString(claims, "iss");
-        var subject = requiredString(claims, "sub");
+        var idToken = oidcUser.getIdToken();
+        var issuer = idToken == null || idToken.getIssuer() == null ? null : idToken.getIssuer().toString();
+        var subject = idToken == null ? null : idToken.getSubject();
         var stringClaims = new LinkedHashMap<String, String>();
         claims.forEach((name, value) -> {
             if (value instanceof String stringValue) {
                 stringClaims.put(name, stringValue);
             }
         });
-        return new ExternalIdentity(URI.create(issuer), subject, optionalString(claims, "name"),
+        return new ExternalIdentity(URI.create(requiredValue(issuer, "iss")), requiredValue(subject, "sub"),
+                optionalString(claims, "name"),
                 optionalString(claims, "email"), stringClaims);
     }
 
-    private static String requiredString(java.util.Map<String, Object> claims, String name) {
-        var value = optionalString(claims, name);
+    private static String requiredValue(String value, String name) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(name + " claim must be a non-blank string");
         }

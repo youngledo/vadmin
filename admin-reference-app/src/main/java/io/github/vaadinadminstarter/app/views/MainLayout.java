@@ -22,6 +22,7 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.example.orders.admin.OrdersView;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
@@ -60,7 +61,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     public MainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
-                      I18NProvider translations) {
+                      I18NProvider translations, AuthenticationContext authenticationContext) {
         this.modules = modules;
         this.authorization = authorization;
         this.localePreference = localePreference;
@@ -87,7 +88,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         setDrawerOpened(true);
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
-        userMenu = createUserMenu(user.username());
+        userMenu = createUserMenu(user.username(), authenticationContext);
         languageMenu = createUtilityMenu("admin-language-menu");
         appearanceMenu = createUtilityMenu("admin-appearance-menu");
         updateHeaderText();
@@ -130,7 +131,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         updateCurrentLocation();
     }
 
-    private MenuBar createUserMenu(String username) {
+    private MenuBar createUserMenu(String username, AuthenticationContext authenticationContext) {
         var menu = new MenuBar();
         menu.setOpenOnHover(false);
         menu.addClassName("admin-user-menu");
@@ -145,7 +146,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         userControl.setSpacing(true);
         userControl.setAlignItems(HorizontalLayout.Alignment.CENTER);
         userControl.addClassName("admin-user-control");
-        menu.addItem(userControl);
+        var trigger = menu.addItem(userControl);
+        trigger.getSubMenu().addItem(text("system.shell.logout"), event -> {
+            if (event.isFromClient()) authenticationContext.logout();
+        });
         return menu;
     }
 

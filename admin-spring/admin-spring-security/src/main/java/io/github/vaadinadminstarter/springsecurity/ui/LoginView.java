@@ -27,6 +27,9 @@ public final class LoginView extends VerticalLayout implements BeforeEnterObserv
         login.setAction("login");
         oidcLogin = oidcLoginAvailability.isAvailable()
                 ? new Anchor(oidcAuthorizationUrl(oidcLoginAvailability.registrationId())) : null;
+        if (oidcLogin != null) {
+            oidcLogin.getElement().setAttribute("router-ignore", true);
+        }
         deniedMessage.setVisible(false);
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
