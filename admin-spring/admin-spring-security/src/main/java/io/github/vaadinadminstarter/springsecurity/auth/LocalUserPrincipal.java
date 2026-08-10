@@ -14,6 +14,11 @@ public final class LocalUserPrincipal implements UserDetails {
         this.account = account;
     }
 
+    public LocalUserPrincipal(CurrentUser currentUser) {
+        this(new LocalUserAccount(currentUser.userId(), currentUser.username(), "", true,
+                currentUser.authVersion(), currentUser.permissions()));
+    }
+
     public CurrentUser currentUser() {
         return new CurrentUser(account.userId(), account.username(), account.permissions(), account.authVersion());
     }

@@ -10,6 +10,7 @@
     <dependencies>
         <dependency><groupId>io.github.vaadinadminstarter</groupId><artifactId>admin-contracts</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-oauth2-client</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webmvc</artifactId></dependency>
         <dependency><groupId>com.vaadin</groupId><artifactId>vaadin-core</artifactId><version>${vaadin.version}</version></dependency>
         <dependency><groupId>com.vaadin</groupId><artifactId>vaadin-spring</artifactId><version>${vaadin.version}</version></dependency>
