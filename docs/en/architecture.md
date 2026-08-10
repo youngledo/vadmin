@@ -44,11 +44,11 @@ depends on it.
 
 | Module | Responsibility | Allowed dependencies |
 |---|---|---|
-| `admin-contracts` | `CurrentUser`, authorization, audit, navigation, file contracts and error semantics | Java 25 |
+| `admin-contracts` | `CurrentUser`, external-identity mapping, authorization, audit, navigation, file contracts and error semantics | Java 25 |
 | `admin-platform` | RBAC administration use cases, application models, persistence and audit ports | contracts |
 | `admin-flow` | route guards, permission gates, Java page patterns, Flow-specific error presentation | contracts, platform, Vaadin Flow |
 | `admin-spring` | Maven parent and reactor aggregator for Spring-specific adapters; no runtime code | root POM inheritance only |
-| `admin-spring-security` | local account authentication and `CurrentUser`/authorization adapters | Spring Security, contracts, platform |
+| `admin-spring-security` | local account authentication, opt-in OIDC adaptation, and `CurrentUser`/authorization adapters | Spring Security, contracts, platform |
 | `admin-spring-jpa` | PostgreSQL JPA mappings, RBAC/audit port implementations, Flyway integration | Spring/JPA/Flyway, contracts, platform |
 | `admin-spring-boot` | auto-configuration, HTTP error mapping, logging and observability wiring | Spring Boot, all adapter-facing modules |
 | `admin-spring-flow` | Spring Boot assembly of Flow administration modules, dynamic route registration, composite translations, and session locale preference | Spring Boot, Vaadin Flow, `admin-flow`, contracts |
@@ -195,6 +195,28 @@ but it can only reference existing `pageId` values.
 The first three are user-experience controls. The fourth is the authoritative
 security boundary.
 
+### 3.4 External Identity And OIDC
+
+OIDC is an opt-in Spring Security adapter, not an alternative authorization
+model. A consumer configures a standard issuer-discovered authorization-code
+client registration and selects it with `vaadin-admin.oidc.registration-id`.
+When a registration and exactly one `ExternalIdentityMapper` are available,
+`admin-spring-security` adapts the authenticated OIDC principal to the
+framework-neutral `ExternalIdentity` contract.
+
+The mapper must resolve the issuer-and-subject pair to an existing enabled
+local account. Only then does the adapter replace the external principal with
+the established local principal. An absent or failed mapping is denied; the
+adapter never creates accounts, grants roles, synchronizes groups, or exposes
+provider tokens to Flow modules. Local-password login remains the default
+baseline.
+
+This design is independent of identity-provider geography or hosting model:
+mainland-China, global, and self-hosted providers use the same OpenID Connect
+discovery path. Keycloak is a Testcontainers fixture only and has no production
+runtime role. Consumer extensions own group and lifecycle policy, including
+provisioning, SCIM, MFA, SAML, LDAP, tenant selection, and data-scope rules.
+
 ## 4. Data and Audit
 
 `users` stores a unique username, password hash, enabled state, and
@@ -263,8 +285,10 @@ succeeded.
 ## 8. Evolution Boundaries
 
 The following are explicitly deferred: multi-tenancy, organization hierarchy,
-data-scope authorization, OIDC/SAML/LDAP/MFA, non-Spring runtimes, a workflow
-engine, a low-code designer, and dynamic loading of arbitrary views.
+data-scope authorization, SAML/LDAP/MFA, SCIM, non-Spring runtimes, a workflow
+engine, a low-code designer, and dynamic loading of arbitrary views. OIDC
+protocol login is available only through the Spring adapter; provider-specific
+and enterprise identity policy remains outside the starter.
 
 A future Quarkus, Helidon, Jakarta EE, or servlet adapter implements the
 contracts and owns its runtime composition. It does not modify the permission

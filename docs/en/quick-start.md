@@ -64,6 +64,73 @@ so do not start it with the `development` profile. To use Flow development
 mode, run the application through Maven with the `vaadin-dev` dependency
 available; do not use development mode as the runtime for a deployment JAR.
 
+## Configure Optional OIDC Login
+
+Local-password login remains enabled unless the consuming application changes
+its own deployment policy. To add a provider-neutral OpenID Connect login, use
+Spring Security's standard issuer discovery and authorization-code client
+configuration. The following example contains no literal client secret; obtain
+and protect any real secret through the deployment's secret-management
+mechanism.
+
+```yaml
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          corporate:
+            client-id: ${OIDC_CLIENT_ID}
+            client-secret: ${OIDC_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          corporate:
+            issuer-uri: https://issuer.example.com
+
+vaadin-admin:
+  oidc:
+    registration-id: corporate
+```
+
+Register the redirect URI resolved for the deployed application, for example
+`https://admin.example.com/login/oauth2/code/corporate`. The configured
+`vaadin-admin.oidc.registration-id` must name an existing Spring Security
+client registration. With both that registration and exactly one
+`ExternalIdentityMapper` bean available, the login page offers an external
+sign-in action at `/oauth2/authorization/corporate`; otherwise its local-login
+behavior is unchanged.
+
+The mapper is the authorization boundary between an authenticated external
+subject and this application's existing local account. It must use the stable
+issuer and subject pair, and return a `CurrentUser` only for an existing,
+enabled local account. This example leaves the persistence of external links
+to the consuming application:
+
+```java
+@Bean
+ExternalIdentityMapper externalIdentityMapper(ExternalIdentityLinks links,
+                                              LocalUserAccountLookup accounts) {
+    return identity -> links.findByIssuerAndSubject(identity.issuer(), identity.subject())
+            .flatMap(link -> accounts.findByUserId(link.localUserId()))
+            .filter(LocalUserAccount::enabled)
+            .map(account -> new CurrentUser(account.userId(), account.username(),
+                    account.permissions(), account.authVersion()));
+}
+```
+
+A successful OIDC authentication grants no role or permission by itself. A
+missing mapper, an unmatched external identity, or a disabled local account
+denies access safely. Group-to-role mapping, automatic provisioning or
+deprovisioning, SCIM, MFA, SAML, LDAP, tenant selection, and data-scope policy
+are application extensions, not starter behavior.
+
+Keycloak is used only by the project's integration tests. A mainland-China,
+global, or self-hosted identity provider follows this same path when it
+supports standard OpenID Connect discovery and authorization-code login; no
+provider SDK is required by the starter.
+
 ## Start The Complete Stack With Compose
 
 ```bash

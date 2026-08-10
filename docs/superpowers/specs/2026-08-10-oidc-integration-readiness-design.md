@@ -1,6 +1,6 @@
 # OIDC Integration Readiness Design
 
-**Status:** Approved for planning  
+**Status:** Implemented and verified
 **Date:** 2026-08-10
 
 ## Goal
@@ -147,13 +147,16 @@ The implementation must prove:
 
 This phase does not add SAML, LDAP, MFA, SCIM, provider administration pages,
 multi-tenancy, organization hierarchy, group-to-role policy, automatic account
-provisioning, automatic deprovisioning, or data-scope authorization. These are
-consumer-owned extensions that may later receive separate specifications when
-real adopter requirements exist.
+provisioning, automatic deprovisioning, tenant selection, or data-scope
+authorization. These are consumer-owned extensions that may later receive
+separate specifications when real adopter requirements exist.
 
 ## Decision Record
 
-Proceed with generic OIDC discovery plus a Keycloak test fixture. Do not ship a
-Keycloak-specific production adapter or a vendor compatibility list. The next
-artifact is a detailed implementation plan; code work starts only from that
-plan.
+Implemented generic OIDC discovery plus a Keycloak test fixture. The runtime
+ships no Keycloak-specific production adapter or vendor compatibility list.
+Configuration remains issuer-based and therefore applies equally to compliant
+mainland-China, global, and self-hosted providers. The public mapper contract
+requires an explicit link to an existing enabled local account; enterprise
+group, provisioning, SCIM, MFA, SAML, LDAP, tenant, and data-scope policies
+remain consumer extensions.

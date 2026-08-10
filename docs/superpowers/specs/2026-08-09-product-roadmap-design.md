@@ -31,6 +31,7 @@ change.
 | Flow Design System Phase 1 | Theme, shell, Java-only page patterns, responsive administration views, and automated browser coverage. |
 | Flow Design System Phase 2 | Detail, confirmation, and operation-feedback patterns; completed administration workflows and permission-filtered workplace entries. |
 | Phase 3: Extensibility And Delivery Maturity | Completed: Spring Flow module assembly, module i18n/theme-token contracts, independently packaged orders example, adoption E2E and architecture coverage, normal and production verification. |
+| Phase 4: Identity And Enterprise Integration Readiness | Completed: opt-in, provider-neutral Spring OIDC discovery and authorization-code login; Spring-free external-identity mapper contract; explicit existing-local-account mapping; Keycloak test fixture; normal and production verification. |
 
 ## Forward Roadmap
 
@@ -55,23 +56,29 @@ surface is reviewed for real consumer use.
 and a sample module from documented extension points; release verification is
 repeatable.
 
-### Phase 4: Identity And Enterprise Integration Readiness
+### Phase 4: Identity And Enterprise Integration Readiness (Completed)
 
 **Goal:** Establish carefully scoped seams for enterprise identity and account
 administration while retaining local authentication as a supported baseline.
 
-**Likely outcomes:** authentication-provider abstraction review; account
-administration improvements; migration-safe identity linkage; OIDC discovery
-and configuration design if it remains justified by real adopters.
+**Delivered outcomes:** a Spring-free `ExternalIdentityMapper` contract; an
+opt-in Spring Security OIDC authorization-code adapter through issuer
+discovery; explicit mapping only to existing enabled local accounts; preserved
+local-password login and local authorization semantics; and Keycloak-backed
+integration coverage without a Keycloak runtime dependency. Any compliant
+mainland-China, global, or self-hosted issuer follows the same standard OIDC
+configuration path.
 
-**Non-goals:** unconditional OIDC/SAML/LDAP implementation, MFA, SCIM,
-organization hierarchy, data-scope authorization.
+**Non-goals:** provider SDKs, automatic provisioning or deprovisioning,
+group-to-role synchronization, SAML/LDAP implementation, MFA, SCIM,
+organization hierarchy, tenant selection, and data-scope authorization.
 
 **Entry criteria:** Phase 3 extension and release contracts are stable; target
 identity providers and security requirements are defined.
 
-**Exit criteria:** an approved identity integration specification and a tested,
-backward-compatible implementation or explicit decision to defer.
+**Exit criteria:** completed. Normal and production reactor verification passed
+with OIDC disabled by default; Keycloak remains a test-only interoperability
+fixture.
 
 ### Phase 5: Ecosystem Adaptation And Long-Term Compatibility
 

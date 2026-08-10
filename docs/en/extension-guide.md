@@ -272,3 +272,33 @@ access denial, and safe failure presentation.
 Every new HTTP entry point must retain `X-Correlation-Id` request propagation
 and write the correlation ID to logs and relevant audit events. Error responses
 and logs may contain only safe diagnostic information.
+
+## Extend External Identity Mapping
+
+`admin-contracts` exposes `ExternalIdentityMapper` for applications that opt
+into Spring Security OIDC login. It accepts a framework-neutral
+`ExternalIdentity` containing the normalized issuer URI, stable `sub`, optional
+display name and email, and scalar string claims. It returns either the
+application's existing `CurrentUser` or no result.
+
+The consuming application owns the mapper and its data model. Match the
+issuer-and-subject pair to a pre-existing, enabled local account; do not make
+email, display name, or an unverified group claim the primary identity key.
+The starter's OIDC adapter recreates its standard local principal only after
+that mapping succeeds, so existing route checks, authorization use cases,
+auditing, and authentication-version invalidation keep one local-user model.
+
+Configure any standards-compliant issuer through Spring Security's client
+registration and set `vaadin-admin.oidc.registration-id` to that registration's
+ID. The corresponding redirect URI is
+`{baseUrl}/login/oauth2/code/{registrationId}`. See [Configure Optional OIDC
+Login](quick-start.md#configure-optional-oidc-login) for the complete
+provider-neutral configuration. Keycloak is test-only; mainland-China, global,
+and self-hosted providers use the same standard OIDC path.
+
+Do not place enterprise authorization policy in a reusable module or the
+starter's mapper SPI. Group-to-role translation, just-in-time provisioning,
+deprovisioning, SCIM, MFA, SAML, LDAP integration, tenant selection, and
+data-scope enforcement remain consumer extensions. An OIDC login that cannot
+be mapped to an enabled local account must be denied rather than creating an
+account or granting a default role.
