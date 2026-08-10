@@ -97,10 +97,13 @@ vaadin-admin:
 Register the redirect URI resolved for the deployed application, for example
 `https://admin.example.com/login/oauth2/code/corporate`. The configured
 `vaadin-admin.oidc.registration-id` must name an existing Spring Security
-client registration. With both that registration and exactly one
-`ExternalIdentityMapper` bean available, the login page offers an external
-sign-in action at `/oauth2/authorization/corporate`; otherwise its local-login
-behavior is unchanged.
+client registration. When no client registration is configured, the application
+runs with local-password login only. When a client registration is configured,
+the application requires exactly one `ExternalIdentityMapper` and a matching
+configured registration ID; a missing or ambiguous mapper, or a mismatched
+registration ID, fails application startup rather than silently disabling
+external login. With a valid configuration, the login page offers an external
+sign-in action at `/oauth2/authorization/corporate` alongside local login.
 
 The mapper is the authorization boundary between an authenticated external
 subject and this application's existing local account. It must use the stable

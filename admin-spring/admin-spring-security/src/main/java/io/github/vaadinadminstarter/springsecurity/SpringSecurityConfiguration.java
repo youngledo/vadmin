@@ -9,6 +9,7 @@ import io.github.vaadinadminstarter.contracts.auth.ExternalIdentityMapper;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserSessionLookup;
 import io.github.vaadinadminstarter.springsecurity.auth.AuthenticationVersionFilter;
+import io.github.vaadinadminstarter.springsecurity.auth.DiscardingOAuth2AuthorizedClientRepository;
 import io.github.vaadinadminstarter.springsecurity.auth.LocalUserDetailsService;
 import io.github.vaadinadminstarter.springsecurity.auth.OidcAccessDeniedFailureHandler;
 import io.github.vaadinadminstarter.springsecurity.auth.OidcLocalUserAuthenticationSuccessHandler;
@@ -101,6 +102,7 @@ public class SpringSecurityConfiguration {
             }
             http.oauth2Login(configurer -> configurer
                     .loginPage("/login")
+                    .authorizedClientRepository(discardingAuthorizedClientRepository())
                     .successHandler(oidcSuccessHandler(mapper, accountLookup, requestCache))
                     .failureHandler(new OidcAccessDeniedFailureHandler()));
         }
@@ -113,5 +115,9 @@ public class SpringSecurityConfiguration {
         var savedRequestHandler = new VaadinSavedRequestAwareAuthenticationSuccessHandler();
         savedRequestHandler.setRequestCache(requestCache);
         return new OidcLocalUserAuthenticationSuccessHandler(identityMapper, accountLookup, savedRequestHandler);
+    }
+
+    DiscardingOAuth2AuthorizedClientRepository discardingAuthorizedClientRepository() {
+        return new DiscardingOAuth2AuthorizedClientRepository();
     }
 }

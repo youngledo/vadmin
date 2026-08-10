@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -46,18 +47,25 @@ class OidcLocalUserAuthenticationSuccessHandlerTest {
         assertThat(authentication.getCredentials()).isNull();
         assertThat(authentication.getAuthorities()).extracting(authority -> authority.getAuthority())
                 .containsExactly("system:user:read");
-        assertThat(request.getSession(false).getAttribute("SPRING_SECURITY_CONTEXT")).isNotNull();
+        var storedContext = (SecurityContextImpl) request.getSession(false)
+                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+        assertThat(storedContext.getAuthentication().getPrincipal()).isInstanceOf(LocalUserPrincipal.class);
     }
 
     @Test
     void deniesAnUnmappedExternalIdentityWithoutAuthenticatingTheSession() throws Exception {
         var handler = new OidcLocalUserAuthenticationSuccessHandler(identity -> Optional.empty(), new AccountLookup(account(true)));
         var request = new MockHttpServletRequest("GET", "/login/oauth2/code/test");
+        var externalContext = SecurityContextHolder.createEmptyContext();
+        externalContext.setAuthentication(oidcAuthentication());
+        request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, externalContext);
         var response = new MockHttpServletResponse();
 
         handler.onAuthenticationSuccess(request, response, oidcAuthentication());
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        assertThat(request.getSession(false).getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY))
+                .isNull();
         assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_FOUND);
         assertThat(response.getRedirectedUrl()).isEqualTo("/login?error=access-denied");
     }

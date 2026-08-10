@@ -9,6 +9,7 @@ import com.vaadin.flow.spring.security.VaadinDefaultRequestCache;
 import com.vaadin.flow.spring.security.VaadinSavedRequestAwareAuthenticationSuccessHandler;
 import io.github.vaadinadminstarter.contracts.auth.ExternalIdentityMapper;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
+import io.github.vaadinadminstarter.springsecurity.auth.DiscardingOAuth2AuthorizedClientRepository;
 import io.github.vaadinadminstarter.springsecurity.auth.OidcLocalUserAuthenticationSuccessHandler;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -91,6 +92,12 @@ class SpringSecurityConfigurationTest {
         var savedRequestHandler = ReflectionTestUtils.getField(handler, "successHandler");
         assertThat(savedRequestHandler).isInstanceOf(VaadinSavedRequestAwareAuthenticationSuccessHandler.class);
         assertThat(ReflectionTestUtils.getField(savedRequestHandler, "requestCache")).isSameAs(requestCache);
+    }
+
+    @Test
+    void configuresOidcLoginToDiscardAuthorizedClientTokens() {
+        assertThat(configuration.discardingAuthorizedClientRepository())
+                .isInstanceOf(DiscardingOAuth2AuthorizedClientRepository.class);
     }
 
     private ClientRegistrationRepository registrationRepository() {
