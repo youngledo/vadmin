@@ -31,6 +31,13 @@ public final class OidcLocalUserAuthenticationSuccessHandler implements Authenti
                 new OidcAccessDeniedFailureHandler());
     }
 
+    public OidcLocalUserAuthenticationSuccessHandler(ExternalIdentityMapper identityMapper,
+                                                      LocalUserAccountLookup accountLookup,
+                                                      AuthenticationSuccessHandler successHandler) {
+        this(identityMapper, accountLookup, new OidcExternalIdentityFactory(),
+                new HttpSessionSecurityContextRepository(), successHandler, new OidcAccessDeniedFailureHandler());
+    }
+
     OidcLocalUserAuthenticationSuccessHandler(ExternalIdentityMapper identityMapper,
                                               LocalUserAccountLookup accountLookup,
                                               OidcExternalIdentityFactory identityFactory,
