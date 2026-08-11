@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.vaadinadminstarter.contracts.auth.ExternalIdentityMapper;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
+import io.github.vaadinadminstarter.app.theme.AdminAppearanceProperties;
+import io.github.vaadinadminstarter.app.theme.AdminDensity;
+import io.github.vaadinadminstarter.app.theme.AdminVisualLanguage;
 import io.github.vaadinadminstarter.contracts.audit.AuditSink;
 import io.github.vaadinadminstarter.contracts.audit.CorrelationIdProvider;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
@@ -52,6 +55,19 @@ class ApplicationConfigurationTest {
                 "app.identity.oidc.links[0].subject=subject-42",
                 "app.identity.oidc.links[0].username=admin")
                 .run(context -> assertThat(context).hasSingleBean(ExternalIdentityMapper.class));
+    }
+
+    @Test
+    void registersConfiguredHostAppearanceValues() {
+        contextRunner.withPropertyValues(
+                        "app.appearance.visual-language=ant",
+                        "app.appearance.density=compact")
+                .run(context -> {
+                    assertThat(context).hasSingleBean(AdminAppearanceProperties.class);
+                    var appearance = context.getBean(AdminAppearanceProperties.class);
+                    assertThat(appearance.visualLanguage()).isEqualTo(AdminVisualLanguage.ANT);
+                    assertThat(appearance.density()).isEqualTo(AdminDensity.COMPACT);
+                });
     }
 
     @Configuration(proxyBeanMethods = false)

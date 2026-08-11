@@ -24,6 +24,7 @@ import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.example.orders.admin.OrdersView;
+import io.github.vaadinadminstarter.app.theme.AdminAppearanceProperties;
 import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
@@ -50,6 +51,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private final AuthorizationService authorization;
     private final AdminLocalePreference localePreference;
     private final I18NProvider translations;
+    private final AdminAppearanceProperties appearance;
     private final Span currentLocation = new Span();
     private final VerticalLayout drawer = new VerticalLayout();
     private final DrawerToggle toggle = new DrawerToggle();
@@ -61,11 +63,13 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     public MainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
-                      I18NProvider translations, AuthenticationContext authenticationContext) {
+                      I18NProvider translations, AdminAppearanceProperties appearance,
+                      AuthenticationContext authenticationContext) {
         this.modules = modules;
         this.authorization = authorization;
         this.localePreference = localePreference;
         this.translations = translations;
+        this.appearance = appearance;
         var productMark = new Span(VaadinIcon.CUBE.create());
         productMark.addClassName("admin-product-mark");
         var productName = new Span("Vaadin Admin Starter");
@@ -120,6 +124,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        applyHostAppearance();
         applyTheme(sessionThemeMode());
     }
 
@@ -203,6 +208,12 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private String sessionThemeMode() {
         var mode = VaadinSession.getCurrent().getAttribute(THEME_MODE_KEY);
         return "dark".equals(mode) ? "dark" : "light";
+    }
+
+    private void applyHostAppearance() {
+        var root = UI.getCurrent().getElement();
+        root.setAttribute("data-admin-visual-language", appearance.visualLanguage().cssValue());
+        root.setAttribute("data-admin-density", appearance.density().cssValue());
     }
 
     private void applyTheme(String themeMode) { UI.getCurrent().getElement().getThemeList().set("dark", "dark".equals(themeMode)); }

@@ -12,6 +12,7 @@ import io.github.vaadinadminstarter.contracts.file.FileStorage;
 import io.github.vaadinadminstarter.app.auth.ConfiguredExternalIdentityMapper;
 import io.github.vaadinadminstarter.app.auth.OidcIdentityLinkProperties;
 import io.github.vaadinadminstarter.app.file.LocalFileStorage;
+import io.github.vaadinadminstarter.app.theme.AdminAppearanceProperties;
 import io.github.vaadinadminstarter.app.views.MainLayout;
 import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
 import io.github.vaadinadminstarter.platform.access.AccessControlRepository;
@@ -36,7 +37,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(OidcIdentityLinkProperties.class)
+@EnableConfigurationProperties({OidcIdentityLinkProperties.class, AdminAppearanceProperties.class})
 public class ApplicationConfiguration {
     @Bean
     AdminHostLayout adminHostLayout() {
