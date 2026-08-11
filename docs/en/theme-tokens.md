@@ -57,11 +57,11 @@ table.
 
 ## Appearance Axes
 
-Visual language, color mode, and density are independent host decisions. The
+Visual language, color mode, and density are independent appearance axes. The
 reference application currently supports the `vaadin` and `ant` visual
 languages, light and dark session color modes, and `comfortable` and `compact`
-densities. The profile and density select semantic token values; the existing
-session appearance control selects only light or dark mode. See
+densities. The host selects visual language and density; the existing session
+appearance control selects only light or dark mode. See
 [Appearance Profiles](appearance-profiles.md) for host configuration.
 
 Modules consume the semantic tokens and shared Flow patterns. They must not
