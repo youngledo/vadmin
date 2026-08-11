@@ -22,13 +22,10 @@ class AntCompactVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
 
         assertThat(page.locator("body")).hasAttribute("data-admin-visual-language", "ant");
         assertThat(page.locator("body")).hasAttribute("data-admin-density", "compact");
-        org.assertj.core.api.Assertions.assertThat(remValue(computedThemeVariable("--admin-control-height")))
-                .isEqualTo(2.0)
-                .isLessThan(2.25);
-        var gridPadding = remValues(computedThemeVariable("--admin-grid-cell-padding"));
-        org.assertj.core.api.Assertions.assertThat(gridPadding).containsExactly(0.375, 0.75);
-        org.assertj.core.api.Assertions.assertThat(gridPadding[0]).isLessThan(0.5);
-        org.assertj.core.api.Assertions.assertThat(gridPadding[1]).isLessThan(1.0);
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-control-height"))
+                .isEqualTo("2rem");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-grid-cell-padding"))
+                .isEqualTo("0.375rem 0.75rem");
 
         var navigation = page.getByLabel("切换导航");
         var language = page.locator("vaadin-menu-bar.admin-language-menu vaadin-menu-bar-button:not([hidden])");
@@ -51,15 +48,5 @@ class AntCompactVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("新增客户")).click();
         assertThat(page.getByLabel("名称")).isVisible();
         assertThat(page.getByLabel("名称")).isEditable();
-    }
-
-    private static double remValue(String value) {
-        return Double.parseDouble(value.replace("rem", ""));
-    }
-
-    private static double[] remValues(String value) {
-        return java.util.Arrays.stream(value.split("\\s+"))
-                .mapToDouble(AntCompactVisualLanguageE2EIT::remValue)
-                .toArray();
     }
 }

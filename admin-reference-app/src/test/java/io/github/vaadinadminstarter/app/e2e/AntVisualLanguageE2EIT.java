@@ -15,6 +15,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles("development")
 class AntVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
     @Test
+    void antProfileAppliesToTheStandaloneLoginRouteBeforeAuthentication() {
+        page.navigate(baseUrl() + "/login");
+
+        assertThat(page.locator("body")).hasAttribute("data-admin-visual-language", "ant");
+        assertThat(page.locator("body")).hasAttribute("data-admin-density", "comfortable");
+        assertThat(page.locator("vaadin-login-form")).isVisible();
+    }
+
+    @Test
     void antProfileKeepsSharedPagePatternsAcrossRepresentativePages() {
         signInAsAdministrator();
         page.navigate(baseUrl() + "/users");
@@ -55,16 +64,40 @@ class AntVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
     }
 
     @Test
-    void antProfileProvidesTheFocusTokenForShellUtilityControls() {
+    void antProfileProvidesAVisibleFocusRingForShellUtilityControls() {
         signInAsAdministrator();
         page.navigate(baseUrl() + "/users");
 
         var languageControl = page.locator(
                 "vaadin-menu-bar.admin-language-menu vaadin-menu-bar-button:not([hidden])");
         assertThat(languageControl).isVisible();
+        languageControl.focus();
+        org.assertj.core.api.Assertions.assertThat((Boolean) languageControl.evaluate(
+                "element => document.activeElement === element && element.matches(':focus-visible')"))
+                .isTrue();
+        org.assertj.core.api.Assertions.assertThat((String) languageControl.evaluate(
+                "element => getComputedStyle(element).outlineColor"))
+                .isNotEqualTo("rgba(0, 0, 0, 0)");
+        org.assertj.core.api.Assertions.assertThat((String) languageControl.evaluate(
+                "element => getComputedStyle(element).outlineStyle"))
+                .isEqualTo("solid");
+        org.assertj.core.api.Assertions.assertThat((String) languageControl.evaluate(
+                "element => getComputedStyle(element).outlineWidth"))
+                .isEqualTo("2px");
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--vaadin-focus-ring-color"))
                 .isEqualTo("#1677ff");
         assertThat(page.getByRole(AriaRole.MENUBAR,
                 new Page.GetByRoleOptions().setName("语言选项"))).isVisible();
+    }
+
+    @Test
+    void antComfortableProfileUsesItsRuntimeDensityValues() {
+        signInAsAdministrator();
+        page.navigate(baseUrl() + "/users");
+
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-control-height"))
+                .isEqualTo("2.25rem");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-grid-cell-padding"))
+                .isEqualTo("0.5rem 1rem");
     }
 }
