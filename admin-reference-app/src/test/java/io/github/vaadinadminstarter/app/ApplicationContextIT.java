@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.orders.admin.OrderQueryService;
 import com.example.orders.admin.OrdersAdminModule;
+import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
@@ -57,6 +58,9 @@ class ApplicationContextIT {
     @Autowired
     private GrantPermissionUseCase grantPermissionUseCase;
 
+    @Autowired
+    private AdministrationQueryService administrationQueries;
+
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
@@ -69,6 +73,13 @@ class ApplicationContextIT {
     @Test
     void startsWithThePostgresqlAdapterAndBootstrapAdministrator() {
         assertThat(accountLookup.findByUsername("admin")).isPresent();
+    }
+
+    @Test
+    void readsBootstrapAuditEntriesThroughThePagedQuery() {
+        assertThat(administrationQueries.audit(
+                new io.github.vaadinadminstarter.contracts.navigation.PagedQuery(0, 10, "occurred_at", false, java.util.Map.of()))
+                .items()).isNotEmpty();
     }
 
     @Test

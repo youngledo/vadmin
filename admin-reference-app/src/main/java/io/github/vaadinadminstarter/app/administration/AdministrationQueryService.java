@@ -3,6 +3,7 @@ package io.github.vaadinadminstarter.app.administration;
 import io.github.vaadinadminstarter.contracts.navigation.PagedQuery;
 import io.github.vaadinadminstarter.contracts.navigation.PagedResult;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -84,20 +85,16 @@ public class AdministrationQueryService {
         return jdbcTemplate.query("""
                 select occurred_at, action_code, target_type, target_id, outcome, correlation_id
                 from audit_entries order by occurred_at desc limit 100
-                """, (result, row) -> new AuditRow(result.getObject("occurred_at", Instant.class),
-                result.getString("action_code"), result.getString("target_type"), result.getString("target_id"),
-                result.getString("outcome"), result.getString("correlation_id")));
+                """, (result, row) -> auditRow(result));
     }
 
     @Transactional(readOnly = true)
     public PagedResult<AuditRow> audit(PagedQuery query) {
         var total = jdbcTemplate.queryForObject("select count(*) from audit_entries", Long.class);
         var items = jdbcTemplate.query("""
-                        select occurred_at, action_code, target_type, target_id, outcome, correlation_id
-                        from audit_entries order by occurred_at desc limit ? offset ?
-                        """, (result, row) -> new AuditRow(result.getObject("occurred_at", Instant.class),
-                        result.getString("action_code"), result.getString("target_type"), result.getString("target_id"),
-                        result.getString("outcome"), result.getString("correlation_id")), query.pageSize(), offset(query));
+                select occurred_at, action_code, target_type, target_id, outcome, correlation_id
+                from audit_entries order by occurred_at desc limit ? offset ?
+                """, (result, row) -> auditRow(result), query.pageSize(), offset(query));
         return new PagedResult<>(items, total);
     }
 
@@ -107,6 +104,12 @@ public class AdministrationQueryService {
 
     private static List<String> permissionCodes(String commaSeparatedCodes) {
         return commaSeparatedCodes.isBlank() ? List.of() : List.of(commaSeparatedCodes.split(","));
+    }
+
+    private static AuditRow auditRow(java.sql.ResultSet result) throws java.sql.SQLException {
+        return new AuditRow(result.getObject("occurred_at", OffsetDateTime.class).toInstant(),
+                result.getString("action_code"), result.getString("target_type"), result.getString("target_id"),
+                result.getString("outcome"), result.getString("correlation_id"));
     }
 
     public record UserRow(UUID id, String username, boolean enabled, long authVersion) { }
