@@ -483,8 +483,8 @@ class BrowserE2EIT {
                 .getByRole(AriaRole.BUTTON,
                         new com.microsoft.playwright.Locator.GetByRoleOptions().setName("停用")).click();
         assertThat(page.getByText("用户已停用。", new Page.GetByTextOptions().setExact(true))).isVisible();
-        org.assertj.core.api.Assertions.assertThat(page.getByRole(AriaRole.DIALOG,
-                new Page.GetByRoleOptions().setName("停用用户")).count()).isZero();
+        assertThat(page.getByRole(AriaRole.DIALOG,
+                new Page.GetByRoleOptions().setName("停用用户"))).not().isVisible();
         waitUntil(() -> !userIsEnabled("managed-user"));
     }
 
