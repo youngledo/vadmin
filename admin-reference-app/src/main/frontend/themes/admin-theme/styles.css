@@ -20,6 +20,8 @@
   --admin-space-sm: 0.5rem;
   --admin-space-md: 1rem;
   --admin-space-lg: 1.5rem;
+  --admin-control-height: 2.25rem;
+  --admin-grid-cell-padding: 0.5rem 1rem;
   --admin-utility-size: 2.25rem;
   --admin-radius-control: 0.375rem;
   --admin-radius-surface: 0.5rem;
@@ -46,6 +48,7 @@
   --lumo-contrast-10pct: var(--admin-border);
   --lumo-border-radius-m: var(--admin-radius-control);
   --lumo-font-family: var(--admin-font-family);
+  --lumo-size-m: var(--admin-control-height);
   --vaadin-focus-ring-color: var(--admin-focus);
 }
 
@@ -72,6 +75,8 @@ html[theme~="dark"],
   --admin-space-sm: 0.5rem;
   --admin-space-md: 1rem;
   --admin-space-lg: 1.5rem;
+  --admin-control-height: 2.25rem;
+  --admin-grid-cell-padding: 0.5rem 1rem;
   --admin-utility-size: 2.25rem;
   --admin-radius-control: 0.375rem;
   --admin-radius-surface: 0.5rem;
@@ -97,7 +102,70 @@ html[theme~="dark"],
   --lumo-contrast-10pct: var(--admin-border);
   --lumo-border-radius-m: var(--admin-radius-control);
   --lumo-font-family: var(--admin-font-family);
+  --lumo-size-m: var(--admin-control-height);
   --vaadin-focus-ring-color: var(--admin-focus);
+}
+
+[data-admin-visual-language="ant"] {
+  --admin-canvas: #f5f5f5;
+  --admin-surface: #ffffff;
+  --admin-surface-raised: #ffffff;
+  --admin-border: #d9d9d9;
+  --admin-accent: #1677ff;
+  --admin-accent-hover: #4096ff;
+  --admin-neutral-action: rgba(0, 0, 0, 0.65);
+  --admin-danger: #ff4d4f;
+  --admin-disabled: rgba(0, 0, 0, 0.25);
+  --admin-success: #52c41a;
+  --admin-warning: #faad14;
+  --admin-error: var(--admin-danger);
+  --admin-info: var(--admin-accent);
+  --admin-text-primary: rgba(0, 0, 0, 0.88);
+  --admin-text-secondary: rgba(0, 0, 0, 0.65);
+  --admin-text-muted: rgba(0, 0, 0, 0.45);
+  --admin-focus: #1677ff;
+  --admin-radius-control: 0.375rem;
+  --admin-radius-surface: 0.5rem;
+  --admin-elevation-raised: 0 1px 2px rgb(0 0 0 / 3%);
+  --admin-elevation-workspace: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+[data-admin-visual-language="ant"][theme~="dark"] {
+  --admin-canvas: #141414;
+  --admin-surface: #1f1f1f;
+  --admin-surface-raised: #1f1f1f;
+  --admin-border: #424242;
+  --admin-accent: #1668dc;
+  --admin-accent-hover: #3c89e8;
+  --admin-neutral-action: rgba(255, 255, 255, 0.65);
+  --admin-danger: #dc4446;
+  --admin-disabled: rgba(255, 255, 255, 0.3);
+  --admin-success: #49aa19;
+  --admin-warning: #d89614;
+  --admin-error: var(--admin-danger);
+  --admin-info: var(--admin-accent);
+  --admin-text-primary: rgba(255, 255, 255, 0.85);
+  --admin-text-secondary: rgba(255, 255, 255, 0.65);
+  --admin-text-muted: rgba(255, 255, 255, 0.45);
+  --admin-focus: #3c89e8;
+  --admin-elevation-raised: 0 1px 2px rgb(0 0 0 / 45%);
+  --admin-elevation-workspace: 0 2px 8px rgb(0 0 0 / 45%);
+}
+
+[data-admin-density="comfortable"] {
+  --admin-space-sm: 0.5rem;
+  --admin-space-md: 1rem;
+  --admin-space-lg: 1.5rem;
+  --admin-control-height: 2.25rem;
+  --admin-grid-cell-padding: 0.5rem 1rem;
+}
+
+[data-admin-density="compact"] {
+  --admin-space-sm: 0.375rem;
+  --admin-space-md: 0.75rem;
+  --admin-space-lg: 1rem;
+  --admin-control-height: 2rem;
+  --admin-grid-cell-padding: 0.375rem 0.75rem;
 }
 
 html,
@@ -120,6 +188,39 @@ vaadin-app-layout::part(navbar) {
 vaadin-app-layout::part(drawer) {
   background: var(--admin-surface);
   border-right: 1px solid var(--admin-border);
+}
+
+vaadin-grid {
+  --vaadin-grid-cell-content-padding: var(--admin-grid-cell-padding);
+}
+
+[data-admin-visual-language="ant"] .admin-page-controls {
+  box-shadow: none;
+}
+
+[data-admin-visual-language="ant"] .admin-page-workspace {
+  box-shadow: var(--admin-elevation-workspace);
+}
+
+[data-admin-visual-language="ant"] vaadin-button {
+  font-weight: 500;
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="primary"] {
+  box-shadow: none;
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker::part(input-field) {
+  border-radius: var(--admin-radius-control);
+  box-shadow: 0 0 0 1px var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(header-cell) {
+  background: var(--admin-canvas);
+  color: var(--admin-text-secondary);
+  font-weight: 600;
 }
 
 .admin-shell-header {

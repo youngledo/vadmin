@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 class AdminThemeTokenTest {
+    private static final List<String> PROFILE_TOKENS = List.of("control-height", "grid-cell-padding");
     private static final List<String> REQUIRED_TOKENS = List.of(
             "surface",
             "surface-raised",
@@ -58,6 +59,19 @@ class AdminThemeTokenTest {
     }
 
     @Test
+    void declaresProfileAndDensityLayersWithoutReplacingSemanticMappings() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+
+        assertTokenDeclarations(extractBlock(styles, ":root"), PROFILE_TOKENS);
+        assertTokenDeclarations(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"), PROFILE_TOKENS);
+        assertThat(styles).contains("[data-admin-visual-language=\"ant\"]");
+        assertThat(styles).contains("[data-admin-visual-language=\"ant\"][theme~=\"dark\"]");
+        assertThat(styles).contains("[data-admin-density=\"compact\"]");
+        assertThat(styles).contains("--admin-accent: #1677ff;");
+        assertThat(styles).contains("--lumo-size-m: var(--admin-control-height);");
+    }
+
+    @Test
     void documentsEveryRequiredSemanticToken() throws IOException {
         var documentation = Files.readString(Path.of("../docs/en/theme-tokens.md"), StandardCharsets.UTF_8);
 
@@ -101,7 +115,11 @@ class AdminThemeTokenTest {
     }
 
     private void assertTokenDeclarations(String selectorBlock) {
-        REQUIRED_TOKENS.forEach(token -> assertThat(selectorBlock)
+        assertTokenDeclarations(selectorBlock, REQUIRED_TOKENS);
+    }
+
+    private void assertTokenDeclarations(String selectorBlock, List<String> tokens) {
+        tokens.forEach(token -> assertThat(selectorBlock)
                 .as("token %s", token)
                 .contains("--admin-" + token + ":"));
     }
