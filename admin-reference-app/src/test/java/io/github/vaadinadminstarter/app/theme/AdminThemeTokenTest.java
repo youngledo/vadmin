@@ -69,6 +69,8 @@ class AdminThemeTokenTest {
         assertThat(styles).contains("[data-admin-density=\"compact\"]");
         assertThat(styles).contains("--admin-accent: #1677ff;");
         assertThat(styles).contains("--lumo-size-m: var(--admin-control-height);");
+        assertThat(styles).contains("[data-admin-visual-language],\n[data-admin-density] {");
+        assertThat(styles).contains("--vaadin-focus-ring-color: var(--admin-focus);");
     }
 
     @Test
