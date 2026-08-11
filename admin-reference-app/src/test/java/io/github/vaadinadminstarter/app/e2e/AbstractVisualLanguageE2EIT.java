@@ -112,6 +112,12 @@ abstract class AbstractVisualLanguageE2EIT {
                 .evaluate("(element, name) => getComputedStyle(element).getPropertyValue(name).trim()", name);
     }
 
+    double[] remValues(String value) {
+        return java.util.Arrays.stream(value.split("\\s+"))
+                .mapToDouble(part -> Double.parseDouble(part.replace("rem", "")))
+                .toArray();
+    }
+
     String baseUrl() {
         return "http://localhost:" + port;
     }

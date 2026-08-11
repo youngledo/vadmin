@@ -24,8 +24,8 @@ class AntCompactVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
         assertThat(page.locator("body")).hasAttribute("data-admin-density", "compact");
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-control-height"))
                 .isEqualTo("2rem");
-        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-grid-cell-padding"))
-                .isEqualTo("0.375rem 0.75rem");
+        org.assertj.core.api.Assertions.assertThat(remValues(computedThemeVariable("--admin-grid-cell-padding")))
+                .containsExactly(0.375, 0.75);
 
         var navigation = page.getByLabel("切换导航");
         var language = page.locator("vaadin-menu-bar.admin-language-menu vaadin-menu-bar-button:not([hidden])");

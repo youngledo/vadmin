@@ -97,7 +97,7 @@ class AntVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
 
         org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-control-height"))
                 .isEqualTo("2.25rem");
-        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-grid-cell-padding"))
-                .isEqualTo("0.5rem 1rem");
+        org.assertj.core.api.Assertions.assertThat(remValues(computedThemeVariable("--admin-grid-cell-padding")))
+                .containsExactly(0.5, 1.0);
     }
 }
