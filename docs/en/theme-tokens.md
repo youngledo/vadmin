@@ -32,6 +32,8 @@ its meaning, never for a particular color or size.
 | `--admin-space-sm` | Compact, related spacing. |
 | `--admin-space-md` | Standard layout and control spacing. |
 | `--admin-space-lg` | Content-canvas spacing and larger layout separation. |
+| `--admin-control-height` | Standard interactive-control height for the active density. |
+| `--admin-grid-cell-padding` | Grid cell padding for the active density. |
 | `--admin-utility-size` | Stable square dimension for compact shell utility controls. |
 | `--admin-radius-control` | Standard interactive-control corner radius. |
 | `--admin-radius-surface` | Corner radius for contained work surfaces. |
@@ -52,6 +54,19 @@ Legacy `--admin-primary`, `--admin-text`, `--admin-space-compact`,
 `--admin-space-standard`, `--admin-radius`, and `--admin-elevation` aliases
 remain for compatibility. New module CSS must use the canonical names in the
 table.
+
+## Appearance Axes
+
+Visual language, color mode, and density are independent host decisions. The
+reference application currently supports the `vaadin` and `ant` visual
+languages, light and dark session color modes, and `comfortable` and `compact`
+densities. The profile and density select semantic token values; the existing
+session appearance control selects only light or dark mode. See
+[Appearance Profiles](appearance-profiles.md) for host configuration.
+
+Modules consume the semantic tokens and shared Flow patterns. They must not
+select a visual language or density, mutate Lumo variables globally, or depend
+on profile-specific selectors such as `[data-admin-visual-language="ant"]`.
 
 ## Host Overrides
 

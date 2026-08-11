@@ -225,6 +225,11 @@ success, warning, danger, focus, spacing, typography, radius, and elevation;
 see [Theme Tokens](theme-tokens.md). A module may add narrowly scoped CSS for
 genuinely module-specific presentation, using those tokens.
 
+Modules must not import the host `admin-theme`, declare a global `@Theme`,
+select an appearance profile or density, mutate global Lumo variables, or
+depend on Ant-only selectors. Those are host-owned choices; see
+[Appearance Profiles](appearance-profiles.md).
+
 The host's `MainLayout` renders grouped, permission-filtered navigation from
 the assembled `AdminModuleRegistry`, and uses the same metadata for workplace
 entries. Hidden navigation is not authorization: mutating use cases must check

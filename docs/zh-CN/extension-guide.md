@@ -83,6 +83,10 @@ editor.open();
 自己的命名主题，并覆盖 `--admin-*` 语义变量，而不是修改 `admin-flow`。当前用户菜单中
 的浅色/深色模式仅保存在 Vaadin session；它不是账户偏好设置。
 
+业务模块只能使用公开的 `--admin-*` 语义令牌和共享 Flow 页面模式。模块不得导入宿主的
+`admin-theme`、注册全局 `@Theme`、选择视觉语言或密度、全局修改 Lumo 变量，或依赖仅由
+Ant 档案提供的选择器。这些均属于宿主决策，参见[外观配置档案](appearance-profiles.md)。
+
 参考应用的 `MainLayout` 组合了应用外壳。它使用 `AppLayout`、
 `PageRegistry.visibleTo(...)` 和授权服务生成分组导航，并通过 `DrawerToggle` 保持窄屏
 中的导航可达。扩展页面应复用该布局，或实现相同的权限过滤和直接路由保护。隐藏导航

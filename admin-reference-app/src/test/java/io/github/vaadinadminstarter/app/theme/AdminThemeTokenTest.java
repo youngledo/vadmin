@@ -28,6 +28,8 @@ class AdminThemeTokenTest {
             "space-sm",
             "space-md",
             "space-lg",
+            "control-height",
+            "grid-cell-padding",
             "utility-size",
             "radius-control",
             "radius-surface",
@@ -80,6 +82,19 @@ class AdminThemeTokenTest {
         REQUIRED_TOKENS.forEach(token -> assertThat(documentation)
                 .as("documented token %s", token)
                 .contains("`--admin-" + token + "`"));
+    }
+
+    @Test
+    void documentsHostAppearanceProfiles() throws IOException {
+        var documentation = Files.readString(Path.of("../docs/en/appearance-profiles.md"), StandardCharsets.UTF_8);
+
+        assertThat(documentation).contains(
+                "app.appearance.visual-language",
+                "app.appearance.density",
+                "vaadin",
+                "ant",
+                "comfortable",
+                "compact");
     }
 
     @Test
