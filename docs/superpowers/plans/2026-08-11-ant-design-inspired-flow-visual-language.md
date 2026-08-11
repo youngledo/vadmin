@@ -64,7 +64,7 @@ Extend `ApplicationConfigurationTest` to pass `app.appearance.visual-language=an
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dtest=AdminAppearancePropertiesTest,ApplicationConfigurationTest test`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=AdminAppearancePropertiesTest,ApplicationConfigurationTest test`
 
 Expected: compilation fails because the new types do not exist.
 
@@ -131,7 +131,7 @@ Do not add profile or density to `appearanceMenu`; it remains a light/dark sessi
 
 - [ ] **Step 5: Run the test to verify it passes**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dtest=AdminAppearancePropertiesTest,ApplicationConfigurationTest test`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=AdminAppearancePropertiesTest,ApplicationConfigurationTest test`
 
 Expected: all targeted tests pass, including old context tests.
 
@@ -171,7 +171,7 @@ Keep the existing assertions for both Vaadin-baseline color scopes and Lumo mapp
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dtest=AdminThemeTokenTest test`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=AdminThemeTokenTest test`
 
 Expected: failure reports absent profile/density selectors and tokens.
 
@@ -215,7 +215,7 @@ Use only `[data-admin-visual-language="ant"]` selectors to refine existing shell
 
 - [ ] **Step 5: Run the test to verify it passes**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dtest=AdminThemeTokenTest test`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=AdminThemeTokenTest test`
 
 Expected: baseline, dark, Ant profile, density, and Lumo-contract assertions pass.
 
@@ -249,7 +249,7 @@ After admin sign-in, verify `/users` and `/orders` share the unchanged page fram
 
 - [ ] **Step 2: Run it to verify it fails**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dit.test=AntVisualLanguageE2EIT verify`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dfailsafe.failIfNoSpecifiedTests=false -Dit.test=AntVisualLanguageE2EIT verify`
 
 Expected: test fails until host attributes and Ant tokens exist. Docker and Playwright Chromium are prerequisites.
 
@@ -259,7 +259,7 @@ Create the same focused fixture with `app.appearance.density=compact`. Assert th
 
 - [ ] **Step 4: Run it to verify it fails**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dit.test=AntCompactVisualLanguageE2EIT verify`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dfailsafe.failIfNoSpecifiedTests=false -Dit.test=AntCompactVisualLanguageE2EIT verify`
 
 Expected: failure until compact profile behavior is present.
 
@@ -268,8 +268,8 @@ Expected: failure until compact profile behavior is present.
 Run:
 
 ```bash
-./mvnw -B -ntp -pl :admin-reference-app -Dit.test=AntVisualLanguageE2EIT,AntCompactVisualLanguageE2EIT verify
-./mvnw -B -ntp -pl :admin-reference-app -Dit.test=BrowserE2EIT verify
+./mvnw -B -ntp -pl :admin-reference-app -am -Dfailsafe.failIfNoSpecifiedTests=false -Dit.test=AntVisualLanguageE2EIT,AntCompactVisualLanguageE2EIT verify
+./mvnw -B -ntp -pl :admin-reference-app -am -Dfailsafe.failIfNoSpecifiedTests=false -Dit.test=BrowserE2EIT verify
 ```
 
 Expected: Ant light/dark comfortable, Ant light/dark compact, and Vaadin baseline suites all pass.
@@ -298,7 +298,7 @@ Extend `AdminThemeTokenTest.documentsEveryRequiredSemanticToken` so the new cont
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dtest=AdminThemeTokenTest test`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=AdminThemeTokenTest test`
 
 Expected: failure because the new public contract is undocumented.
 
@@ -317,7 +317,7 @@ Explain that the profile is Flow-native, contains no React/Vue/Ant runtime depen
 
 - [ ] **Step 4: Run the test to verify it passes**
 
-Run: `./mvnw -B -ntp -pl :admin-reference-app -Dtest=AdminThemeTokenTest test`
+Run: `./mvnw -B -ntp -pl :admin-reference-app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest=AdminThemeTokenTest test`
 
 Expected: token and appearance-profile documentation contract passes.
 
