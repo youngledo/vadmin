@@ -114,6 +114,8 @@ class AdminModuleRegistryTest {
 
         assertThat(registry.pages()).containsExactly(page);
         assertThat(AdminIconCatalog.create("shopping-cart")).isNotNull();
+        assertThat(AdminIconCatalog.createAdminIcon("shopping-cart")
+                .getElement().getAttribute("data-admin-icon")).isEqualTo("shopping-cart");
     }
 
     @Test
