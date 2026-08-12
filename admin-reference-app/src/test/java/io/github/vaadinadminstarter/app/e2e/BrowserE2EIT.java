@@ -400,6 +400,19 @@ class BrowserE2EIT {
     }
 
     @Test
+    void rejectedLocalCredentialsShowTheLoginFormError() {
+        page.navigate(baseUrl() + "/login");
+        var loginForm = page.locator("vaadin-login-form");
+        loginForm.locator("input:not([type=hidden])").nth(0).fill("admin");
+        loginForm.locator("input:not([type=hidden])").nth(1).fill("incorrect-password");
+
+        loginForm.locator("vaadin-button[slot=submit]").click();
+
+        page.waitForURL(baseUrl() + "/login?error");
+        assertThat(loginForm).hasAttribute("error", "");
+    }
+
+    @Test
     void unassignedUserCannotOpenUsersRoute() {
         createUser("unassigned", "unassigned-password");
 

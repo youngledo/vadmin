@@ -20,10 +20,10 @@ import io.github.vaadinadminstarter.springsecurity.OidcLoginAvailability;
 public final class LoginView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver, HasDynamicTitle {
     private final H1 heading = new H1();
     private final Span deniedMessage = new Span();
+    private final LoginForm login = new LoginForm();
     private final Anchor oidcLogin;
 
     public LoginView(OidcLoginAvailability oidcLoginAvailability) {
-        var login = new LoginForm();
         login.setAction("login");
         oidcLogin = oidcLoginAvailability.isAvailable()
                 ? new Anchor(oidcAuthorizationUrl(oidcLoginAvailability.registrationId())) : null;
@@ -41,9 +41,11 @@ public final class LoginView extends VerticalLayout implements BeforeEnterObserv
         updateText();
     }
     @Override public void beforeEnter(BeforeEnterEvent event) {
-        var denied = event.getLocation().getQueryParameters().getParameters()
-                .getOrDefault("error", java.util.List.of()).contains("access-denied");
+        var errors = event.getLocation().getQueryParameters().getParameters()
+                .getOrDefault("error", java.util.List.of());
+        var denied = errors.contains("access-denied");
         deniedMessage.setVisible(denied);
+        login.setError(!errors.isEmpty() && !denied);
         if (denied) deniedMessage.setText(getTranslation("flow.login.denied"));
     }
     @Override public void localeChange(LocaleChangeEvent event) { updateText(); updateBrowserTitle(); }

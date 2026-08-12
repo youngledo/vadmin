@@ -10,6 +10,8 @@ import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
+import com.vaadin.flow.router.Location;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import io.github.vaadinadminstarter.springsecurity.OidcLoginAvailability;
@@ -92,5 +94,18 @@ class LoginViewTest {
 
         assertThat(view.getChildren()).noneMatch(Anchor.class::isInstance);
         assertThat(view.getChildren()).anyMatch(LoginForm.class::isInstance);
+    }
+
+    @Test
+    void showsTheGenericLoginFormErrorAfterLocalCredentialsAreRejected() {
+        var view = new LoginView(new OidcLoginAvailability(false, "oidc"));
+        var event = mock(com.vaadin.flow.router.BeforeEnterEvent.class);
+        when(event.getLocation()).thenReturn(new Location("login", QueryParameters.of("error", "")));
+
+        view.beforeEnter(event);
+
+        assertThat(view.getChildren().filter(LoginForm.class::isInstance))
+                .singleElement()
+                .isInstanceOfSatisfying(LoginForm.class, login -> assertThat(login.isError()).isTrue());
     }
 }
