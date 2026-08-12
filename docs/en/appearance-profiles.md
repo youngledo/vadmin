@@ -13,6 +13,11 @@ operational hierarchy and density. It does not add an Ant Design, React, Vue,
 or other frontend runtime dependency. Vaadin Flow remains the component and
 programming model for every profile.
 
+The Ant profile includes a host-owned neutral icon language and compact shell
+treatment. It is deliberately Ant-inspired rather than a pixel-perfect clone:
+the `vaadin` profile remains a supported parallel baseline and continues to
+render Vaadin fallback glyphs.
+
 ## Host Configuration
 
 Set the profile and density in the host application configuration:
@@ -41,3 +46,9 @@ Business modules use public `--admin-*` semantic tokens and the shared Flow
 page patterns. They must not import the host's `admin-theme`, register a global
 `@Theme`, select a profile or density, mutate global Lumo variables, or depend
 on Ant-only selectors. This keeps a module portable across every host profile.
+
+For standard action icons, modules may use
+`AdminIcon.of(AdminIconName)` from `admin-flow`. Navigation metadata must keep
+using the validated `AdminIconCatalog` keys. Modules must not reference the
+host SVG files or CSS mask selectors: the host chooses how each semantic icon
+is rendered for an active profile.

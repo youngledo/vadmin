@@ -24,6 +24,20 @@ class AntVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
     }
 
     @Test
+    void antProfileRendersSemanticIconsWithHostOwnedMasks() {
+        signInAsAdministrator();
+        page.navigate(baseUrl() + "/users");
+
+        var navigationIcon = page.locator("[data-admin-visual-language=ant] "
+                + ".admin-icon[data-admin-icon=users]");
+        assertThat(navigationIcon).isVisible();
+        org.assertj.core.api.Assertions.assertThat((String) navigationIcon.evaluate(
+                "element => getComputedStyle(element).maskImage"))
+                .contains("users.svg");
+        assertThat(navigationIcon.locator("vaadin-icon")).isHidden();
+    }
+
+    @Test
     void antProfileKeepsSharedPagePatternsAcrossRepresentativePages() {
         signInAsAdministrator();
         page.navigate(baseUrl() + "/users");

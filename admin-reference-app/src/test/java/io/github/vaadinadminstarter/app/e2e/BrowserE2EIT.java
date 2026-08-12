@@ -170,6 +170,17 @@ class BrowserE2EIT {
     }
 
     @Test
+    void vaadinProfileKeepsTheSemanticIconFallbackVisible() {
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        var navigationIcon = page.locator("[data-admin-visual-language=vaadin] "
+                + ".admin-icon[data-admin-icon=users]");
+        assertThat(navigationIcon).isVisible();
+        assertThat(navigationIcon.locator("vaadin-icon")).isVisible();
+    }
+
+    @Test
     void desktopShellCanSwitchBetweenLightAndDarkModes() {
         signInAs("admin", "change-me");
         page.navigate(baseUrl() + "/users");

@@ -87,6 +87,11 @@ editor.open();
 `admin-theme`、注册全局 `@Theme`、选择视觉语言或密度、全局修改 Lumo 变量，或依赖仅由
 Ant 档案提供的选择器。这些均属于宿主决策，参见[外观配置档案](appearance-profiles.md)。
 
+对于常见操作图标，使用 `admin-flow` 的 `AdminIcon.of(AdminIconName)`，不要直接选择
+`VaadinIcon` 来表达宿主无关的业务语义。模块导航页仍只能声明 `AdminIconCatalog` 支持的图标键。
+模块不得导入 `admin-theme/icons`、自行设置 `data-admin-icon` 或 CSS mask 变量；Ant SVG 掩膜由
+宿主提供，Vaadin 档案会保留对应的 Vaadin 回退图标。
+
 参考应用的 `MainLayout` 组合了应用外壳。它使用 `AppLayout`、
 `PageRegistry.visibleTo(...)` 和授权服务生成分组导航，并通过 `DrawerToggle` 保持窄屏
 中的导航可达。扩展页面应复用该布局，或实现相同的权限过滤和直接路由保护。隐藏导航

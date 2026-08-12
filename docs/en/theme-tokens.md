@@ -68,6 +68,12 @@ Modules consume the semantic tokens and shared Flow patterns. They must not
 select a visual language or density, mutate Lumo variables globally, or depend
 on profile-specific selectors such as `[data-admin-visual-language="ant"]`.
 
+Semantic icons follow the same ownership rule. Use `AdminIcon` and
+`AdminIconName` from `admin-flow` for standard actions, but do not import
+`admin-theme/icons`, assign `data-admin-icon`, or set icon mask variables from
+a module. The host provides the Ant SVG masks and keeps the Vaadin fallback
+visible in the Vaadin profile.
+
 ## Host Overrides
 
 A host may override a token in its own theme while retaining the same semantic

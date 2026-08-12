@@ -32,6 +32,9 @@ class AntCompactVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
         var appearance = page.locator("vaadin-menu-bar.admin-appearance-menu vaadin-menu-bar-button:not([hidden])");
         var account = page.getByLabel("当前用户菜单");
         assertShellDoesNotOverflow(navigation, language, appearance, account);
+        org.assertj.core.api.Assertions.assertThat((String) page.locator(".admin-icon[data-admin-icon=globe]")
+                .evaluate("element => getComputedStyle(element).maskImage"))
+                .contains("globe.svg");
         navigation.click();
         page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("客户")).click();
         assertThat(page.getByTestId("customers-workspace")).isVisible();
