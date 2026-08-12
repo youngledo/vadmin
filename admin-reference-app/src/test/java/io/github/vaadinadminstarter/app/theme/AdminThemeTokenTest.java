@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconName;
 import org.junit.jupiter.api.Test;
 
 class AdminThemeTokenTest {
@@ -108,6 +109,25 @@ class AdminThemeTokenTest {
                   width: 100%;
                 }
                 """);
+    }
+
+    @Test
+    void providesLicensedAntMaskAssetsForEverySemanticIcon() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+        var iconDirectory = Path.of("src/main/frontend/themes/admin-theme/icons");
+
+        assertThat(styles).contains(
+                "[data-admin-visual-language=\"ant\"] .admin-icon",
+                "mask-image: var(--admin-icon-mask);",
+                "[data-admin-icon=\"shopping-cart\"]",
+                ".admin-shell-header",
+                "vaadin-side-nav-item[current]::part(link)");
+        assertThat(Files.readString(iconDirectory.resolve("LICENSE"), StandardCharsets.UTF_8))
+                .contains("ISC License");
+        for (var icon : AdminIconName.values()) {
+            var asset = Files.readString(iconDirectory.resolve(icon.cssValue() + ".svg"), StandardCharsets.UTF_8);
+            assertThat(asset).contains("<svg", "viewBox=");
+        }
     }
 
     private void assertThemeContractMappings(String selectorBlock) {

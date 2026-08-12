@@ -242,6 +242,74 @@ vaadin-grid {
   font-weight: 600;
 }
 
+[data-admin-visual-language="ant"] .admin-icon {
+  --admin-icon-mask: none;
+  align-items: center;
+  background: currentcolor;
+  display: inline-flex;
+  flex: 0 0 1rem;
+  height: 1rem;
+  justify-content: center;
+  mask-image: var(--admin-icon-mask);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 1rem;
+}
+
+[data-admin-visual-language="ant"] .admin-icon > vaadin-icon {
+  display: none;
+}
+
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="add"] { --admin-icon-mask: url("./icons/add.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="attachment"] { --admin-icon-mask: url("./icons/attachment.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="briefcase"] { --admin-icon-mask: url("./icons/briefcase.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="clock"] { --admin-icon-mask: url("./icons/clock.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="cube"] { --admin-icon-mask: url("./icons/cube.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="delete"] { --admin-icon-mask: url("./icons/delete.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="edit"] { --admin-icon-mask: url("./icons/edit.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="eye"] { --admin-icon-mask: url("./icons/eye.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="globe"] { --admin-icon-mask: url("./icons/globe.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="history"] { --admin-icon-mask: url("./icons/history.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="home"] { --admin-icon-mask: url("./icons/home.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="key"] { --admin-icon-mask: url("./icons/key.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="palette"] { --admin-icon-mask: url("./icons/palette.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="pause"] { --admin-icon-mask: url("./icons/pause.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="play"] { --admin-icon-mask: url("./icons/play.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="shield"] { --admin-icon-mask: url("./icons/shield.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="shopping-cart"] { --admin-icon-mask: url("./icons/shopping-cart.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="users"] { --admin-icon-mask: url("./icons/users.svg"); }
+
+[data-admin-visual-language="ant"] vaadin-app-layout::part(navbar) {
+  min-height: 3rem;
+}
+
+[data-admin-visual-language="ant"] vaadin-app-layout::part(drawer) {
+  width: 13rem;
+}
+
+[data-admin-visual-language="ant"] .admin-shell-header {
+  gap: 0.75rem;
+  min-height: 3rem;
+}
+
+[data-admin-visual-language="ant"] .admin-product-mark {
+  border-radius: 0.25rem;
+}
+
+[data-admin-visual-language="ant"] .admin-drawer-content {
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+[data-admin-visual-language="ant"] vaadin-side-nav-item::part(link) {
+  border-radius: 0.375rem;
+}
+
+[data-admin-visual-language="ant"] vaadin-side-nav-item[current]::part(link) {
+  background: color-mix(in srgb, var(--admin-accent) 12%, transparent);
+}
+
 .admin-shell-header {
   box-sizing: border-box;
   gap: var(--admin-space-md);
