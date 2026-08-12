@@ -15,6 +15,7 @@ public final class EmptyState extends VerticalLayout {
     public EmptyState(String title, String description) {
         this.title = Objects.requireNonNull(title);
         this.description = Objects.requireNonNull(description);
+        addClassName("admin-empty-state");
         setPadding(true);
         setSpacing(true);
         setAlignItems(Alignment.CENTER);

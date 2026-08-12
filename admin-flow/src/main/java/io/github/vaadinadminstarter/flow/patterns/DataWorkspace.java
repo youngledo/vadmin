@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -28,6 +29,7 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
     private final List<Button> selectionActions = new ArrayList<>();
     private final Map<Button, BooleanSupplier> actionEligibility = new LinkedHashMap<>();
     private Component stateView;
+    private Component footer;
     private State state = State.READY;
     private int selectedItemCount;
 
@@ -51,6 +53,7 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
         }
         add(selectionBar, status, grid);
         updateSelection(0);
+        updateStatePresentation();
     }
 
     public Grid<T> getGrid() {
@@ -75,6 +78,20 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
 
     public HorizontalLayout getBulkActions() {
         return bulkActions;
+    }
+
+    /** Installs one caller-owned footer, typically a server-page navigation control. */
+    public void setFooter(Component footer) {
+        if (this.footer != null) {
+            remove(this.footer);
+        }
+        this.footer = Objects.requireNonNull(footer);
+        add(this.footer);
+        updateStatePresentation();
+    }
+
+    public Component getFooter() {
+        return footer;
     }
 
     /** Shows or hides selection controls for workspaces that support bulk operations. */
@@ -137,8 +154,7 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
     public void showData() {
         state = State.READY;
         clearStateView();
-        status.setVisible(false);
-        grid.setVisible(true);
+        updateStatePresentation();
         updateSelection(grid.getSelectedItems().size());
     }
 
@@ -150,9 +166,17 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
             addComponentAtIndex(getComponentCount() - 1, stateView);
         }
         status.setText(message);
-        status.setVisible(true);
-        grid.setVisible(state != State.EMPTY && state != State.FAILURE);
+        updateStatePresentation();
         updateSelection(grid.getSelectedItems().size());
+    }
+
+    private void updateStatePresentation() {
+        getElement().setAttribute("data-admin-workspace-state", state.name().toLowerCase(Locale.ROOT));
+        status.setVisible(state != State.READY);
+        grid.setVisible(state != State.EMPTY && state != State.FAILURE);
+        if (footer != null) {
+            footer.setVisible(state == State.READY);
+        }
     }
 
     private void clearStateView() {

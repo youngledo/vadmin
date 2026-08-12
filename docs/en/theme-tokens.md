@@ -39,6 +39,19 @@ its meaning, never for a particular color or size.
 | `--admin-radius-surface` | Corner radius for contained work surfaces. |
 | `--admin-elevation-raised` | Shadow for raised application chrome. |
 | `--admin-elevation-workspace` | Reserved elevation for a data workspace surface. |
+| `--admin-control-fill` | Normal fill of a standard form control. |
+| `--admin-control-border` | Resting border of a standard form control. |
+| `--admin-control-hover-border` | Border treatment for an enabled control on hover. |
+| `--admin-control-disabled-fill` | Non-interactive fill for a disabled control. |
+| `--admin-overlay-surface` | Surface for menus, pickers, dialogs, and notifications. |
+| `--admin-overlay-shadow` | Elevation for menus, pickers, dialogs, and notifications. |
+| `--admin-workspace-header-fill` | Header surface for dense data workspaces. |
+| `--admin-workspace-header-text` | Secondary text used in workspace headers. |
+| `--admin-workspace-row-hover` | Hover surface for an enabled workspace row. |
+| `--admin-workspace-row-selected` | Selected-row and selection-summary surface. |
+| `--admin-workspace-divider` | Low-emphasis separator between workspace regions. |
+| `--admin-workspace-status-fill` | Busy, empty, and failure state surface inside a workspace. |
+| `--admin-workspace-danger-fill` | Consequence surface for a destructive confirmation. |
 
 The reference theme maps Vaadin Lumo variables from these semantic tokens.
 In particular, `--lumo-font-family` is mapped from `--admin-font-family`, and
@@ -73,6 +86,16 @@ Semantic icons follow the same ownership rule. Use `AdminIcon` and
 `admin-theme/icons`, assign `data-admin-icon`, or set icon mask variables from
 a module. The host provides the Ant SVG masks and keeps the Vaadin fallback
 visible in the Vaadin profile.
+
+Controls and overlays follow the same boundary. Modules rely on Vaadin's
+native invalid, disabled, focus, dialog, and notification semantics, but do
+not target overlay internals or Ant-only selectors. The host maps those
+states through this semantic token contract for its active profile.
+
+Dense workspace presentation follows the same boundary. Modules compose
+`DataWorkspace` with `PagedGrid.getPaginationBar()` and use normal Grid,
+selection, status, and dialog APIs. They must not target Grid internals,
+profile selectors, or Ant workspace rules.
 
 ## Host Overrides
 

@@ -26,6 +26,7 @@ public final class AuditView extends PermissionProtectedView implements LocaleCh
     private final Grid.Column<AdministrationQueryService.AuditRow> targetTypeColumn;
     private final Grid.Column<AdministrationQueryService.AuditRow> targetIdColumn;
     private final Grid.Column<AdministrationQueryService.AuditRow> outcomeColumn;
+    private final PagedGrid<AdministrationQueryService.AuditRow> pages;
 
     public AuditView(CurrentUserProvider currentUser, AuthorizationService authorization,
                      AdministrationQueryService queries) {
@@ -37,11 +38,12 @@ public final class AuditView extends PermissionProtectedView implements LocaleCh
         outcomeColumn = grid.addColumn(AdministrationQueryService.AuditRow::outcome);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
-        new PagedGrid<>(grid, queries::audit, "occurred_at");
+        pages = new PagedGrid<>(grid, queries::audit, "occurred_at");
         var header = PageHeader.translated("system.audit.title", "system.audit.intent");
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "read-only-workspace");
+        workspace.setFooter(pages.getPaginationBar());
         var frame = new AdminPageFrame(header, null, workspace);
         add(frame);
         expand(frame);
@@ -50,7 +52,7 @@ public final class AuditView extends PermissionProtectedView implements LocaleCh
 
     @Override protected PermissionCode requiredPermission() { return REQUIRED_PERMISSION; }
 
-    @Override public void localeChange(LocaleChangeEvent event) { updateText(); updateBrowserTitle(); }
+    @Override public void localeChange(LocaleChangeEvent event) { updateText(); pages.refresh(); updateBrowserTitle(); }
 
     @Override public String getPageTitle() { return getTranslation("system.audit.title"); }
 

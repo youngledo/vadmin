@@ -13,8 +13,8 @@ operational hierarchy and density. It does not add an Ant Design, React, Vue,
 or other frontend runtime dependency. Vaadin Flow remains the component and
 programming model for every profile.
 
-The Ant profile includes a host-owned neutral icon language and compact shell
-treatment. It is deliberately Ant-inspired rather than a pixel-perfect clone:
+The Ant profile includes a host-owned neutral icon language, compact shell
+treatment, and high-use controls and overlays. It is deliberately Ant-inspired rather than a pixel-perfect clone:
 the `vaadin` profile remains a supported parallel baseline and continues to
 render Vaadin fallback glyphs.
 
@@ -52,3 +52,13 @@ For standard action icons, modules may use
 using the validated `AdminIconCatalog` keys. Modules must not reference the
 host SVG files or CSS mask selectors: the host chooses how each semantic icon
 is rendered for an active profile.
+
+The host theme also owns Ant presentation for buttons, fields, menus, dialogs,
+notifications, and their native focus, disabled, and validation states.
+Modules keep using normal Vaadin Flow semantics and must not target overlay
+internals or Ant-only selectors.
+
+The host also owns Ant presentation for dense data workspaces: Grid headers and
+rows, selection, state feedback, pager footers, and destructive consequences.
+Modules compose `DataWorkspace` and `PagedGrid.getPaginationBar()` without
+selecting a profile or targeting Grid internals.

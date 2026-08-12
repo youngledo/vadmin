@@ -16,5 +16,6 @@ class EmptyStateTest {
         assertThat(emptyState.getTitle()).isEqualTo("No users");
         assertThat(emptyState.getDescription()).isEqualTo("Create a user to begin.");
         assertThat(emptyState.getAction()).isSameAs(create);
+        assertThat(emptyState.getClassNames()).contains("admin-empty-state");
     }
 }

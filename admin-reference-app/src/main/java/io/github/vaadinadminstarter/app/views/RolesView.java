@@ -61,6 +61,7 @@ public final class RolesView extends PermissionProtectedView implements LocaleCh
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "roles-workspace");
+        workspace.setFooter(pages.getPaginationBar());
 
         var frame = new AdminPageFrame(header, toolbar, workspace);
         add(frame);

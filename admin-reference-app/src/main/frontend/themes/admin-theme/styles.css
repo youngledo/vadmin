@@ -27,6 +27,12 @@
   --admin-radius-surface: 0.5rem;
   --admin-elevation-raised: 0 1px 2px rgb(24 33 43 / 12%);
   --admin-elevation-workspace: 0 1px 3px rgb(24 33 43 / 10%);
+  --admin-control-fill: #ffffff;
+  --admin-control-border: #d8dee6;
+  --admin-control-hover-border: #146c94;
+  --admin-control-disabled-fill: #eef1f4;
+  --admin-overlay-surface: #ffffff;
+  --admin-overlay-shadow: 0 8px 24px rgb(24 33 43 / 18%);
   --admin-content-max-width: 90rem;
   --admin-primary: var(--admin-accent);
   --admin-primary-hover: var(--admin-accent-hover);
@@ -82,6 +88,12 @@ html[theme~="dark"],
   --admin-radius-surface: 0.5rem;
   --admin-elevation-raised: 0 1px 2px rgb(24 33 43 / 12%);
   --admin-elevation-workspace: 0 1px 3px rgb(24 33 43 / 18%);
+  --admin-control-fill: #1d2630;
+  --admin-control-border: #3a4654;
+  --admin-control-hover-border: #8bcef0;
+  --admin-control-disabled-fill: #273340;
+  --admin-overlay-surface: #273340;
+  --admin-overlay-shadow: 0 12px 28px rgb(0 0 0 / 40%);
   --admin-primary: var(--admin-accent);
   --admin-primary-hover: var(--admin-accent-hover);
   --admin-text: var(--admin-text-primary);
@@ -128,6 +140,19 @@ html[theme~="dark"],
   --admin-radius-surface: 0.5rem;
   --admin-elevation-raised: 0 1px 2px rgb(0 0 0 / 3%);
   --admin-elevation-workspace: 0 1px 2px rgb(0 0 0 / 8%);
+  --admin-control-fill: #ffffff;
+  --admin-control-border: #d9d9d9;
+  --admin-control-hover-border: #4096ff;
+  --admin-control-disabled-fill: #f5f5f5;
+  --admin-overlay-surface: #ffffff;
+  --admin-overlay-shadow: 0 6px 16px rgb(0 0 0 / 8%);
+  --admin-workspace-header-fill: #fafafa;
+  --admin-workspace-header-text: rgba(0, 0, 0, 0.65);
+  --admin-workspace-row-hover: #fafafa;
+  --admin-workspace-row-selected: #e6f4ff;
+  --admin-workspace-divider: #f0f0f0;
+  --admin-workspace-status-fill: #fafafa;
+  --admin-workspace-danger-fill: #fff2f0;
 }
 
 [data-admin-visual-language="ant"][theme~="dark"] {
@@ -150,6 +175,19 @@ html[theme~="dark"],
   --admin-focus: #3c89e8;
   --admin-elevation-raised: 0 1px 2px rgb(0 0 0 / 45%);
   --admin-elevation-workspace: 0 2px 8px rgb(0 0 0 / 45%);
+  --admin-control-fill: #141414;
+  --admin-control-border: #434343;
+  --admin-control-hover-border: #3c89e8;
+  --admin-control-disabled-fill: #303030;
+  --admin-overlay-surface: #1f1f1f;
+  --admin-overlay-shadow: 0 6px 16px rgb(0 0 0 / 45%);
+  --admin-workspace-header-fill: #262626;
+  --admin-workspace-header-text: rgba(255, 255, 255, 0.65);
+  --admin-workspace-row-hover: #262626;
+  --admin-workspace-row-selected: #111d2c;
+  --admin-workspace-divider: #303030;
+  --admin-workspace-status-fill: #262626;
+  --admin-workspace-danger-fill: #2a1215;
 }
 
 [data-admin-density="comfortable"] {
@@ -222,24 +260,189 @@ vaadin-grid {
 }
 
 [data-admin-visual-language="ant"] vaadin-button {
+  --vaadin-button-background: var(--admin-control-fill);
+  --vaadin-button-border-color: var(--admin-control-border);
+  --vaadin-button-border-radius: var(--admin-radius-control);
+  --vaadin-button-height: var(--admin-control-height);
+  --vaadin-button-text-color: var(--admin-text-primary);
   font-weight: 500;
 }
 
 [data-admin-visual-language="ant"] vaadin-button[theme~="primary"] {
+  --vaadin-button-background: var(--admin-accent);
+  --vaadin-button-border-color: var(--admin-accent);
+  --vaadin-button-text-color: #ffffff;
   box-shadow: none;
 }
 
+[data-admin-visual-language="ant"] vaadin-button:not([disabled]):hover {
+  --vaadin-button-border-color: var(--admin-control-hover-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="primary"]:not([disabled]):hover {
+  --vaadin-button-background: var(--admin-accent-hover);
+  --vaadin-button-border-color: var(--admin-accent-hover);
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="tertiary"] {
+  --vaadin-button-background: transparent;
+  --vaadin-button-border-color: transparent;
+  --vaadin-button-text-color: var(--admin-neutral-action);
+}
+
+[data-admin-visual-language="ant"] vaadin-button[disabled] {
+  --vaadin-button-background: var(--admin-control-disabled-fill);
+  --vaadin-button-border-color: var(--admin-border);
+  --vaadin-button-text-color: var(--admin-disabled);
+  opacity: 1;
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="primary"][disabled] {
+  --vaadin-button-background: var(--admin-control-disabled-fill) !important;
+  --vaadin-button-text-color: var(--admin-disabled) !important;
+  background: var(--admin-control-disabled-fill) !important;
+  color: var(--admin-disabled) !important;
+}
+
 [data-admin-visual-language="ant"] vaadin-text-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box::part(input-field),
 [data-admin-visual-language="ant"] vaadin-select::part(input-field),
 [data-admin-visual-language="ant"] vaadin-date-picker::part(input-field) {
+  background: var(--admin-control-fill);
+  border: 1px solid var(--admin-control-border);
   border-radius: var(--admin-radius-control);
-  box-shadow: 0 0 0 1px var(--admin-border);
+  box-shadow: none;
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker:not([disabled]):hover::part(input-field) {
+  border-color: var(--admin-control-hover-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker[focus-ring]::part(input-field) {
+  border-color: var(--admin-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-focus) 20%, transparent);
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker[invalid]::part(input-field) {
+  border-color: var(--admin-danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-danger) 12%, transparent);
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker[disabled]::part(input-field) {
+  background: var(--admin-control-disabled-fill);
+  border-color: var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-menu-bar-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-select-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-combo-box-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-date-picker-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-notification-card::part(overlay) {
+  background: var(--admin-overlay-surface);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-overlay-shadow);
+}
+
+[data-admin-visual-language="ant"] vaadin-menu-bar-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-select-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-combo-box-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-date-picker-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-notification-card::part(overlay) {
+  border-radius: var(--admin-radius-control);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(overlay) {
+  border-radius: var(--admin-radius-surface);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(header),
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(footer) {
+  padding: var(--admin-space-md);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(header) {
+  border-bottom: 1px solid var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(footer) {
+  border-top: 1px solid var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-notification-card::part(content) {
+  color: var(--admin-text-primary);
+  padding: var(--admin-space-md);
 }
 
 [data-admin-visual-language="ant"] vaadin-grid::part(header-cell) {
-  background: var(--admin-canvas);
-  color: var(--admin-text-secondary);
+  background: var(--admin-workspace-header-fill);
+  border-bottom: 1px solid var(--admin-workspace-divider);
+  color: var(--admin-workspace-header-text);
   font-weight: 600;
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(body-cell) {
+  box-shadow: inset 0 -1px var(--admin-workspace-divider);
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(row):hover {
+  background: var(--admin-workspace-row-hover);
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(selected-row) {
+  background: var(--admin-workspace-row-selected);
+}
+
+[data-admin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state] {
+  border-color: var(--admin-workspace-divider);
+}
+
+[data-admin-visual-language="ant"] .admin-page-workspace > [role="status"],
+[data-admin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state="empty"] .admin-empty-state,
+[data-admin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state="failure"] .admin-empty-state {
+  background: var(--admin-workspace-status-fill);
+}
+
+[data-admin-visual-language="ant"] .admin-pagination-bar {
+  border-top: 1px solid var(--admin-workspace-divider);
+  justify-content: flex-end;
+  padding-top: var(--admin-space-sm);
+  width: 100%;
+}
+
+[data-admin-visual-language="ant"] .admin-confirmation-consequence {
+  background: var(--admin-workspace-danger-fill);
+  border-left: 3px solid var(--admin-danger);
+  color: var(--admin-text-primary);
+  margin: 0;
+  padding: var(--admin-space-sm);
 }
 
 [data-admin-visual-language="ant"] .admin-icon {

@@ -10,6 +10,9 @@
   PostgreSQL 18 和 Flyway 13.1.0 的验证兼容性基线。
 - Maven、生产构建和 Testcontainers 验证的 GitHub Actions 工作流。
 - 面向 Maven 与 GitHub Actions 的 Dependabot 周期性更新检查。
+- Vaadin Flow 原生的 `ant` 外观配置：中性图标语言、应用壳、常用控件与覆盖层、
+  数据工作区、服务端分页，以及桌面和窄屏浏览器验证；`vaadin` 外观仍保持为并行基线。
+- 可审计的 `0.1.0` 发布准备指南，记录当前验证基线、版本策略、升级规则和发布门禁。
 
 ### Upgrade policy
 

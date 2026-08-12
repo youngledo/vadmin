@@ -39,9 +39,10 @@ Open `http://localhost:8080` and sign in with `admin` and the value of
 | Quick Start | [Read](docs/en/quick-start.md) | [阅读](docs/zh-CN/quick-start.md) |
 | Architecture | [Read](docs/en/architecture.md) | [阅读](docs/zh-CN/architecture.md) |
 | Extension Guide | [Read](docs/en/extension-guide.md) | [阅读](docs/zh-CN/extension-guide.md) |
-| Deployment | [Read](docs/deployment.md) | [阅读](docs/zh-CN/deployment.md) |
-| Security | [Read](docs/security.md) | [阅读](docs/zh-CN/security.md) |
-| Contributing | [Read](docs/contributing.md) | [阅读](docs/zh-CN/contributing.md) |
+| Deployment | -- | [阅读](docs/deployment.md) |
+| Release Guide | [Read](docs/en/release-guide.md) | [阅读](docs/zh-CN/release-guide.md) |
+| Security | -- | [阅读](docs/security.md) |
+| Contributing | -- | [阅读](docs/contributing.md) |
 
 ## Verification
 

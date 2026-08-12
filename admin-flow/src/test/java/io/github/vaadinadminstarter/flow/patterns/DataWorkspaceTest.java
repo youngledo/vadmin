@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
@@ -121,19 +122,37 @@ class DataWorkspaceTest {
     @Test
     void exposesBusyEmptyAndFailureStatesWithAccessibleStatusText() {
         var workspace = new DataWorkspace<>(new Grid<Row>(Row.class, false));
+        var footer = new Div();
+        workspace.setFooter(footer);
+
+        assertThat(workspace.getElement().getAttribute("data-admin-workspace-state")).isEqualTo("ready");
+        assertThat(workspace.getFooter()).isSameAs(footer);
+        assertThat(footer.isVisible()).isTrue();
 
         workspace.setBusy(true);
         assertThat(workspace.getState()).isEqualTo(DataWorkspace.State.BUSY);
         assertThat(workspace.getStatusMessage()).isEqualTo("Loading data");
         assertThat(workspace.getClassNames()).contains("admin-page-workspace");
+        assertThat(workspace.getElement().getAttribute("data-admin-workspace-state")).isEqualTo("busy");
+        assertThat(footer.isVisible()).isFalse();
 
         workspace.showEmpty(new EmptyState("No users", "Create a user to begin."));
         assertThat(workspace.getState()).isEqualTo(DataWorkspace.State.EMPTY);
         assertThat(workspace.getStatusMessage()).isEqualTo("No users");
+        assertThat(workspace.getElement().getAttribute("data-admin-workspace-state")).isEqualTo("empty");
+        assertThat(footer.isVisible()).isFalse();
 
         workspace.showFailure("Unable to load users");
         assertThat(workspace.getState()).isEqualTo(DataWorkspace.State.FAILURE);
         assertThat(workspace.getStatusMessage()).isEqualTo("Unable to load users");
+        assertThat(workspace.getElement().getAttribute("data-admin-workspace-state")).isEqualTo("failure");
+        assertThat(footer.isVisible()).isFalse();
+
+        workspace.showData();
+
+        assertThat(workspace.getElement().getAttribute("data-admin-workspace-state")).isEqualTo("ready");
+        assertThat(workspace.getFooter()).isSameAs(footer);
+        assertThat(footer.isVisible()).isTrue();
     }
 
     @Test

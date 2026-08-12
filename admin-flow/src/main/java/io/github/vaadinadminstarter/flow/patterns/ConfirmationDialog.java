@@ -98,6 +98,7 @@ public final class ConfirmationDialog extends Dialog implements LocaleChangeObse
         var title = text(titleKey);
         setHeaderTitle(title);
         getElement().setAttribute("aria-label", title);
+        consequence.addClassName("admin-confirmation-consequence");
         consequence.setText(text(consequenceKey));
         confirmAction.setText(text(confirmActionKey));
         cancelAction.setText(translated ? getTranslation("flow.action.cancel") : "Cancel");

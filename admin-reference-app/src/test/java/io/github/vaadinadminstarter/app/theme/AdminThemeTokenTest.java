@@ -35,14 +35,42 @@ class AdminThemeTokenTest {
             "radius-control",
             "radius-surface",
             "elevation-raised",
-            "elevation-workspace");
+            "elevation-workspace",
+            "control-fill",
+            "control-border",
+            "control-hover-border",
+            "control-disabled-fill",
+            "overlay-surface",
+            "overlay-shadow",
+            "workspace-header-fill",
+            "workspace-header-text",
+            "workspace-row-hover",
+            "workspace-row-selected",
+            "workspace-divider",
+            "workspace-status-fill",
+            "workspace-danger-fill");
+    private static final List<String> WORKSPACE_TOKENS = List.of(
+            "workspace-header-fill",
+            "workspace-header-text",
+            "workspace-row-hover",
+            "workspace-row-selected",
+            "workspace-divider",
+            "workspace-status-fill",
+            "workspace-danger-fill");
 
     @Test
     void declaresEverySemanticTokenForLightAndDarkThemes() throws IOException {
         var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
 
-        assertTokenDeclarations(extractBlock(styles, ":root"));
-        assertTokenDeclarations(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"));
+        assertTokenDeclarations(extractBlock(styles, ":root"), REQUIRED_TOKENS.stream()
+                .filter(token -> !WORKSPACE_TOKENS.contains(token))
+                .toList());
+        assertTokenDeclarations(extractBlock(styles, "html\\[theme~=\"dark\"\\],\\s*\\[theme~=\"dark\"\\]"), REQUIRED_TOKENS.stream()
+                .filter(token -> !WORKSPACE_TOKENS.contains(token))
+                .toList());
+        assertTokenDeclarations(extractBlock(styles, "\\[data-admin-visual-language=\"ant\"\\]"), WORKSPACE_TOKENS);
+        assertTokenDeclarations(
+                extractBlock(styles, "\\[data-admin-visual-language=\"ant\"\\]\\[theme~=\"dark\"\\]"), WORKSPACE_TOKENS);
     }
 
     @Test
@@ -128,6 +156,43 @@ class AdminThemeTokenTest {
             var asset = Files.readString(iconDirectory.resolve(icon.cssValue() + ".svg"), StandardCharsets.UTF_8);
             assertThat(asset).contains("<svg", "viewBox=");
         }
+    }
+
+    @Test
+    void scopesAntControlAndOverlaySkinningToPublicVaadinParts() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+
+        assertThat(styles).contains(
+                "--admin-control-fill:",
+                "--admin-control-border:",
+                "--admin-control-hover-border:",
+                "--admin-control-disabled-fill:",
+                "--admin-overlay-surface:",
+                "--admin-overlay-shadow:",
+                "[data-admin-visual-language=\"ant\"] vaadin-button[theme~=\"primary\"]",
+                "[data-admin-visual-language=\"ant\"] vaadin-text-field[invalid]::part(input-field)",
+                "[data-admin-visual-language=\"ant\"] vaadin-dialog-overlay::part(overlay)",
+                "[data-admin-visual-language=\"ant\"] vaadin-menu-bar-overlay::part(overlay)",
+                "[data-admin-visual-language=\"ant\"] vaadin-notification-card::part(overlay)");
+    }
+
+    @Test
+    void scopesAntWorkspaceSkinningToSemanticHooksAndPublicVaadinParts() throws IOException {
+        var styles = Files.readString(Path.of("src/main/frontend/themes/admin-theme/styles.css"), StandardCharsets.UTF_8);
+
+        assertThat(styles).contains(
+                "--admin-workspace-header-fill:",
+                "--admin-workspace-header-text:",
+                "--admin-workspace-row-hover:",
+                "--admin-workspace-row-selected:",
+                "--admin-workspace-divider:",
+                "--admin-workspace-status-fill:",
+                "--admin-workspace-danger-fill:",
+                "[data-admin-visual-language=\"ant\"] vaadin-grid::part(header-cell)",
+                "[data-admin-visual-language=\"ant\"] vaadin-grid::part(body-cell)",
+                "[data-admin-visual-language=\"ant\"] .admin-page-workspace[data-admin-workspace-state]",
+                "[data-admin-visual-language=\"ant\"] .admin-pagination-bar",
+                "[data-admin-visual-language=\"ant\"] .admin-confirmation-consequence");
     }
 
     private void assertThemeContractMappings(String selectorBlock) {

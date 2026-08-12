@@ -19,6 +19,14 @@ class ConfirmationDialogTest {
     }
 
     @Test
+    void marksTheConsequenceForHostOwnedDangerPresentation() {
+        var dialog = new ConfirmationDialog("Delete customer", "Deletion cannot be undone.", "Delete", () -> { });
+
+        assertThat(dialog.getChildren().filter(component -> component.getClassNames()
+                .contains("admin-confirmation-consequence"))).hasSize(1);
+    }
+
+    @Test
     void cancelNeverInvokesTheConfirmationCommand() {
         var invocations = new AtomicInteger();
         var dialog = new ConfirmationDialog("Delete customer", "Deletion cannot be undone.", "Delete",

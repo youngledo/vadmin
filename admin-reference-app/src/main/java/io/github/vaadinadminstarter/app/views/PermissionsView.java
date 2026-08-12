@@ -23,6 +23,7 @@ public final class PermissionsView extends PermissionProtectedView implements Lo
     private final Grid<AdministrationQueryService.PermissionRow> grid = new Grid<>(AdministrationQueryService.PermissionRow.class, false);
     private final Grid.Column<AdministrationQueryService.PermissionRow> codeColumn;
     private final Grid.Column<AdministrationQueryService.PermissionRow> sourceColumn;
+    private final PagedGrid<AdministrationQueryService.PermissionRow> pages;
 
     public PermissionsView(CurrentUserProvider currentUser, AuthorizationService authorization,
                            AdministrationQueryService queries) {
@@ -31,11 +32,12 @@ public final class PermissionsView extends PermissionProtectedView implements Lo
         sourceColumn = grid.addColumn(permission -> permission.systemManaged() ? getTranslation("system.permissions.system-managed") : getTranslation("system.permissions.custom"));
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
-        new PagedGrid<>(grid, queries::permissions, "code");
+        pages = new PagedGrid<>(grid, queries::permissions, "code");
         var header = PageHeader.translated("system.permissions.title", "system.permissions.intent");
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "read-only-workspace");
+        workspace.setFooter(pages.getPaginationBar());
         var frame = new AdminPageFrame(header, null, workspace);
         add(frame);
         expand(frame);
@@ -44,7 +46,7 @@ public final class PermissionsView extends PermissionProtectedView implements Lo
 
     @Override protected PermissionCode requiredPermission() { return REQUIRED_PERMISSION; }
 
-    @Override public void localeChange(LocaleChangeEvent event) { updateText(); grid.getDataProvider().refreshAll(); updateBrowserTitle(); }
+    @Override public void localeChange(LocaleChangeEvent event) { updateText(); pages.refresh(); updateBrowserTitle(); }
 
     @Override public String getPageTitle() { return getTranslation("system.permissions.title"); }
 

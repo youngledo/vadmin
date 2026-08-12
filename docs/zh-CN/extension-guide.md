@@ -51,6 +51,7 @@ var pages = new PagedGrid<>(grid, queries::orders,
 filter.addValueChangeListener(event -> pages.refresh());
 
 var workspace = new DataWorkspace<>(grid);
+workspace.setFooter(pages.getPaginationBar());
 workspace.addBulkAction(cancelSelected, () -> canCancelOrders());
 add(header, toolbar, workspace);
 ```
@@ -83,9 +84,13 @@ editor.open();
 自己的命名主题，并覆盖 `--admin-*` 语义变量，而不是修改 `admin-flow`。当前用户菜单中
 的浅色/深色模式仅保存在 Vaadin session；它不是账户偏好设置。
 
-业务模块只能使用公开的 `--admin-*` 语义令牌和共享 Flow 页面模式。模块不得导入宿主的
+业务模块只能使用公开的 `--admin-*` 语义令牌和共享 Flow 页面模式。分页工作区应通过
+`workspace.setFooter(pages.getPaginationBar())` 组合。模块不得导入宿主的
 `admin-theme`、注册全局 `@Theme`、选择视觉语言或密度、全局修改 Lumo 变量，或依赖仅由
 Ant 档案提供的选择器。这些均属于宿主决策，参见[外观配置档案](appearance-profiles.md)。
+
+Grid 表头和行、分页页脚、工作区状态以及危险操作后果说明都由宿主主题负责。模块只使用
+标准 Flow 的 Grid、状态和对话框 API，不得针对 Ant 选择器或 Grid 内部结构编写样式。
 
 对于常见操作图标，使用 `admin-flow` 的 `AdminIcon.of(AdminIconName)`，不要直接选择
 `VaadinIcon` 来表达宿主无关的业务语义。模块导航页仍只能声明 `AdminIconCatalog` 支持的图标键。

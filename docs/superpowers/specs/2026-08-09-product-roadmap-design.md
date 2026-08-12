@@ -32,6 +32,7 @@ change.
 | Flow Design System Phase 2 | Detail, confirmation, and operation-feedback patterns; completed administration workflows and permission-filtered workplace entries. |
 | Phase 3: Extensibility And Delivery Maturity | Completed: Spring Flow module assembly, module i18n/theme-token contracts, independently packaged orders example, adoption E2E and architecture coverage, normal and production verification. |
 | Phase 4: Identity And Enterprise Integration Readiness | Completed: opt-in, provider-neutral Spring OIDC discovery and authorization-code login; Spring-free external-identity mapper contract; explicit existing-local-account mapping; Keycloak test fixture; normal and production verification. |
+| Ant Flow Profile Maturity (Phases A-C) | Completed: profile-neutral icons and an Ant-inspired shell; Flow-native control and overlay skins; dense data workspaces, server-side pagination, state feedback, and narrow-screen verification. The Vaadin visual profile remains a parallel supported baseline. |
 
 ## Forward Roadmap
 
@@ -94,9 +95,10 @@ roadmap.
 programming model. The starter may provide Flow-native visual-language profiles
 inspired by established administration design systems; it must not embed React
 or Vue component libraries. Ant Design-inspired visual and interaction
-patterns are the first candidate. Naive UI-inspired and Element UI-inspired
-profiles are later candidates, evaluated only when concrete adopter needs
-justify them.
+patterns were the first candidate and are complete through shell, controls,
+overlays, and operational data workspaces. Naive UI-inspired and Element
+UI-inspired profiles remain later candidates, evaluated only when concrete
+adopter needs justify them.
 
 Visual language, color mode, and information density are independent choices:
 
@@ -121,6 +123,14 @@ concrete adopter requirements.
 
 **Exit criteria:** an approved adapter roadmap with an explicit scope, or a
 documented decision to retain Spring Boot only.
+
+## Release Readiness
+
+The next practical milestone is the `0.1.0` release-candidate preparation,
+not a second runtime adapter. It records the tested compatibility baseline,
+versioning policy, upgrade notes, release gates, and the distinction between
+what is verified in this repository and what must be configured before public
+artifact publication. See the [release guide](../../en/release-guide.md).
 
 ## Governance
 

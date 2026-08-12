@@ -11,6 +11,7 @@ import io.github.vaadinadminstarter.contracts.auth.LocalUserSessionLookup;
 import io.github.vaadinadminstarter.springsecurity.auth.AuthenticationVersionFilter;
 import io.github.vaadinadminstarter.springsecurity.auth.DiscardingOAuth2AuthorizedClientRepository;
 import io.github.vaadinadminstarter.springsecurity.auth.LocalUserDetailsService;
+import io.github.vaadinadminstarter.springsecurity.auth.LocalLoginAuthenticator;
 import io.github.vaadinadminstarter.springsecurity.auth.OidcAccessDeniedFailureHandler;
 import io.github.vaadinadminstarter.springsecurity.auth.OidcLocalUserAuthenticationSuccessHandler;
 import io.github.vaadinadminstarter.springsecurity.auth.SecurityContextCurrentUserProvider;
@@ -22,6 +23,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -29,6 +31,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -50,6 +54,12 @@ public class SpringSecurityConfiguration {
         var provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
+    }
+
+    @Bean
+    LocalLoginAuthenticator localLoginAuthenticator(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return new LocalLoginAuthenticator(authenticationConfiguration.getAuthenticationManager(),
+                new ChangeSessionIdAuthenticationStrategy(), new HttpSessionSecurityContextRepository());
     }
 
     @Bean

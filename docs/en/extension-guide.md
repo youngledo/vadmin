@@ -188,6 +188,7 @@ var pages = new PagedGrid<>(grid, queries::orders,
 filter.addValueChangeListener(event -> pages.refresh());
 
 var workspace = new DataWorkspace<>(grid);
+workspace.setFooter(pages.getPaginationBar());
 workspace.addBulkAction(cancelSelected, () -> canCancelOrders());
 add(header, toolbar, workspace);
 ```
@@ -221,13 +222,17 @@ Themes belong to the host application. It alone declares `@Theme` and controls
 light/dark selection. Modules use the documented semantic `--admin-*` tokens
 or existing Flow pattern classes, never a global theme or a competing brand
 stylesheet. The canonical token contract covers surface, text, border, accent,
-success, warning, danger, focus, spacing, typography, radius, and elevation;
-see [Theme Tokens](theme-tokens.md). A module may add narrowly scoped CSS for
-genuinely module-specific presentation, using those tokens.
+success, warning, danger, focus, spacing, typography, radius, elevation, and
+dense-workspace roles; see [Theme Tokens](theme-tokens.md). A module may add
+narrowly scoped CSS for genuinely module-specific presentation, using those
+tokens.
 
 Modules must not import the host `admin-theme`, declare a global `@Theme`,
 select an appearance profile or density, mutate global Lumo variables, or
-depend on Ant-only selectors. Those are host-owned choices; see
+depend on Ant-only selectors or Grid internals. Grid headers and rows, pager
+footers, workspace states, and destructive confirmations are host-owned
+presentation; modules use normal Flow state and dialog APIs. Those are
+host-owned choices; see
 [Appearance Profiles](appearance-profiles.md).
 
 The host's `MainLayout` renders grouped, permission-filtered navigation from

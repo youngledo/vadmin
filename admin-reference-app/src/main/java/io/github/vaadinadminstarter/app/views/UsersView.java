@@ -80,6 +80,7 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
 
         var workspace = new DataWorkspace<>(grid);
         workspace.getElement().setAttribute("data-testid", "users-workspace");
+        workspace.setFooter(pages.getPaginationBar());
         enableSelectedAction = bulkAction(AdminIconName.PLAY, true, authorization);
         disableSelectedAction = bulkAction(AdminIconName.PAUSE, false, authorization);
         var canUpdate = authorization.hasPermission(requireCurrentUser(), UPDATE);

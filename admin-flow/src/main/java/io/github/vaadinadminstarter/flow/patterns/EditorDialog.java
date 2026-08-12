@@ -1,6 +1,7 @@
 package io.github.vaadinadminstarter.flow.patterns;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.component.button.Button;
@@ -36,6 +37,7 @@ public final class EditorDialog extends Dialog implements LocaleChangeObserver {
         validation.getElement().setAttribute("role", "alert");
         validation.setVisible(false);
         primaryAction = new Button();
+        primaryAction.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         primaryAction.addClickListener(event -> Objects.requireNonNull(onPrimaryAction).run());
         cancelAction = new Button();
         cancelAction.addClickListener(event -> close());

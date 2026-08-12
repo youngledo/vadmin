@@ -52,6 +52,7 @@ public final class OrdersView extends PermissionProtectedView implements LocaleC
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "orders-workspace");
+        workspace.setFooter(pages.getPaginationBar());
         var frame = new AdminPageFrame(header, null, workspace);
         add(frame);
         expand(frame);

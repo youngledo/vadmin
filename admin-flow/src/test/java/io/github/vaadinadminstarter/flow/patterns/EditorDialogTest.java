@@ -22,6 +22,14 @@ class EditorDialogTest {
     }
 
     @Test
+    void marksTheCommitCommandAsThePrimaryAction() {
+        var dialog = new EditorDialog("Create user", "Save", () -> { });
+
+        assertThat(dialog.getPrimaryAction().getThemeNames()).contains("primary");
+        assertThat(dialog.getCancelAction().getThemeNames()).doesNotContain("primary");
+    }
+
+    @Test
     void closesWhenTheAccessibleCancelActionIsInvoked() {
         var dialog = new EditorDialog("Create user", "Save", () -> { });
 

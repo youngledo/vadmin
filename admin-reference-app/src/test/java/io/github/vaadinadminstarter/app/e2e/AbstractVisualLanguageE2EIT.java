@@ -10,6 +10,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.ViewportSize;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,6 +33,9 @@ abstract class AbstractVisualLanguageE2EIT {
 
     @LocalServerPort
     int port;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     BrowserContext browserContext;
     Page page;
@@ -94,6 +99,15 @@ abstract class AbstractVisualLanguageE2EIT {
         page.setDefaultTimeout(10_000);
     }
 
+    void useNarrowDesktopBrowser() {
+        browserContext.close();
+        browserContext = browser.newContext(new Browser.NewContextOptions()
+                .setViewportSize(new ViewportSize(390, 844))
+                .setLocale("zh-CN"));
+        page = browserContext.newPage();
+        page.setDefaultTimeout(10_000);
+    }
+
     void assertShellDoesNotOverflow(Locator... controls) {
         var header = page.locator(".admin-shell-header");
         var viewportWidth = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
@@ -110,6 +124,38 @@ abstract class AbstractVisualLanguageE2EIT {
     String computedThemeVariable(String name) {
         return (String) page.locator("body")
                 .evaluate("(element, name) => getComputedStyle(element).getPropertyValue(name).trim()", name);
+    }
+
+    String computedPartStyle(Locator component, String part, String property) {
+        return (String) component.evaluate("""
+                element => getComputedStyle(element.shadowRoot.querySelector('[part="%s"]'))
+                        .getPropertyValue('%s')
+                """.formatted(part, property));
+    }
+
+    String computedPublicPartStyle(Locator component, String partToken, String property) {
+        return (String) component.evaluate("""
+                (element, options) => {
+                  const part = element.shadowRoot.querySelector('[part~="' + options.partToken + '"]');
+                  if (!part) throw new Error('Missing exported part: ' + options.partToken);
+                  return getComputedStyle(part).getPropertyValue(options.property);
+                }
+                """, Map.of("partToken", partToken, "property", property));
+    }
+
+    void assertWithinViewport(Locator control) {
+        var box = control.boundingBox();
+        var viewportWidth = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
+        var viewportHeight = ((Number) page.evaluate("() => window.innerHeight")).doubleValue();
+        org.assertj.core.api.Assertions.assertThat(box).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(box.x).isGreaterThanOrEqualTo(-1);
+        org.assertj.core.api.Assertions.assertThat(box.y).isGreaterThanOrEqualTo(-1);
+        org.assertj.core.api.Assertions.assertThat(box.x + box.width).isLessThanOrEqualTo(viewportWidth + 1);
+        org.assertj.core.api.Assertions.assertThat(box.y + box.height).isLessThanOrEqualTo(viewportHeight + 1);
+    }
+
+    String computedOpenedDialogOverlayPartStyle(String partToken, String property) {
+        return computedPublicPartStyle(page.locator("vaadin-dialog-overlay[opened]"), partToken, property);
     }
 
     double[] remValues(String value) {

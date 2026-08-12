@@ -400,16 +400,44 @@ class BrowserE2EIT {
     }
 
     @Test
-    void rejectedLocalCredentialsShowTheLoginFormError() {
+    void anonymousChineseBrowserSeesALocalizedLoginForm() {
+        browserContext.close();
+        browserContext = browser.newContext(new Browser.NewContextOptions().setLocale("zh-CN"));
+        page = browserContext.newPage();
+        page.setDefaultTimeout(10_000);
+
+        page.navigate(baseUrl() + "/login");
+
+        assertThat(page.getByRole(AriaRole.REGION, new Page.GetByRoleOptions().setName("登录"))).isVisible();
+        assertThat(page.getByLabel("用户名")).isVisible();
+        assertThat(page.getByLabel("密码")).isVisible();
+        assertThat(page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("登录"))).isVisible();
+
+        var loginForm = page.locator("vaadin-login-form");
+        loginForm.locator("input:not([type=hidden])").nth(0).fill("admin");
+        loginForm.locator("input:not([type=hidden])").nth(1).fill("incorrect-password");
+        loginForm.locator("vaadin-button[slot=submit]").click();
+
+        assertThat(page.getByText("用户名或密码不正确", new Page.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(page.getByText("请检查用户名和密码后重试。", new Page.GetByTextOptions().setExact(true))).isVisible();
+    }
+
+    @Test
+    void rejectedLocalCredentialsKeepTheLoginViewOpenAndShowTheLoginFormError() {
         page.navigate(baseUrl() + "/login");
         var loginForm = page.locator("vaadin-login-form");
+        var navigationsBeforeLogin = ((Number) page.evaluate("() => performance.getEntriesByType('navigation').length"))
+                .intValue();
         loginForm.locator("input:not([type=hidden])").nth(0).fill("admin");
         loginForm.locator("input:not([type=hidden])").nth(1).fill("incorrect-password");
 
         loginForm.locator("vaadin-button[slot=submit]").click();
 
-        page.waitForURL(baseUrl() + "/login?error");
         assertThat(loginForm).hasAttribute("error", "");
+        assertThat(page).hasURL(baseUrl() + "/login");
+        org.assertj.core.api.Assertions.assertThat(
+                ((Number) page.evaluate("() => performance.getEntriesByType('navigation').length")).intValue())
+                .isEqualTo(navigationsBeforeLogin);
     }
 
     @Test
@@ -615,10 +643,8 @@ class BrowserE2EIT {
         var credentials = loginForm.locator("input:not([type=hidden])");
         credentials.nth(0).fill(username);
         credentials.nth(1).fill(password);
-        var loginResponse = page.waitForResponse(response -> response.url().equals(baseUrl() + "/login")
-                && "POST".equals(response.request().method()),
-                () -> loginForm.locator("vaadin-button[slot=submit]").click());
-        org.assertj.core.api.Assertions.assertThat(loginResponse.status()).isEqualTo(302);
+        loginForm.locator("vaadin-button[slot=submit]").click();
+        page.waitForURL(baseUrl() + "/");
     }
 
     private void useNarrowBrowser() {

@@ -92,6 +92,7 @@ public final class CustomersView extends PermissionProtectedView implements Loca
         var workspace = new DataWorkspace<>(grid);
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "customers-workspace");
+        workspace.setFooter(pages.getPaginationBar());
 
         var frame = new AdminPageFrame(header, toolbar, workspace);
         add(frame);
@@ -138,6 +139,8 @@ public final class CustomersView extends PermissionProtectedView implements Loca
         name.setRequired(true);
         var email = new TextField(getTranslation("customers.email"));
         email.setRequired(true);
+        clearRequiredValidationWhenCorrected(name);
+        clearRequiredValidationWhenCorrected(email);
         var active = new Checkbox(getTranslation("customers.enabled"));
         if (customer != null) {
             name.setValue(customer.name());
@@ -149,6 +152,8 @@ public final class CustomersView extends PermissionProtectedView implements Loca
         var dialog = EditorDialog.translated(customer == null ? "customers.create-title" : "customers.edit-title", "customers.save", () -> { });
         dialog.getPrimaryAction().addClickListener(event -> {
             if (name.getValue().isBlank() || email.getValue().isBlank()) {
+                showRequiredValidation(name);
+                showRequiredValidation(email);
                 dialog.showValidationMessage(getTranslation("customers.required"));
                 return;
             }
@@ -214,6 +219,23 @@ public final class CustomersView extends PermissionProtectedView implements Loca
             return getTranslation("customers.required");
         }
         return getTranslation("customers.save-failed");
+    }
+
+    private void clearRequiredValidationWhenCorrected(TextField field) {
+        field.setValueChangeMode(ValueChangeMode.EAGER);
+        field.addValueChangeListener(event -> {
+            if (!field.getValue().isBlank()) {
+                field.setInvalid(false);
+                field.setErrorMessage("");
+            }
+        });
+    }
+
+    private void showRequiredValidation(TextField field) {
+        if (field.getValue().isBlank()) {
+            field.setErrorMessage(getTranslation("customers.required"));
+            field.setInvalid(true);
+        }
     }
 
     @Override public void localeChange(LocaleChangeEvent event) { updateText(); pages.refresh(); updateBrowserTitle(); }
