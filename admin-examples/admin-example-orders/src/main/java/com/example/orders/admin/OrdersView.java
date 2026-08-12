@@ -5,7 +5,6 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
@@ -15,6 +14,8 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import io.github.vaadinadminstarter.flow.navigation.AdminIcon;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconName;
 import io.github.vaadinadminstarter.flow.patterns.AdminPageFrame;
 import io.github.vaadinadminstarter.flow.patterns.DataWorkspace;
 import io.github.vaadinadminstarter.flow.patterns.DetailDialog;
@@ -75,7 +76,7 @@ public final class OrdersView extends PermissionProtectedView implements LocaleC
     }
 
     private HorizontalLayout actions(OrderRow order) {
-        var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(order));
+        var details = new Button(AdminIcon.of(AdminIconName.EYE), event -> showDetails(order));
         details.setTooltipText(getTranslation("orders.details"));
         details.setAriaLabel(getTranslation("orders.details-aria", order.number()));
         var actions = new HorizontalLayout(details);

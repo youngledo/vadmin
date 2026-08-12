@@ -9,7 +9,6 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,6 +28,8 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.flow.navigation.AdminIconCatalog;
+import io.github.vaadinadminstarter.flow.navigation.AdminIcon;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconName;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.flow.navigation.AdminPage;
 import io.github.vaadinadminstarter.springflow.i18n.AdminLocalePreference;
@@ -70,7 +71,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         this.localePreference = localePreference;
         this.translations = translations;
         this.appearance = appearance;
-        var productMark = new Span(VaadinIcon.CUBE.create());
+        var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
         var productName = new Span("Vaadin Admin Starter");
         productName.addClassName("admin-shell-brand");
@@ -177,7 +178,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private void rebuildDrawer() {
         drawer.removeAll();
         drawer.add(navigationGroup(text("system.shell.workspace"),
-                new SideNavItem(text("system.shell.home"), "", VaadinIcon.HOME.create())));
+                new SideNavItem(text("system.shell.home"), "", AdminIcon.of(AdminIconName.HOME))));
         var visiblePages = modules.pagesVisibleTo(user, authorization);
         modules.groupsVisibleTo(user, authorization).forEach(group -> addNavigationGroup(drawer, text(group.titleKey()),
                 visiblePages.stream().filter(page -> page.groupId().equals(group.id())).toList()));
@@ -185,7 +186,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     private void addNavigationGroup(VerticalLayout target, String label, java.util.List<AdminPage> pages) {
         if (!pages.isEmpty()) target.add(navigationGroup(label, pages.stream()
-                .map(page -> new SideNavItem(titleFor(page), page.route(), AdminIconCatalog.create(page.iconKey())))
+                .map(page -> new SideNavItem(titleFor(page), page.route(), AdminIconCatalog.createAdminIcon(page.iconKey())))
                 .toArray(SideNavItem[]::new)));
     }
 
@@ -235,7 +236,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         languageMenu.removeAll();
         languageMenu.getElement().setAttribute("aria-label", text("system.shell.language-menu"));
         languageMenu.setVisible(translations.getProvidedLocales().size() > 1);
-        var trigger = languageMenu.addItem(VaadinIcon.GLOBE.create());
+        var trigger = languageMenu.addItem(AdminIcon.of(AdminIconName.GLOBE));
         trigger.setAriaLabel(text("system.shell.language"));
         trigger.setTooltipText(text("system.shell.language"));
         translations.getProvidedLocales().forEach(locale -> addLanguageChoice(trigger, locale));
@@ -257,7 +258,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private void updateAppearanceMenu() {
         appearanceMenu.removeAll();
         appearanceMenu.getElement().setAttribute("aria-label", text("system.shell.appearance-menu"));
-        var trigger = appearanceMenu.addItem(VaadinIcon.PALETTE.create());
+        var trigger = appearanceMenu.addItem(AdminIcon.of(AdminIconName.PALETTE));
         trigger.setAriaLabel(text("system.shell.appearance"));
         trigger.setTooltipText(text("system.shell.appearance"));
         addThemeChoice(trigger, "light");

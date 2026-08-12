@@ -13,7 +13,11 @@ import io.github.vaadinadminstarter.app.views.MainLayout;
 import io.github.vaadinadminstarter.app.views.PermissionsView;
 import io.github.vaadinadminstarter.app.views.RolesView;
 import io.github.vaadinadminstarter.app.views.UsersView;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class ApplicationShellTest {
@@ -49,5 +53,27 @@ class ApplicationShellTest {
                 .filteredOn(field -> field.getName().equals("languageMenu") || field.getName().equals("appearanceMenu"))
                 .extracting(Field::getType)
                 .containsOnly(MenuBar.class);
+    }
+
+    @Test
+    void usesProfileNeutralIconsForTheShellAndReferenceWorkflows() throws IOException {
+        assertUsesSemanticIcons("src/main/java/io/github/vaadinadminstarter/app/views/MainLayout.java",
+                "AdminIcon.of(AdminIconName.GLOBE)", "AdminIconCatalog.createAdminIcon(page.iconKey())");
+        assertUsesSemanticIcons("src/main/java/io/github/vaadinadminstarter/app/views/UsersView.java",
+                "AdminIcon.of(AdminIconName.ADD)");
+        assertUsesSemanticIcons("src/main/java/io/github/vaadinadminstarter/app/views/CustomersView.java",
+                "AdminIcon.of(AdminIconName.ATTACHMENT)");
+        assertUsesSemanticIcons("src/main/java/io/github/vaadinadminstarter/app/views/RolesView.java",
+                "AdminIcon.of(AdminIconName.EYE)");
+        assertUsesSemanticIcons("../admin-examples/admin-example-orders/src/main/java/com/example/orders/admin/OrdersView.java",
+                "AdminIcon.of(AdminIconName.EYE)");
+    }
+
+    private void assertUsesSemanticIcons(String relativePath, String... expectedUsages) throws IOException {
+        var source = Files.readString(Path.of(relativePath), StandardCharsets.UTF_8);
+
+        assertThat(source).contains("import io.github.vaadinadminstarter.flow.navigation.AdminIcon;");
+        assertThat(source).doesNotContain("import com.vaadin.flow.component.icon.VaadinIcon;");
+        assertThat(source).contains(expectedUsages);
     }
 }

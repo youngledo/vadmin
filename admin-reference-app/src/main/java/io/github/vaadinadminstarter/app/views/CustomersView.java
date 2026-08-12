@@ -5,7 +5,6 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,6 +31,8 @@ import io.github.vaadinadminstarter.flow.patterns.EditorDialog;
 import io.github.vaadinadminstarter.flow.patterns.FlowFileUpload;
 import io.github.vaadinadminstarter.flow.patterns.OperationFeedback;
 import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
+import io.github.vaadinadminstarter.flow.navigation.AdminIcon;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconName;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
@@ -85,7 +86,7 @@ public final class CustomersView extends PermissionProtectedView implements Loca
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "customers-toolbar");
         toolbar.addFilter(filter);
-        createAction = new Button(VaadinIcon.PLUS.create(), event -> edit(null));
+        createAction = new Button(AdminIcon.of(AdminIconName.ADD), event -> edit(null));
         createAction.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
         toolbar.setPrimaryAction(createAction);
         var workspace = new DataWorkspace<>(grid);
@@ -104,18 +105,18 @@ public final class CustomersView extends PermissionProtectedView implements Loca
     }
 
     private HorizontalLayout actions(Customer customer, AuthorizationService authorization) {
-        var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(customer));
+        var details = new Button(AdminIcon.of(AdminIconName.EYE), event -> showDetails(customer));
         details.setTooltipText(getTranslation("customers.details"));
         details.setAriaLabel(getTranslation("customers.details-aria", customer.name()));
-        var edit = new Button(VaadinIcon.EDIT.create(), event -> edit(customer));
+        var edit = new Button(AdminIcon.of(AdminIconName.EDIT), event -> edit(customer));
         edit.setTooltipText(getTranslation("customers.edit"));
         edit.setAriaLabel(getTranslation("customers.edit"));
         edit.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
-        var delete = new Button(VaadinIcon.TRASH.create(), event -> confirmDelete(customer));
+        var delete = new Button(AdminIcon.of(AdminIconName.DELETE), event -> confirmDelete(customer));
         delete.setTooltipText(getTranslation("customers.delete"));
         delete.setAriaLabel(getTranslation("customers.delete"));
         delete.setVisible(authorization.hasPermission(requireCurrentUser(), DELETE));
-        var attachments = new Button(VaadinIcon.PAPERCLIP.create(), event -> showAttachments(customer, authorization));
+        var attachments = new Button(AdminIcon.of(AdminIconName.ATTACHMENT), event -> showAttachments(customer, authorization));
         attachments.setTooltipText(getTranslation("customers.attachments"));
         attachments.setAriaLabel(getTranslation("customers.attachments"));
         var actions = new HorizontalLayout(details, edit, attachments, delete);

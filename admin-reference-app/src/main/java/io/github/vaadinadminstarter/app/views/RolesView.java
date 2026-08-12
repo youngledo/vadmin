@@ -3,7 +3,6 @@ package io.github.vaadinadminstarter.app.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -23,6 +22,8 @@ import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionCommand;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionUseCase;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import io.github.vaadinadminstarter.flow.navigation.AdminIcon;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconName;
 import jakarta.annotation.security.PermitAll;
 import java.util.Comparator;
 
@@ -68,7 +69,7 @@ public final class RolesView extends PermissionProtectedView implements LocaleCh
     }
 
     private Button detailsAction(AdministrationQueryService.RoleRow role) {
-        var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(role));
+        var details = new Button(AdminIcon.of(AdminIconName.EYE), event -> showDetails(role));
         details.setTooltipText(getTranslation("system.roles.details"));
         details.setAriaLabel(getTranslation("system.roles.details-aria", role.code()));
         return details;

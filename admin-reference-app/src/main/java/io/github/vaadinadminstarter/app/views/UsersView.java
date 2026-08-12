@@ -2,7 +2,6 @@ package io.github.vaadinadminstarter.app.views;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -26,6 +25,8 @@ import io.github.vaadinadminstarter.flow.patterns.PagedGrid;
 import io.github.vaadinadminstarter.flow.patterns.PageHeader;
 import io.github.vaadinadminstarter.flow.patterns.PageToolbar;
 import io.github.vaadinadminstarter.flow.navigation.PermissionProtectedView;
+import io.github.vaadinadminstarter.flow.navigation.AdminIcon;
+import io.github.vaadinadminstarter.flow.navigation.AdminIconName;
 import jakarta.annotation.security.PermitAll;
 import java.util.Map;
 import java.util.Set;
@@ -73,14 +74,14 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "users-toolbar");
         toolbar.addFilter(filter);
-        createAction = new Button(VaadinIcon.PLUS.create(), event -> createUser());
+        createAction = new Button(AdminIcon.of(AdminIconName.ADD), event -> createUser());
         createAction.setVisible(authorization.hasPermission(requireCurrentUser(), CREATE));
         toolbar.setPrimaryAction(createAction);
 
         var workspace = new DataWorkspace<>(grid);
         workspace.getElement().setAttribute("data-testid", "users-workspace");
-        enableSelectedAction = bulkAction(VaadinIcon.PLAY, true, authorization);
-        disableSelectedAction = bulkAction(VaadinIcon.PAUSE, false, authorization);
+        enableSelectedAction = bulkAction(AdminIconName.PLAY, true, authorization);
+        disableSelectedAction = bulkAction(AdminIconName.PAUSE, false, authorization);
         var canUpdate = authorization.hasPermission(requireCurrentUser(), UPDATE);
         workspace.addBulkAction(enableSelectedAction, () -> canUpdate);
         workspace.addBulkAction(disableSelectedAction, () -> canUpdate);
@@ -97,11 +98,11 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
     }
 
     private HorizontalLayout action(AdministrationQueryService.UserRow user, AuthorizationService authorization) {
-        var details = new Button(VaadinIcon.EYE.create(), event -> showDetails(user));
+        var details = new Button(AdminIcon.of(AdminIconName.EYE), event -> showDetails(user));
         details.setTooltipText(getTranslation("system.users.details"));
         details.setAriaLabel(getTranslation("system.users.details-aria", user.username()));
         var actionLabel = getTranslation(user.enabled() ? "system.users.disable" : "system.users.enable");
-        var enabled = new Button(user.enabled() ? VaadinIcon.PAUSE.create() : VaadinIcon.PLAY.create(),
+        var enabled = new Button(AdminIcon.of(user.enabled() ? AdminIconName.PAUSE : AdminIconName.PLAY),
                 event -> confirmStatusChange(Set.of(user.id()), user.enabled()));
         enabled.setTooltipText(actionLabel);
         enabled.setAriaLabel(getTranslation(user.enabled() ? "system.users.disable-aria" : "system.users.enable-aria", user.username()));
@@ -112,8 +113,8 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
         return actions;
     }
 
-    private Button bulkAction(VaadinIcon icon, boolean enabled, AuthorizationService authorization) {
-        var action = new Button(icon.create(), event -> confirmStatusChange(grid.getSelectedItems().stream()
+    private Button bulkAction(AdminIconName icon, boolean enabled, AuthorizationService authorization) {
+        var action = new Button(AdminIcon.of(icon), event -> confirmStatusChange(grid.getSelectedItems().stream()
                 .map(AdministrationQueryService.UserRow::id)
                 .collect(Collectors.toSet()), !enabled));
         action.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
