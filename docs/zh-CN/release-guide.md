@@ -89,6 +89,7 @@ Reactor 版本由根 `pom.xml` 统一管理，所有第一方 Maven 模块继承
 ```bash
 ./mvnw -B -ntp verify
 ./mvnw -B -ntp -Pproduction verify
+./scripts/verify-standalone-consumer.sh
 docker compose --env-file .env.example config
 docker build -t vaadin-admin-starter:0.1.0-rc .
 ```
@@ -97,6 +98,7 @@ docker build -t vaadin-admin-starter:0.1.0-rc .
 - [ ] 单元、架构、Testcontainers、OIDC、基线浏览器、Ant 桌面和 Ant 紧凑浏览器套件均为
   零 failures、零 errors。
 - [ ] 生产构建包含动态组合的 Flow 路由，且在没有 Vaadin 开发服务器时可运行。
+- [ ] 独立使用方脚本完成本地制品安装、已认证的订单浏览器流程，以及使用方自身的生产前端打包。
 - [ ] Compose 配置渲染时没有未解析变量。
 - [ ] 镜像以非 root 运行时镜像构建，并能使用外部提供的凭据连接全新的 PostgreSQL 18
   服务启动。
@@ -109,6 +111,16 @@ docker build -t vaadin-admin-starter:0.1.0-rc .
 仓库的坐标、凭据、签名、POM 元数据（名称、描述、URL、SCM、开发者和许可证）、适用时的
 源码与 Javadoc 制品以及制品来源证明要求。发布或提升前，应在干净的使用方项目中检查
 staged 制品。
+
+仓库为本地 Maven 仓库中的 snapshot 提供了等价的发布前接入验收路径：
+
+```bash
+./scripts/verify-standalone-consumer.sh
+```
+
+它会将第一方 reactor 制品安装到本地仓库，然后验证一个仅通过坐标消费 starter 与
+`admin-example-orders` 的独立 Spring Boot 宿主。应在常规发布检查完成后运行它；该结果是
+本地使用方接入的证据，不是制品发布步骤。
 
 本地 reactor 构建通过并不代表可以上传制品、推送发布标签、创建 GitHub Release 或暴露
 引导密码。

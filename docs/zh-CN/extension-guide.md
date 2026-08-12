@@ -2,109 +2,196 @@
 
 [English](../en/extension-guide.md) | 简体中文
 
-本项目是模块化单体。`admin-contracts` 定义 Java 级端口和共享模型，
-`admin-platform` 定义经过授权的业务用例。Flow、Spring Security、JPA 和 Spring Boot
-属于适配器层；`admin-reference-app` 是组合根和示例业务模块。新增业务能力应沿着这一
-依赖方向组织。不要让 Flow 视图直接调用 JPA repository。
+本指南说明独立打包的 Vaadin Flow 管理模块应如何接入 Spring Boot 宿主。当前只支持
+Spring Boot 运行时。这是编译期 Maven 组合，不是运行时插件安装：宿主通过普通 Maven
+依赖选择模块，Spring Boot 在启动时发现各模块的自动配置。
 
-## 新增权限和页面
+`admin-contracts` 和 `admin-platform` 保持 Java 优先且不依赖 Spring。`admin-flow`
+拥有 Flow 页面模式和 Spring-free 管理模块契约。`admin-spring-flow` 是 Spring Boot
+适配器，负责聚合模块描述符、权限、翻译资源和动态 Flow 路由；宿主拥有自身的应用布局与主题。
 
-首先在 `ApplicationConfiguration.permissionCatalog()` 中新增稳定的权限代码，例如
-`orders:order:read`。然后在同一个配置类中新增 `PageDefinition`。它应提供稳定的
-`pageId`、中文标题键、图标、顺序、路由和所需权限。启动时，权限目录会同步到数据库；
-管理员仍须显式将新权限授予现有角色。
+## 新增管理模块
 
-使用 `@Route` 注册 Flow 页面，并在进入页面前检查与页面定义相同的权限。参考应用中的
-受保护页面通过 `SecuredView` 执行该检查。新页面应遵循相同的重定向策略：未登录用户
-进入登录页，没有权限的用户进入 `access-denied`。页面上的按钮仅是用户体验控制。用于
-创建、修改、删除和其他变更的平台用例必须再次调用 `AuthorizationService`。
+使用 `admin-examples/admin-example-orders` 中的独立订单示例作为完整的工作参考。宿主只需
+添加一项 Maven 依赖来接入该制品：
+
+```xml
+<dependency>
+  <groupId>io.github.vaadinadminstarter</groupId>
+  <artifactId>admin-example-orders</artifactId>
+  <version>${vaadin-admin-starter.version}</version>
+</dependency>
+```
+
+模块自身依赖 `admin-flow`、`admin-contracts`、`spring-boot-autoconfigure` 和
+`vaadin-spring`，不得依赖 `admin-reference-app`。参考应用包含订单制品，仅用于展示宿主
+组合方式和验收测试。
+
+每个模块从一个 Boot 自动配置中贡献一个 `AdminModule` Bean。该描述符是导航、路由、权限
+和翻译元数据的唯一事实来源：
+
+```java
+@AutoConfiguration
+public class OrdersAutoConfiguration {
+  @Bean
+  AdminModule ordersAdminModule() {
+    return AdminModule.of("orders",
+        List.of(new AdminNavigationGroup("business", "orders.nav.group", 300)),
+        List.of(new AdminPage("orders.list", "business", "orders.title",
+            "orders.intent", "shopping-cart", 100, "orders",
+            PermissionCode.of("orders:order:read"), OrdersView.class)),
+        Set.of(PermissionCode.of("orders:order:read")),
+        List.of(new AdminMessageBundle("orders", "orders.i18n.messages")));
+  }
+
+  @Bean
+  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+  OrdersView ordersView(CurrentUserProvider currentUser,
+                         AuthorizationService authorization,
+                         OrderQueryService orders) {
+    return new OrdersView(currentUser, authorization, orders);
+  }
+}
+```
+
+使用稳定标识符。模块 ID、分组 ID、页面 ID、路由、权限代码和消息资源包基名都是公开配置
+标识符。页面标题和意图 key 必须以模块 ID 为前缀，例如 `orders.title`、`orders.intent`。
+
+不要在贡献的页面上声明 `@Route`。`admin-spring-flow` 会通过 Flow 公共路由配置 API，连同
+宿主布局一起注册描述符中声明的 View 类型。受保护的 View 应继承
+`PermissionProtectedView`，并返回与 `AdminPage` 声明相同的权限；匿名请求会跳转到
+`login`，无权请求会跳转到 `access-denied`。
+
+组合后的权限目录是权威来源。不要定义宿主 `PermissionCatalog` Bean。
+`admin-spring-flow` 从每个启用的 `AdminModule` 推导权限目录，并通过宿主已有集成同步它；
+宿主管理员再以常规方式把新权限授予现有角色。
+
+### 宿主布局
+
+宿主只声明一次其路由布局。模块不得导入具体宿主布局，例如参考应用的 `MainLayout`：
+
+```java
+@Bean
+AdminHostLayout adminHostLayout() {
+  return new AdminHostLayout(MainLayout.class);
+}
+```
+
+### 生产前端锚点
+
+动态注册可以让 View 在运行时路由，但 Vaadin 生产前端构建不能从路由注解发现该 View。因此，
+宿主必须为每个动态注册模块 View 在其组合的 `@Layout` 类上添加一个静态 `@Uses` 注解。
+这是必需的宿主生产包锚点，不能替代模块描述符，且模块 View 仍不得声明 `@Route`：
+
+```java
+@Layout
+@Uses(OrdersView.class)
+public final class MainLayout extends AppLayout {
+    // 宿主的公共应用壳。
+}
+```
+
+宿主组合更多模块页面时，也在这里添加其 View 类型。注解属于宿主而不是模块，因为宿主决定
+哪些 Maven 模块进入生产构建。
+
+### 翻译资源
+
+模块声明消息资源包基名，并在自身制品中提供两种支持语言：
+
+```text
+src/main/resources/
+  orders/i18n/messages_zh_CN.properties
+  orders/i18n/messages_en_US.properties
+```
+
+组合 Provider 先解析当前选中的 `zh-CN` 或 `en-US` 资源，再回退到 `zh-CN`；未解析 key
+会被记录并显示为显式标记。对用户切换语言后必须刷新的可见 View 文本使用
+`LocaleChangeObserver`。导航和工作台条目会自动从描述符的翻译 key 解析。
+
+### 冲突和图标
+
+启动时会拒绝重复的模块 ID、页面 ID、路由、权限代码和消息资源包基名。只有当每项贡献的
+ID、标题 key 和顺序完全相同时，多个模块才能共享导航分组；第一项声明拥有其标题 key。
+应在贡献模块中修正冲突，不得依赖发现顺序。
+
+`iconKey` 在启动时校验。当前 `AdminIconCatalog` 支持 `briefcase`、`clock`、`history`、
+`key`、`shield`、`shopping-cart` 和 `users`。请选择这些稳定 key；未知字符串是配置错误，
+不会静默降级为通用图标。
+
+### 接入检查清单
+
+- 在宿主中以普通 Maven 依赖添加模块制品。
+- 从模块 Boot 自动配置中恰好贡献一个 `AdminModule` Bean；需要时再提供 Spring 管理的
+  prototype View Bean。
+- 不要在贡献 View 上声明 `@Route`，也不要定义宿主 `PermissionCatalog`。
+- 注册宿主 `AdminHostLayout`，并为宿主布局上的每个动态注册模块 View 添加
+  `@Uses(ModuleView.class)`。
+- 为每个声明的消息资源包提供完整的 `zh-CN` 默认资源。启动校验器还要求模块声明的每个
+  导航分组标题、页面标题和页面意图 key。为第二种支持语言增加 `en-US`；其缺失 key 会稳定
+  回退到 `zh-CN`。
+- 修改已组合的 View 集合后，运行宿主生产构建。
+
+### 验证本地使用方
+
+在 Docker 可用的前提下，于仓库根目录运行以下命令，可在发布前验证这条接入路径：
+
+```bash
+./scripts/verify-standalone-consumer.sh
+```
+
+脚本会先将所有第一方 `0.1.0-SNAPSHOT` 制品安装到本地 Maven 仓库，然后把
+`verification/standalone-consumer` 作为独立 Spring Boot 宿主构建。该宿主仅通过 Maven
+坐标依赖 starter 与 `admin-example-orders`，并拥有自己的布局和引导配置；它会使用本地开发
+管理员登录、打开动态注册的 `/orders` 页面，并执行使用方自身的生产前端打包。这是本地仓库
+接入验收，不是发布到 Maven Central，也不是第二个参考应用。
 
 ## 使用 Flow 设计系统
 
-`admin-flow` 提供可组合的 Java Flow 页面模式，而不是另一个前端组件运行时。页面继续
-直接使用标准 Vaadin 组件；仅在重复的管理工作流中组合以下模式：
+`admin-flow` 提供可组合的 Java Flow 页面模式，而不是另一个前端组件运行时。页面继续直接
+使用标准 Vaadin 组件；仅在重复管理工作流中组合以下模式：
 
 | 模式 | 用途 |
-|---|---|
+| --- | --- |
 | `PageHeader` | 页面标题、说明、位置和页面级动作。 |
-| `PageToolbar` | 查询字段、次要操作和主要创建操作。 |
+| `PageToolbar` | 查询字段、次要操作和主要创建动作。 |
 | `DataWorkspace<T>` | 稳定的 `Grid` 容器、选中数量、批量操作，以及忙碌、空或失败状态。 |
-| `EditorDialog` | 响应式 `FormLayout`、字段校验反馈和标准页脚操作。 |
+| `EditorDialog` | 响应式 `FormLayout`、字段校验反馈和标准页脚动作。 |
 | `EmptyState` | 带有明确下一步的空数据或加载失败内容。 |
 | `PagedGrid<T>` | 将服务端分页查询绑定到 `Grid`，并统一刷新行为和空表格文案。 |
 
-以下是精简的页面组合示例。领域查询和命令仍是应用层依赖；示例不会向
-`admin-flow` 引入 Spring 类型：
+以下是精简的页面组合示例。领域查询和命令仍是应用层依赖；示例不会向 `admin-flow` 引入
+Spring 类型：
 
 ```java
 var header = new PageHeader("订单", "处理可访问订单。");
-
-var filter = new TextField("搜索订单");
-var toolbar = new PageToolbar();
-toolbar.addFilter(filter);
-toolbar.setPrimaryAction(new Button("新增订单", event -> openEditor()));
-
 var grid = new Grid<OrderRow>();
-grid.setSelectionMode(Grid.SelectionMode.MULTI);
-var pages = new PagedGrid<>(grid, queries::orders,
-        () -> Map.of("q", filter.getValue()), "number");
-filter.addValueChangeListener(event -> pages.refresh());
-
+var pages = new PagedGrid<>(grid, queries::orders, "number");
 var workspace = new DataWorkspace<>(grid);
 workspace.setFooter(pages.getPaginationBar());
-workspace.addBulkAction(cancelSelected, () -> canCancelOrders());
-add(header, toolbar, workspace);
-```
-
-编辑器通过实际的命令处理器保存，并在对话框中显示可恢复的字段错误：
-
-```java
-var editor = new EditorDialog("新增订单", "保存", () -> { });
-editor.addField(number, customer);
-editor.getPrimaryAction().addClickListener(event -> {
-    if (number.isEmpty()) {
-        editor.showValidationMessage("订单号为必填项。");
-        return;
-    }
-    commands.create(requireCurrentUser(), number.getValue(), customer.getValue());
-    editor.close();
-    pages.refresh();
-});
-editor.open();
+add(header, workspace);
 ```
 
 使用 `workspace.setBusy(true)`、`workspace.showEmpty(...)`、
-`workspace.showFailure(...)` 和 `workspace.showData()` 显式表示异步查询或加载
-结果。不要将“无数据”显示为成功的表格，也不要在可复用模式中放入领域文案或权限决策。
-页面提供批量操作资格；资格发生变化时，页面调用
-`workspace.refreshBulkActions()`。
+`workspace.showFailure(...)` 和 `workspace.showData()` 显式表示异步查询或加载结果。
+不要将“无数据”显示为成功的表格，也不要在可复用模式中放入领域文案或权限决策。页面提供
+批量操作资格；资格发生变化时调用 `workspace.refreshBulkActions()`。
 
-主题属于应用层。参考应用使用 `ApplicationShell` 和 `@Theme("admin-theme")` 注册
-`src/main/frontend/themes/admin-theme/theme.json` 与 `styles.css`。新应用应复制或创建
-自己的命名主题，并覆盖 `--admin-*` 语义变量，而不是修改 `admin-flow`。当前用户菜单中
-的浅色/深色模式仅保存在 Vaadin session；它不是账户偏好设置。
+主题属于宿主应用。只有宿主声明 `@Theme` 并控制浅色/深色选择。模块使用文档化的
+`--admin-*` 语义令牌或现有 Flow 页面模式，不得声明全局主题或竞争性品牌样式表。规范令牌
+契约覆盖 surface、text、border、accent、success、warning、danger、focus、spacing、
+typography、radius、elevation 和密集工作区角色，详见[主题令牌](../en/theme-tokens.md)。
 
-业务模块只能使用公开的 `--admin-*` 语义令牌和共享 Flow 页面模式。分页工作区应通过
-`workspace.setFooter(pages.getPaginationBar())` 组合。模块不得导入宿主的
-`admin-theme`、注册全局 `@Theme`、选择视觉语言或密度、全局修改 Lumo 变量，或依赖仅由
-Ant 档案提供的选择器。这些均属于宿主决策，参见[外观配置档案](appearance-profiles.md)。
+模块不得导入宿主 `admin-theme`、声明全局 `@Theme`、选择外观档案或密度、修改全局 Lumo
+变量，或依赖仅适用于 Ant 的选择器或 Grid 内部结构。Grid 表头和行、分页页脚、工作区状态
+与危险确认内容均由宿主负责呈现；模块只使用普通 Flow 状态和对话框 API，详见
+[外观配置档案](appearance-profiles.md)。
 
-Grid 表头和行、分页页脚、工作区状态以及危险操作后果说明都由宿主主题负责。模块只使用
-标准 Flow 的 Grid、状态和对话框 API，不得针对 Ant 选择器或 Grid 内部结构编写样式。
-
-对于常见操作图标，使用 `admin-flow` 的 `AdminIcon.of(AdminIconName)`，不要直接选择
-`VaadinIcon` 来表达宿主无关的业务语义。模块导航页仍只能声明 `AdminIconCatalog` 支持的图标键。
-模块不得导入 `admin-theme/icons`、自行设置 `data-admin-icon` 或 CSS mask 变量；Ant SVG 掩膜由
-宿主提供，Vaadin 档案会保留对应的 Vaadin 回退图标。
-
-参考应用的 `MainLayout` 组合了应用外壳。它使用 `AppLayout`、
-`PageRegistry.visibleTo(...)` 和授权服务生成分组导航，并通过 `DrawerToggle` 保持窄屏
-中的导航可达。扩展页面应复用该布局，或实现相同的权限过滤和直接路由保护。隐藏导航
-不能替代用例级授权。
+宿主 `MainLayout` 从组合后的 `AdminModuleRegistry` 渲染按权限过滤的分组导航，并使用相同
+元数据生成工作台条目。隐藏导航不等于授权：变更用例必须再次检查 `AuthorizationService`。
 
 ## 新增业务模块
 
-业务模块应定义自己的实体、查询模型、端口和用例。推荐的调用方向为：
+业务模块应定义自己的实体、查询模型、端口和用例。推荐调用方向：
 
 ```text
 Flow view -> business use case -> repository / audit / file-storage ports
@@ -113,31 +200,45 @@ Flow view -> business use case -> repository / audit / file-storage ports
 ```
 
 将业务规则和授权放入用例，而不是页面事件监听器。将 JPA 映射、SQL 和事务放入 Spring
-适配器或参考应用的持久化实现。为每个变更用例增加权限检查和审计结果，并为每个新表增加
-不可变的版本化 Flyway 迁移。核心模块不得导入 Spring、JPA、Flyway 或具体的适配器类型。
+适配器或使用方自身的持久化实现。每个变更用例都增加权限检查和审计结果，每个新表都使用
+不可变的版本化 Flyway 迁移。核心模块不得导入 Spring、JPA、Flyway 或具体适配器类型。
 
 ## 替换文件存储
 
-`FileStorage` 是用于存储、读取和删除二进制内容的端口。默认的 `LocalFileStorage` 适合
-本地开发和演示。生产对象存储适配器应以不透明 UUID 作为键，保留流式读取语义，在失败
-时提供可诊断的日志，并在业务删除操作中调用相同的删除语义。
+`FileStorage` 是存储、读取和删除二进制内容的端口。默认 `LocalFileStorage` 适用于本地开发
+和演示。生产对象存储适配器应使用不透明 UUID 键、保留流式读取语义、在失败时记录可诊断
+日志，并在业务删除操作中调用相同删除语义。
 
-新增适配器后，请在组合根提供唯一的 `FileStorage` bean，并配置其凭据和存储位置。若
-适配器引入新的事务、一致性、重试、删除延迟或安全语义，应先记录架构决策，并为失败和
-恢复路径增加集成测试。
-
-## 中文优先的 UI 和品牌
-
-当前参考 UI 以中文为先。为新页面、校验消息和导航标题优先提供中文文本。需要其他语言
-时，使用消息键和 Spring `MessageSource`；不要将业务规则绑定到展示文本。应用层负责
-品牌名称、主布局标题、导航文案和主题变量。保留 Vaadin 的无障碍和浅色/深色主题约定，
-不要修改可复用模块来硬编码特定组织的名称或颜色。
+新增适配器后，在组合根提供唯一 `FileStorage` Bean，并配置其凭据和存储位置。如果适配器
+引入新的事务、一致性、重试、删除延迟或安全语义，先记录架构决策并为失败与恢复路径增加
+集成测试。
 
 ## HTTP 错误与可观测性
 
-对于自定义 HTTP API，复用 `ProblemDetailMapper` 将 `BusinessFailure` 映射为 RFC 9457
-Problem Details。不要将 Spring 的 `ProblemDetail` 放入 contracts 或 platform。对于 Flow
-交互，复用 `FlowErrorMapper` 处理字段校验、访问拒绝和安全失败呈现。
+自定义 HTTP API 复用 `ProblemDetailMapper` 将 `BusinessFailure` 映射为 RFC 9457 Problem
+Details。不要将 Spring 的 `ProblemDetail` 放入 contracts 或 platform。Flow 交互复用
+`FlowErrorMapper` 处理字段校验、访问拒绝与安全失败呈现。
 
-每个新的 HTTP 入口都必须保留 `X-Correlation-Id` 请求传播，并将关联 ID 写入日志和相关
-审计事件。错误响应和日志只能包含安全的诊断信息。
+每个新的 HTTP 入口必须保留 `X-Correlation-Id` 请求传播，并把关联 ID 写入日志和相关审计
+事件。错误响应和日志只能包含安全的诊断信息。
+
+## 扩展外部身份映射
+
+`admin-contracts` 提供 `ExternalIdentityMapper`，供选择 Spring Security OIDC 登录的应用
+使用。它接收框架无关的 `ExternalIdentity`，其中包含规范化 issuer URI、稳定 `sub`、可选
+显示名称与邮箱，以及标量字符串声明；它返回应用已有 `CurrentUser` 或无结果。
+
+使用方拥有映射器和自身数据模型。把 issuer 与 subject 匹配到预先存在且启用的本地账户；
+不要把邮箱、显示名称或未经验证的组声明作为主身份键。只有映射成功后，starter 的 OIDC
+适配器才会重建标准本地主体，因此既有路由检查、授权用例、审计和认证版本失效保持同一个
+本地用户模型。
+
+通过 Spring Security 客户端注册配置任意符合标准的 issuer，并将
+`vaadin-admin.oidc.registration-id` 设为该注册 ID。对应重定向 URI 是
+`{baseUrl}/login/oauth2/code/{registrationId}`。完整、与提供商无关的配置参见
+[配置可选 OIDC 登录](quick-start.md#配置可选-oidc-登录)。Keycloak 仅用于测试；中国大陆、
+全球及自托管提供商都使用相同的标准 OIDC 路径。
+
+不要将企业授权策略放进可复用模块或 starter 的 mapper SPI。组到角色转换、即时创建、
+去配、SCIM、MFA、SAML、LDAP 集成、租户选择和数据范围控制均由使用方扩展。无法映射到
+启用本地账户的 OIDC 登录必须被拒绝，而不是创建账户或授予默认角色。

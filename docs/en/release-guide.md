@@ -107,6 +107,7 @@ release record.
 ```bash
 ./mvnw -B -ntp verify
 ./mvnw -B -ntp -Pproduction verify
+./scripts/verify-standalone-consumer.sh
 docker compose --env-file .env.example config
 docker build -t vaadin-admin-starter:0.1.0-rc .
 ```
@@ -116,6 +117,9 @@ docker build -t vaadin-admin-starter:0.1.0-rc .
   and Ant compact browser suites report zero failures and zero errors.
 - [ ] The production build includes the dynamically composed Flow routes and
   works without the Vaadin development server.
+- [ ] The standalone-consumer script installs local artifacts, completes its
+  authenticated orders browser flow, and creates its independent production
+  frontend package.
 - [ ] Compose configuration renders without unresolved variables.
 - [ ] The image builds with the non-root runtime image and starts against a
   fresh PostgreSQL 18 service using externally supplied credentials.
@@ -132,6 +136,18 @@ covers the chosen repository's coordinates, credentials, signing, POM metadata
 artifacts where applicable, and provenance requirements. Review the resulting
 staged artifacts from a clean consumer project before publishing or promoting
 them.
+
+The repository includes the equivalent pre-publication acceptance path for
+snapshots in the local Maven repository:
+
+```bash
+./scripts/verify-standalone-consumer.sh
+```
+
+It installs the first-party reactor locally, then verifies an independent
+Spring Boot host that consumes the starter and `admin-example-orders` only by
+coordinates. Run it after the normal release checks; it is evidence of local
+consumer adoption, not an artifact-publication step.
 
 Do not treat a green local reactor build as authorization to upload artifacts,
 push a release tag, create a GitHub Release, or expose bootstrap credentials.

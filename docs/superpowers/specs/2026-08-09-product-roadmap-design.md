@@ -132,6 +132,13 @@ versioning policy, upgrade notes, release gates, and the distinction between
 what is verified in this repository and what must be configured before public
 artifact publication. See the [release guide](../../en/release-guide.md).
 
+The first release-readiness acceptance deliverable is a standalone local
+consumer verification: install first-party snapshots to the local Maven
+repository, build a minimal external Spring Boot host, and access the
+independently packaged orders module without a dependency on the reference
+application. It is recorded in
+[Standalone Consumer Verification](2026-08-12-standalone-consumer-verification-design.md).
+
 ## Governance
 
 - Start only one forward phase at a time.

@@ -154,6 +154,24 @@ do not silently fall back to a generic icon.
   fallback behavior.
 - Run the host's production build after changing the composed view set.
 
+### Verify A Local Consumer
+
+Before publishing the starter, validate this adoption path from the repository
+root with Docker available:
+
+```bash
+./scripts/verify-standalone-consumer.sh
+```
+
+The script installs all first-party `0.1.0-SNAPSHOT` artifacts into the local
+Maven repository, then builds `verification/standalone-consumer` as an
+independent Spring Boot host. That host depends on the starter and
+`admin-example-orders` only by Maven coordinates, has its own layout and
+bootstrap configuration, logs in with its local development administrator, and
+opens the dynamically registered `/orders` page. It also runs the consumer's
+production frontend package. This is a local repository acceptance check, not
+publication to Maven Central and not a second reference application.
+
 ## Use The Flow Design System
 
 `admin-flow` provides composable Java Flow page patterns, not another frontend
