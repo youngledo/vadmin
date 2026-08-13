@@ -64,15 +64,16 @@ Phase 1 将可复用的 Flow 模式保留在 `admin-flow` 中，将主题资源�
 ApplicationShell (@Theme("admin-theme"))
   -> admin-theme/theme.json + styles.css
   -> MainLayout (AppLayout)
-       -> PageRegistry.visibleTo(currentUser, authorization)
+       -> AdminModuleRegistry.pagesVisibleTo(currentUser, authorization)
        -> protected Flow views
             -> PageHeader / PageToolbar / DataWorkspace / EditorDialog
             -> DetailDialog / ConfirmationDialog / OperationFeedback
 ```
 
 `ApplicationShell` 是 Flow 的 `AppShellConfigurator`；它是放置应用级 `@Theme` 注解的
-必要位置。`MainLayout` 是应用组合类，而不是可复用的 Spring 适配器。它从 `PageRegistry`
-获取经权限过滤的页面投影，提供产品页头和分组导航，并在导航后更新当前路由标题。
+必要位置。`MainLayout` 是应用组合类，而不是可复用的 Spring 适配器。它从
+`AdminModuleRegistry` 获取经权限过滤的页面投影，提供产品页头和分组导航，并在导航后更新
+当前路由标题。
 
 具名 `admin-theme` 位于
 `admin-reference-app/src/main/frontend/themes/admin-theme/`。其 CSS 负责语义化浅色和深色
