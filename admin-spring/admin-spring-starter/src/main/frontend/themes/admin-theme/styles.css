@@ -1,0 +1,812 @@
+:root {
+  --admin-canvas: #f4f6f8;
+  --admin-surface: #ffffff;
+  --admin-surface-raised: #ffffff;
+  --admin-border: #d8dee6;
+  --admin-accent: #146c94;
+  --admin-accent-hover: #0d587b;
+  --admin-neutral-action: #586574;
+  --admin-danger: #b42318;
+  --admin-disabled: #aab4bf;
+  --admin-success: #16794b;
+  --admin-warning: #9a6700;
+  --admin-error: var(--admin-danger);
+  --admin-info: #146c94;
+  --admin-text-primary: #18212b;
+  --admin-text-secondary: #52606d;
+  --admin-text-muted: #788491;
+  --admin-focus: #146c94;
+  --admin-font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --admin-space-sm: 0.5rem;
+  --admin-space-md: 1rem;
+  --admin-space-lg: 1.5rem;
+  --admin-control-height: 2.25rem;
+  --admin-grid-cell-padding: 0.5rem 1rem;
+  --admin-utility-size: 2.25rem;
+  --admin-radius-control: 0.375rem;
+  --admin-radius-surface: 0.5rem;
+  --admin-elevation-raised: 0 1px 2px rgb(24 33 43 / 12%);
+  --admin-elevation-workspace: 0 1px 3px rgb(24 33 43 / 10%);
+  --admin-control-fill: #ffffff;
+  --admin-control-border: #d8dee6;
+  --admin-control-hover-border: #146c94;
+  --admin-control-disabled-fill: #eef1f4;
+  --admin-overlay-surface: #ffffff;
+  --admin-overlay-shadow: 0 8px 24px rgb(24 33 43 / 18%);
+  --admin-content-max-width: 90rem;
+  --admin-primary: var(--admin-accent);
+  --admin-primary-hover: var(--admin-accent-hover);
+  --admin-text: var(--admin-text-primary);
+  --admin-space-compact: var(--admin-space-sm);
+  --admin-space-standard: var(--admin-space-md);
+  --admin-radius: var(--admin-radius-control);
+  --admin-elevation: var(--admin-elevation-raised);
+  --lumo-primary-color: var(--admin-accent);
+  --lumo-primary-color-50pct: color-mix(in srgb, var(--admin-accent) 50%, transparent);
+  --lumo-primary-color-10pct: color-mix(in srgb, var(--admin-accent) 10%, transparent);
+  --lumo-success-color: var(--admin-success);
+  --lumo-warning-color: var(--admin-warning);
+  --lumo-error-color: var(--admin-danger);
+  --lumo-body-text-color: var(--admin-text-primary);
+  --lumo-secondary-text-color: var(--admin-text-secondary);
+  --lumo-tertiary-text-color: var(--admin-text-muted);
+  --lumo-base-color: var(--admin-surface);
+  --lumo-contrast-10pct: var(--admin-border);
+  --lumo-border-radius-m: var(--admin-radius-control);
+  --lumo-font-family: var(--admin-font-family);
+  --lumo-size-m: var(--admin-control-height);
+  --vaadin-focus-ring-color: var(--admin-focus);
+}
+
+html[theme~="dark"],
+[theme~="dark"] {
+  --admin-canvas: #151b23;
+  --admin-surface: #1d2630;
+  --admin-surface-raised: #273340;
+  --admin-border: #3a4654;
+  --admin-accent: #52b6e8;
+  --admin-accent-hover: #8bcef0;
+  --admin-neutral-action: #afbbc7;
+  --admin-danger: #ff9b93;
+  --admin-disabled: #697786;
+  --admin-success: #62c78f;
+  --admin-warning: #f3bd5b;
+  --admin-error: var(--admin-danger);
+  --admin-info: #7cc8ef;
+  --admin-text-primary: #edf2f7;
+  --admin-text-secondary: #c0cad5;
+  --admin-text-muted: #94a2b0;
+  --admin-focus: #7cc8ef;
+  --admin-font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --admin-space-sm: 0.5rem;
+  --admin-space-md: 1rem;
+  --admin-space-lg: 1.5rem;
+  --admin-control-height: 2.25rem;
+  --admin-grid-cell-padding: 0.5rem 1rem;
+  --admin-utility-size: 2.25rem;
+  --admin-radius-control: 0.375rem;
+  --admin-radius-surface: 0.5rem;
+  --admin-elevation-raised: 0 1px 2px rgb(24 33 43 / 12%);
+  --admin-elevation-workspace: 0 1px 3px rgb(24 33 43 / 18%);
+  --admin-control-fill: #1d2630;
+  --admin-control-border: #3a4654;
+  --admin-control-hover-border: #8bcef0;
+  --admin-control-disabled-fill: #273340;
+  --admin-overlay-surface: #273340;
+  --admin-overlay-shadow: 0 12px 28px rgb(0 0 0 / 40%);
+  --admin-primary: var(--admin-accent);
+  --admin-primary-hover: var(--admin-accent-hover);
+  --admin-text: var(--admin-text-primary);
+  --admin-space-compact: var(--admin-space-sm);
+  --admin-space-standard: var(--admin-space-md);
+  --admin-radius: var(--admin-radius-control);
+  --admin-elevation: var(--admin-elevation-raised);
+  --lumo-primary-color: var(--admin-accent);
+  --lumo-primary-color-50pct: color-mix(in srgb, var(--admin-accent) 50%, transparent);
+  --lumo-primary-color-10pct: color-mix(in srgb, var(--admin-accent) 10%, transparent);
+  --lumo-success-color: var(--admin-success);
+  --lumo-warning-color: var(--admin-warning);
+  --lumo-error-color: var(--admin-danger);
+  --lumo-body-text-color: var(--admin-text-primary);
+  --lumo-secondary-text-color: var(--admin-text-secondary);
+  --lumo-tertiary-text-color: var(--admin-text-muted);
+  --lumo-base-color: var(--admin-surface);
+  --lumo-contrast-10pct: var(--admin-border);
+  --lumo-border-radius-m: var(--admin-radius-control);
+  --lumo-font-family: var(--admin-font-family);
+  --lumo-size-m: var(--admin-control-height);
+  --vaadin-focus-ring-color: var(--admin-focus);
+}
+
+[data-admin-visual-language="ant"] {
+  --admin-canvas: #f5f5f5;
+  --admin-surface: #ffffff;
+  --admin-surface-raised: #ffffff;
+  --admin-border: #d9d9d9;
+  --admin-accent: #1677ff;
+  --admin-accent-hover: #4096ff;
+  --admin-neutral-action: rgba(0, 0, 0, 0.65);
+  --admin-danger: #ff4d4f;
+  --admin-disabled: rgba(0, 0, 0, 0.25);
+  --admin-success: #52c41a;
+  --admin-warning: #faad14;
+  --admin-error: var(--admin-danger);
+  --admin-info: var(--admin-accent);
+  --admin-text-primary: rgba(0, 0, 0, 0.88);
+  --admin-text-secondary: rgba(0, 0, 0, 0.65);
+  --admin-text-muted: rgba(0, 0, 0, 0.45);
+  --admin-focus: #1677ff;
+  --admin-radius-control: 0.375rem;
+  --admin-radius-surface: 0.5rem;
+  --admin-elevation-raised: 0 1px 2px rgb(0 0 0 / 3%);
+  --admin-elevation-workspace: 0 1px 2px rgb(0 0 0 / 8%);
+  --admin-control-fill: #ffffff;
+  --admin-control-border: #d9d9d9;
+  --admin-control-hover-border: #4096ff;
+  --admin-control-disabled-fill: #f5f5f5;
+  --admin-overlay-surface: #ffffff;
+  --admin-overlay-shadow: 0 6px 16px rgb(0 0 0 / 8%);
+  --admin-workspace-header-fill: #fafafa;
+  --admin-workspace-header-text: rgba(0, 0, 0, 0.65);
+  --admin-workspace-row-hover: #fafafa;
+  --admin-workspace-row-selected: #e6f4ff;
+  --admin-workspace-divider: #f0f0f0;
+  --admin-workspace-status-fill: #fafafa;
+  --admin-workspace-danger-fill: #fff2f0;
+}
+
+[data-admin-visual-language="ant"][theme~="dark"] {
+  --admin-canvas: #141414;
+  --admin-surface: #1f1f1f;
+  --admin-surface-raised: #1f1f1f;
+  --admin-border: #424242;
+  --admin-accent: #1668dc;
+  --admin-accent-hover: #3c89e8;
+  --admin-neutral-action: rgba(255, 255, 255, 0.65);
+  --admin-danger: #dc4446;
+  --admin-disabled: rgba(255, 255, 255, 0.3);
+  --admin-success: #49aa19;
+  --admin-warning: #d89614;
+  --admin-error: var(--admin-danger);
+  --admin-info: var(--admin-accent);
+  --admin-text-primary: rgba(255, 255, 255, 0.85);
+  --admin-text-secondary: rgba(255, 255, 255, 0.65);
+  --admin-text-muted: rgba(255, 255, 255, 0.45);
+  --admin-focus: #3c89e8;
+  --admin-elevation-raised: 0 1px 2px rgb(0 0 0 / 45%);
+  --admin-elevation-workspace: 0 2px 8px rgb(0 0 0 / 45%);
+  --admin-control-fill: #141414;
+  --admin-control-border: #434343;
+  --admin-control-hover-border: #3c89e8;
+  --admin-control-disabled-fill: #303030;
+  --admin-overlay-surface: #1f1f1f;
+  --admin-overlay-shadow: 0 6px 16px rgb(0 0 0 / 45%);
+  --admin-workspace-header-fill: #262626;
+  --admin-workspace-header-text: rgba(255, 255, 255, 0.65);
+  --admin-workspace-row-hover: #262626;
+  --admin-workspace-row-selected: #111d2c;
+  --admin-workspace-divider: #303030;
+  --admin-workspace-status-fill: #262626;
+  --admin-workspace-danger-fill: #2a1215;
+}
+
+[data-admin-density="comfortable"] {
+  --admin-space-sm: 0.5rem;
+  --admin-space-md: 1rem;
+  --admin-space-lg: 1.5rem;
+  --admin-control-height: 2.25rem;
+  --admin-grid-cell-padding: 0.5rem 1rem;
+}
+
+[data-admin-density="compact"] {
+  --admin-space-sm: 0.375rem;
+  --admin-space-md: 0.75rem;
+  --admin-space-lg: 1rem;
+  --admin-control-height: 2rem;
+  --admin-grid-cell-padding: 0.375rem 0.75rem;
+}
+
+[data-admin-visual-language],
+[data-admin-density] {
+  --lumo-primary-color: var(--admin-accent);
+  --lumo-primary-color-50pct: color-mix(in srgb, var(--admin-accent) 50%, transparent);
+  --lumo-primary-color-10pct: color-mix(in srgb, var(--admin-accent) 10%, transparent);
+  --lumo-success-color: var(--admin-success);
+  --lumo-warning-color: var(--admin-warning);
+  --lumo-error-color: var(--admin-danger);
+  --lumo-body-text-color: var(--admin-text-primary);
+  --lumo-secondary-text-color: var(--admin-text-secondary);
+  --lumo-tertiary-text-color: var(--admin-text-muted);
+  --lumo-base-color: var(--admin-surface);
+  --lumo-contrast-10pct: var(--admin-border);
+  --lumo-border-radius-m: var(--admin-radius-control);
+  --lumo-font-family: var(--admin-font-family);
+  --lumo-size-m: var(--admin-control-height);
+  --vaadin-focus-ring-color: var(--admin-focus);
+}
+
+html,
+body,
+#outlet {
+  background: var(--admin-canvas);
+}
+
+vaadin-app-layout {
+  background: var(--admin-canvas);
+  color: var(--admin-text-primary);
+}
+
+vaadin-app-layout::part(navbar) {
+  background: var(--admin-surface-raised);
+  border-bottom: 1px solid var(--admin-border);
+  box-shadow: var(--admin-elevation-raised);
+}
+
+vaadin-app-layout::part(drawer) {
+  background: var(--admin-surface);
+  border-right: 1px solid var(--admin-border);
+}
+
+vaadin-grid {
+  --vaadin-grid-cell-content-padding: var(--admin-grid-cell-padding);
+}
+
+[data-admin-visual-language="ant"] .admin-page-controls {
+  box-shadow: none;
+}
+
+[data-admin-visual-language="ant"] .admin-page-workspace {
+  box-shadow: var(--admin-elevation-workspace);
+}
+
+[data-admin-visual-language="ant"] vaadin-button {
+  --vaadin-button-background: var(--admin-control-fill);
+  --vaadin-button-border-color: var(--admin-control-border);
+  --vaadin-button-border-radius: var(--admin-radius-control);
+  --vaadin-button-height: var(--admin-control-height);
+  --vaadin-button-text-color: var(--admin-text-primary);
+  font-weight: 500;
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="primary"] {
+  --vaadin-button-background: var(--admin-accent);
+  --vaadin-button-border-color: var(--admin-accent);
+  --vaadin-button-text-color: #ffffff;
+  box-shadow: none;
+}
+
+[data-admin-visual-language="ant"] vaadin-button:not([disabled]):hover {
+  --vaadin-button-border-color: var(--admin-control-hover-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="primary"]:not([disabled]):hover {
+  --vaadin-button-background: var(--admin-accent-hover);
+  --vaadin-button-border-color: var(--admin-accent-hover);
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="tertiary"] {
+  --vaadin-button-background: transparent;
+  --vaadin-button-border-color: transparent;
+  --vaadin-button-text-color: var(--admin-neutral-action);
+}
+
+[data-admin-visual-language="ant"] vaadin-button[disabled] {
+  --vaadin-button-background: var(--admin-control-disabled-fill);
+  --vaadin-button-border-color: var(--admin-border);
+  --vaadin-button-text-color: var(--admin-disabled);
+  opacity: 1;
+}
+
+[data-admin-visual-language="ant"] vaadin-button[theme~="primary"][disabled] {
+  --vaadin-button-background: var(--admin-control-disabled-fill) !important;
+  --vaadin-button-text-color: var(--admin-disabled) !important;
+  background: var(--admin-control-disabled-fill) !important;
+  color: var(--admin-disabled) !important;
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker::part(input-field) {
+  background: var(--admin-control-fill);
+  border: 1px solid var(--admin-control-border);
+  border-radius: var(--admin-radius-control);
+  box-shadow: none;
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select:not([disabled]):hover::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker:not([disabled]):hover::part(input-field) {
+  border-color: var(--admin-control-hover-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select[focus-ring]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker[focus-ring]::part(input-field) {
+  border-color: var(--admin-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-focus) 20%, transparent);
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select[invalid]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker[invalid]::part(input-field) {
+  border-color: var(--admin-danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-danger) 12%, transparent);
+}
+
+[data-admin-visual-language="ant"] vaadin-text-field[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-password-field[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-number-field[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-text-area[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-combo-box[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-select[disabled]::part(input-field),
+[data-admin-visual-language="ant"] vaadin-date-picker[disabled]::part(input-field) {
+  background: var(--admin-control-disabled-fill);
+  border-color: var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-menu-bar-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-select-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-combo-box-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-date-picker-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-notification-card::part(overlay) {
+  background: var(--admin-overlay-surface);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-overlay-shadow);
+}
+
+[data-admin-visual-language="ant"] vaadin-menu-bar-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-select-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-combo-box-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-date-picker-overlay::part(overlay),
+[data-admin-visual-language="ant"] vaadin-notification-card::part(overlay) {
+  border-radius: var(--admin-radius-control);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(overlay) {
+  border-radius: var(--admin-radius-surface);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(header),
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(footer) {
+  padding: var(--admin-space-md);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(header) {
+  border-bottom: 1px solid var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-dialog-overlay::part(footer) {
+  border-top: 1px solid var(--admin-border);
+}
+
+[data-admin-visual-language="ant"] vaadin-notification-card::part(content) {
+  color: var(--admin-text-primary);
+  padding: var(--admin-space-md);
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(header-cell) {
+  background: var(--admin-workspace-header-fill);
+  border-bottom: 1px solid var(--admin-workspace-divider);
+  color: var(--admin-workspace-header-text);
+  font-weight: 600;
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(body-cell) {
+  box-shadow: inset 0 -1px var(--admin-workspace-divider);
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(row):hover {
+  background: var(--admin-workspace-row-hover);
+}
+
+[data-admin-visual-language="ant"] vaadin-grid::part(selected-row) {
+  background: var(--admin-workspace-row-selected);
+}
+
+[data-admin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state] {
+  border-color: var(--admin-workspace-divider);
+}
+
+[data-admin-visual-language="ant"] .admin-page-workspace > [role="status"],
+[data-admin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state="empty"] .admin-empty-state,
+[data-admin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state="failure"] .admin-empty-state {
+  background: var(--admin-workspace-status-fill);
+}
+
+[data-admin-visual-language="ant"] .admin-pagination-bar {
+  border-top: 1px solid var(--admin-workspace-divider);
+  justify-content: flex-end;
+  padding-top: var(--admin-space-sm);
+  width: 100%;
+}
+
+[data-admin-visual-language="ant"] .admin-confirmation-consequence {
+  background: var(--admin-workspace-danger-fill);
+  border-left: 3px solid var(--admin-danger);
+  color: var(--admin-text-primary);
+  margin: 0;
+  padding: var(--admin-space-sm);
+}
+
+[data-admin-visual-language="ant"] .admin-icon {
+  --admin-icon-mask: none;
+  align-items: center;
+  background: currentcolor;
+  display: inline-flex;
+  flex: 0 0 1rem;
+  height: 1rem;
+  justify-content: center;
+  mask-image: var(--admin-icon-mask);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 1rem;
+}
+
+[data-admin-visual-language="ant"] .admin-icon > vaadin-icon {
+  display: none;
+}
+
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="add"] { --admin-icon-mask: url("./icons/add.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="attachment"] { --admin-icon-mask: url("./icons/attachment.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="briefcase"] { --admin-icon-mask: url("./icons/briefcase.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="clock"] { --admin-icon-mask: url("./icons/clock.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="cube"] { --admin-icon-mask: url("./icons/cube.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="delete"] { --admin-icon-mask: url("./icons/delete.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="edit"] { --admin-icon-mask: url("./icons/edit.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="eye"] { --admin-icon-mask: url("./icons/eye.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="globe"] { --admin-icon-mask: url("./icons/globe.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="history"] { --admin-icon-mask: url("./icons/history.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="home"] { --admin-icon-mask: url("./icons/home.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="key"] { --admin-icon-mask: url("./icons/key.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="palette"] { --admin-icon-mask: url("./icons/palette.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="pause"] { --admin-icon-mask: url("./icons/pause.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="play"] { --admin-icon-mask: url("./icons/play.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="shield"] { --admin-icon-mask: url("./icons/shield.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="shopping-cart"] { --admin-icon-mask: url("./icons/shopping-cart.svg"); }
+[data-admin-visual-language="ant"] .admin-icon[data-admin-icon="users"] { --admin-icon-mask: url("./icons/users.svg"); }
+
+[data-admin-visual-language="ant"] vaadin-app-layout::part(navbar) {
+  min-height: 3rem;
+}
+
+[data-admin-visual-language="ant"] vaadin-app-layout::part(drawer) {
+  width: 13rem;
+}
+
+[data-admin-visual-language="ant"] .admin-shell-header {
+  gap: 0.75rem;
+  min-height: 3rem;
+}
+
+[data-admin-visual-language="ant"] .admin-product-mark {
+  border-radius: 0.25rem;
+}
+
+[data-admin-visual-language="ant"] .admin-drawer-content {
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+[data-admin-visual-language="ant"] vaadin-side-nav-item::part(link) {
+  border-radius: 0.375rem;
+}
+
+[data-admin-visual-language="ant"] vaadin-side-nav-item[current]::part(link) {
+  background: color-mix(in srgb, var(--admin-accent) 12%, transparent);
+}
+
+.admin-shell-header {
+  box-sizing: border-box;
+  gap: var(--admin-space-md);
+  min-height: 3.5rem;
+  padding: 0 var(--admin-space-md);
+}
+
+.admin-shell-brand {
+  color: var(--admin-text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.admin-product-mark {
+  align-items: center;
+  background: var(--admin-accent);
+  border-radius: var(--admin-radius-control);
+  color: var(--admin-surface);
+  display: inline-flex;
+  height: 1.75rem;
+  justify-content: center;
+  width: 1.75rem;
+}
+
+.admin-shell-location {
+  color: var(--admin-text-secondary);
+  font-size: 0.875rem;
+  margin-left: var(--admin-space-sm);
+}
+
+.admin-user-menu {
+  flex-shrink: 0;
+}
+
+.admin-shell-utilities {
+  gap: var(--admin-space-sm);
+  margin-left: auto;
+}
+
+.admin-shell-utility::part(container) {
+  gap: 0;
+}
+
+.admin-shell-utility vaadin-menu-bar-button {
+  border-radius: var(--admin-radius-control);
+  box-sizing: border-box;
+  min-height: var(--admin-utility-size);
+  min-width: var(--admin-utility-size);
+  padding: 0;
+}
+
+.admin-shell-utility vaadin-menu-bar-button:hover {
+  background: var(--lumo-primary-color-10pct);
+}
+
+.admin-drawer-content {
+  box-sizing: border-box;
+  gap: var(--admin-space-md);
+  min-height: 100%;
+  padding: var(--admin-space-md);
+}
+
+.admin-drawer-section {
+  color: var(--admin-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: var(--admin-space-md) var(--admin-space-sm) 0;
+  text-transform: uppercase;
+}
+
+.admin-drawer-nav {
+  width: 100%;
+}
+
+vaadin-side-nav-item::part(link) {
+  border-radius: var(--admin-radius-control);
+}
+
+vaadin-side-nav-item[current]::part(link) {
+  background: var(--lumo-primary-color-10pct);
+  color: var(--admin-accent);
+  font-weight: 600;
+}
+
+vaadin-side-nav-item::part(link):focus-visible,
+vaadin-button:focus-visible,
+vaadin-menu-bar-button:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+.admin-content-canvas {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: var(--admin-content-max-width);
+  min-height: 100%;
+  padding: var(--admin-space-lg);
+  width: 100%;
+}
+
+.admin-content-canvas.admin-content-full-width {
+  max-width: none;
+}
+
+.admin-workplace-entry {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-control);
+  box-sizing: border-box;
+  color: var(--admin-text-primary);
+  display: block;
+  max-width: 42rem;
+  padding: var(--admin-space-md);
+  text-decoration: none;
+  width: 100%;
+}
+
+.admin-workplace-entry:hover {
+  border-color: var(--admin-accent);
+  color: var(--admin-text-primary);
+}
+
+.admin-workplace-entry:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+.admin-workplace-entry-title,
+.admin-workplace-entry-intent {
+  display: block;
+}
+
+.admin-workplace-entry-title {
+  font-weight: 600;
+}
+
+.admin-workplace-entry-intent {
+  color: var(--admin-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.admin-page-frame {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-md);
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-page-header {
+  box-sizing: border-box;
+  color: var(--admin-text-primary);
+  gap: var(--admin-space-sm);
+  min-width: 0;
+  padding: var(--admin-space-sm) var(--admin-space-md);
+}
+
+.admin-page-header h1 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.admin-page-header p {
+  color: var(--admin-text-secondary);
+  margin: calc(var(--admin-space-sm) / 2) 0 0;
+}
+
+.admin-page-header > vaadin-horizontal-layout {
+  column-gap: var(--admin-space-md);
+  row-gap: var(--admin-space-sm);
+}
+
+.admin-page-header > vaadin-horizontal-layout > vaadin-vertical-layout {
+  min-width: 0;
+}
+
+.admin-page-controls {
+  background: var(--admin-surface-raised);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-surface);
+  box-shadow: var(--admin-elevation-raised);
+  box-sizing: border-box;
+  column-gap: var(--admin-space-md);
+  min-width: 0;
+  padding: var(--admin-space-sm) var(--admin-space-md);
+  row-gap: var(--admin-space-sm);
+}
+
+.admin-page-controls > vaadin-horizontal-layout {
+  column-gap: var(--admin-space-sm);
+  flex-wrap: wrap;
+  min-width: 0;
+  row-gap: var(--admin-space-sm);
+}
+
+.admin-page-workspace {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-surface);
+  box-shadow: var(--admin-elevation-workspace);
+  box-sizing: border-box;
+  color: var(--admin-text-primary);
+  gap: var(--admin-space-sm);
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--admin-space-md);
+  width: 100%;
+}
+
+.admin-page-workspace > [role="status"] {
+  box-sizing: border-box;
+  color: var(--admin-text-secondary);
+  width: 100%;
+}
+
+.admin-page-workspace > vaadin-grid {
+  min-width: 0;
+}
+
+@media (max-width: 44rem) {
+  .admin-shell-header {
+    gap: var(--admin-space-sm);
+    padding: 0 var(--admin-space-sm);
+  }
+
+  .admin-shell-brand {
+    display: none;
+  }
+
+  .admin-shell-location {
+    display: none;
+  }
+
+  .admin-shell-utilities {
+    gap: var(--admin-space-sm);
+  }
+
+  .admin-user-control {
+    min-width: 0;
+  }
+
+  .admin-user-menu,
+  .admin-user-menu vaadin-menu-bar-button {
+    max-width: 7rem;
+    min-width: 0;
+  }
+
+  .admin-user-menu-label {
+    display: block;
+    max-width: 4.5rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-content-canvas {
+    padding: var(--admin-space-md);
+  }
+
+  .admin-page-frame {
+    gap: var(--admin-space-sm);
+  }
+
+  .admin-page-header {
+    padding: var(--admin-space-sm) 0;
+  }
+
+  .admin-page-header > vaadin-horizontal-layout,
+  .admin-page-controls {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .admin-page-controls {
+    padding: var(--admin-space-sm);
+  }
+
+  .admin-page-controls > vaadin-horizontal-layout {
+    width: 100%;
+  }
+
+  .admin-page-controls vaadin-text-field {
+    flex: 1 1 13rem;
+    max-width: 100%;
+  }
+
+  .admin-page-workspace {
+    padding: var(--admin-space-sm);
+  }
+}
