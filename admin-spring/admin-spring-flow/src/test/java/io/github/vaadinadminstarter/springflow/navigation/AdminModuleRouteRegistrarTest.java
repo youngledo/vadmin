@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,8 +37,8 @@ import io.github.vaadinadminstarter.flow.navigation.AdminModule;
 import io.github.vaadinadminstarter.flow.navigation.AdminNavigationGroup;
 import io.github.vaadinadminstarter.flow.navigation.AdminPage;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
-import io.github.vaadinadminstarter.externalorders.ExternalOrdersView;
-import io.github.vaadinadminstarter.externalorders.OrdersService;
+import io.github.vaadinadminstarter.sample.ExternalSampleView;
+import io.github.vaadinadminstarter.sample.SampleService;
 
 @SpringBootTest(classes = AdminModuleRouteRegistrarTest.TestApplication.class)
 class AdminModuleRouteRegistrarTest {
@@ -48,7 +49,7 @@ class AdminModuleRouteRegistrarTest {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private OrdersService ordersService;
+    private SampleService sampleService;
 
     @Autowired
     private AdminModuleRegistry modules;
@@ -67,45 +68,49 @@ class AdminModuleRouteRegistrarTest {
         registrar.register(vaadinContext);
 
         var routes = RouteConfiguration.forRegistry(ApplicationRouteRegistry.getInstance(vaadinContext));
-        assertThat(routes.getRoute("orders")).contains(ExternalOrdersView.class);
+        assertThat(routes.getRoute("sample")).contains(ExternalSampleView.class);
         assertThat(routes.getAvailableRoutes())
-                .filteredOn(route -> route.getTemplate().equals("orders"))
+                .filteredOn(route -> route.getTemplate().equals("sample"))
                 .singleElement()
                 .extracting(route -> route.getParentLayouts())
                 .isEqualTo(List.of(TestHostLayout.class));
-        assertThat(routes.getAvailableRoutes()).filteredOn(route -> route.getTemplate().equals("orders")).hasSize(1);
-        assertThat(applicationContext.getBean(ExternalOrdersView.class).service()).isSameAs(ordersService);
-        assertThat(modules.pages()).extracting(AdminPage::route).containsExactly("orders");
-        assertThat(permissionCatalog.all()).containsExactly(PermissionCode.of("orders:order:read"));
-        assertThat(i18NProvider).isNotNull();
+        assertThat(routes.getAvailableRoutes()).filteredOn(route -> route.getTemplate().equals("sample")).hasSize(1);
+        assertThat(applicationContext.getBean(ExternalSampleView.class).service()).isSameAs(sampleService);
+        assertThat(modules.pages()).extracting(AdminPage::route).containsExactly("sample");
+        assertThat(modules.pages()).extracting(AdminPage::iconKey).containsExactly("briefcase");
+        assertThat(permissionCatalog.all()).containsExactly(PermissionCode.of("sample:record:read"));
+        assertThat(i18NProvider.getTranslation("sample.navigation", Locale.SIMPLIFIED_CHINESE))
+                .isEqualTo("示例管理");
+        assertThat(i18NProvider.getTranslation("sample.list.title", Locale.SIMPLIFIED_CHINESE))
+                .isEqualTo("示例");
     }
 
     @Test
     void rejectsAnOccupiedRouteBeforeRegisteringAnyModulePage() {
         var vaadinContext = new TestVaadinContext();
         var routes = RouteConfiguration.forRegistry(ApplicationRouteRegistry.getInstance(vaadinContext));
-        routes.setRoute("orders.history", OccupiedView.class);
-        var atomicRegistrar = new AdminModuleRouteRegistrar(new AdminModuleRegistry(List.of(new AdminModule("orders",
-                List.of(new AdminNavigationGroup("business", "orders.navigation.business", 100)),
+        routes.setRoute("sample.history", OccupiedView.class);
+        var atomicRegistrar = new AdminModuleRouteRegistrar(new AdminModuleRegistry(List.of(new AdminModule("sample",
+                List.of(new AdminNavigationGroup("sample", "sample.navigation", 100)),
                 List.of(
-                        new AdminPage("orders.list", "business", "orders.list.title", "orders.list.intent",
-                                "briefcase", 100, "orders", PermissionCode.of("orders:order:read"), ExternalOrdersView.class),
-                        new AdminPage("orders.history", "business", "orders.history.title", "orders.history.intent",
-                                "history", 200, "orders.history", PermissionCode.of("orders:order:read"), HistoryView.class)),
-                Set.of(PermissionCode.of("orders:order:read")),
-                List.of(new AdminMessageBundle("orders", "orders.i18n.messages"))))), new AdminHostLayout(TestHostLayout.class));
+                        new AdminPage("sample.list", "sample", "sample.list.title", "sample.list.intent",
+                                "briefcase", 100, "sample", PermissionCode.of("sample:record:read"), ExternalSampleView.class),
+                        new AdminPage("sample.history", "sample", "sample.history.title", "sample.history.intent",
+                                "history", 200, "sample.history", PermissionCode.of("sample:record:read"), HistoryView.class)),
+                Set.of(PermissionCode.of("sample:record:read")),
+                List.of(new AdminMessageBundle("sample", "sample.i18n.messages"))))), new AdminHostLayout(TestHostLayout.class));
 
         assertThatThrownBy(() -> atomicRegistrar.register(vaadinContext))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("orders.history");
+                .hasMessageContaining("sample.history");
 
-        assertThat(routes.getRoute("orders")).isEmpty();
-        assertThat(routes.getRoute("orders.history")).contains(OccupiedView.class);
+        assertThat(routes.getRoute("sample")).isEmpty();
+        assertThat(routes.getRoute("sample.history")).contains(OccupiedView.class);
     }
 
     @SpringBootConfiguration
     @EnableAutoConfiguration(exclude = SpringBootAutoConfiguration.class)
-    @Import({TestModuleConfiguration.class, ExternalOrdersView.class})
+    @Import({TestModuleConfiguration.class, ExternalSampleView.class})
     static class TestApplication {
     }
 
@@ -117,18 +122,18 @@ class AdminModuleRouteRegistrarTest {
         }
 
         @Bean
-        AdminModule ordersModule() {
-            return new AdminModule("orders",
-                    List.of(new AdminNavigationGroup("business", "orders.navigation.business", 100)),
-                    List.of(new AdminPage("orders.list", "business", "orders.list.title", "orders.list.intent",
-                            "briefcase", 100, "orders", PermissionCode.of("orders:order:read"), ExternalOrdersView.class)),
-                    Set.of(PermissionCode.of("orders:order:read")),
-                    List.of(new AdminMessageBundle("orders", "orders.i18n.messages")));
+        AdminModule sampleModule() {
+            return new AdminModule("sample",
+                    List.of(new AdminNavigationGroup("sample", "sample.navigation", 100)),
+                    List.of(new AdminPage("sample.list", "sample", "sample.list.title", "sample.list.intent",
+                            "briefcase", 100, "sample", PermissionCode.of("sample:record:read"), ExternalSampleView.class)),
+                    Set.of(PermissionCode.of("sample:record:read")),
+                    List.of(new AdminMessageBundle("sample", "sample.i18n.messages")));
         }
 
         @Bean
-        OrdersService ordersService() {
-            return new OrdersService();
+        SampleService sampleService() {
+            return new SampleService();
         }
     }
 

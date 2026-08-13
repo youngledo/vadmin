@@ -9,4 +9,11 @@ test-results/
 .worktrees/
 admin-reference-app/src/main/frontend/generated/
 admin-reference-app/src/main/bundles/
+admin-reference-app/node_modules/
+admin-reference-app/package.json
+admin-reference-app/package-lock.json
+admin-reference-app/tsconfig.json
+admin-reference-app/types.d.ts
+admin-reference-app/vite.config.ts
+admin-reference-app/vite.generated.ts
 data/

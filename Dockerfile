@@ -7,9 +7,7 @@ RUN ./mvnw -B -ntp -Pproduction -pl admin-reference-app -am package -DskipTests
 FROM eclipse-temurin:25-jre
 
 RUN groupadd --gid 10001 appgroup \
-    && useradd --uid 10001 --gid appgroup --create-home --home-dir /app appuser \
-    && mkdir --parents /var/lib/vaadin-admin-starter/files \
-    && chown --recursive appuser:appgroup /var/lib/vaadin-admin-starter
+    && useradd --uid 10001 --gid appgroup --create-home --home-dir /app appuser
 
 WORKDIR /app
 COPY --from=build --chown=appuser:appgroup \

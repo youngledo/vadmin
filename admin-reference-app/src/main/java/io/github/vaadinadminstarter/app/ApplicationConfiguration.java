@@ -8,20 +8,14 @@ import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
 import io.github.vaadinadminstarter.contracts.auth.ExternalIdentityMapper;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
-import io.github.vaadinadminstarter.contracts.file.FileStorage;
 import io.github.vaadinadminstarter.app.auth.ConfiguredExternalIdentityMapper;
 import io.github.vaadinadminstarter.app.auth.OidcIdentityLinkProperties;
-import io.github.vaadinadminstarter.app.file.LocalFileStorage;
-import io.github.vaadinadminstarter.app.theme.AdminAppearanceProperties;
-import io.github.vaadinadminstarter.app.views.MainLayout;
-import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
 import io.github.vaadinadminstarter.platform.access.AccessControlRepository;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionService;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionUseCase;
 import io.github.vaadinadminstarter.springjpa.access.PermissionCatalogSynchronizer;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
@@ -37,18 +31,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({OidcIdentityLinkProperties.class, AdminAppearanceProperties.class})
+@EnableConfigurationProperties(OidcIdentityLinkProperties.class)
 public class ApplicationConfiguration {
-    @Bean
-    AdminHostLayout adminHostLayout() {
-        return new AdminHostLayout(MainLayout.class);
-    }
-
-    @Bean
-    FileStorage fileStorage(Environment environment) {
-        return new LocalFileStorage(Path.of(environment.getRequiredProperty("app.file-storage.directory")));
-    }
-
     @Bean
     @ConditionalOnProperty(prefix = "app.identity.oidc.links[0]", name = "issuer")
     ExternalIdentityMapper configuredExternalIdentityMapper(OidcIdentityLinkProperties properties,

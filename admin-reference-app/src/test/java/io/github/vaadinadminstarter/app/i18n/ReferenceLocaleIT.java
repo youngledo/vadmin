@@ -32,7 +32,6 @@ class ReferenceLocaleIT {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
-        registry.add("app.file-storage.directory", () -> "target/i18n-test-files");
     }
 
     @Test

@@ -13,8 +13,6 @@ docker run --rm -p 8080:8080 \
   -e DATABASE_USERNAME=vaadin_admin \
   -e DATABASE_PASSWORD='replace-me' \
   -e APP_BOOTSTRAP_PASSWORD='replace-on-first-start' \
-  -e APP_FILE_STORAGE_DIRECTORY=/var/lib/vaadin-admin-starter/files \
-  -v vaadin-admin-files:/var/lib/vaadin-admin-starter/files \
   vaadin-admin-starter:local
 ```
 
@@ -28,26 +26,19 @@ Flyway 在 JPA 适配器可用前执行版本化 SQL 迁移，JPA 随后以 `ddl
 版本化迁移。应用升级前先在生产数据副本验证迁移和回滚方案。
 
 默认 PostgreSQL 地址、用户名与密码分别来自 `DATABASE_URL`、
-`DATABASE_USERNAME`、`DATABASE_PASSWORD`。文件存储目录来自
-`APP_FILE_STORAGE_DIRECTORY`。将数据库连接限制在受信网络，并由运行平台执行
+`DATABASE_USERNAME`、`DATABASE_PASSWORD`。将数据库连接限制在受信网络，并由运行平台执行
 TLS、访问控制、日志收集与健康检查策略。
 
 ## 备份和恢复
 
-客户附件在数据库中保存元数据与不透明文件 ID，实际内容由 `FileStorage` 保存。
-因此可恢复备份必须同时包含：
-
-1. PostgreSQL 数据库（包括 Flyway schema history）。
-2. 与该数据库同一恢复点的文件存储目录或对象存储前缀。
-
-只恢复其中之一会造成无法下载的附件或孤立文件。恢复时先在隔离环境验证数据库与
-文件副本的时间点匹配，再进行生产切换。
+Starter 基线只持久化访问控制和审计数据，因此恢复备份必须包含 PostgreSQL 数据库及其
+Flyway schema history。业务模块如接入 `FileStorage` 或其它外部持久化能力，应由使用方
+明确记录其一致性边界、备份范围和恢复顺序，并在隔离环境完成恢复演练后再进行生产切换。
 
 ## Compose 开发栈
 
-`docker-compose.yml` 使用 PostgreSQL 18、`postgres-data` 命名卷和
-`application-files` 命名卷。PostgreSQL 的 `pg_isready` 健康检查通过后，应用
-服务才会启动。检查渲染后的配置：
+`docker-compose.yml` 使用 PostgreSQL 18 和 `postgres-data` 命名卷。PostgreSQL 的
+`pg_isready` 健康检查通过后，应用服务才会启动。检查渲染后的配置：
 
 ```bash
 docker compose --env-file .env.example config

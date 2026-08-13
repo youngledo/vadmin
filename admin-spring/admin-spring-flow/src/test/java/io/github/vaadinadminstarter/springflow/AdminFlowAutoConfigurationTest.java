@@ -61,13 +61,13 @@ class AdminFlowAutoConfigurationTest {
         }
 
         @Bean
-        AdminModule ordersModule() {
-            return new AdminModule("orders",
-                    List.of(new AdminNavigationGroup("business", "orders.navigation.business", 100)),
-                    List.of(new AdminPage("orders.list", "business", "orders.list.title", "orders.list.intent",
-                            "briefcase", 100, "orders", PermissionCode.of("orders:order:read"), TestView.class)),
-                    Set.of(PermissionCode.of("orders:order:read")),
-                    List.of(new AdminMessageBundle("orders", "i18n.orders")));
+        AdminModule sampleModule() {
+            return new AdminModule("sample",
+                    List.of(new AdminNavigationGroup("sample", "sample.navigation", 100)),
+                    List.of(new AdminPage("sample.list", "sample", "sample.list.title", "sample.list.intent",
+                            "briefcase", 100, "sample", PermissionCode.of("sample:record:read"), TestView.class)),
+                    Set.of(PermissionCode.of("sample:record:read")),
+                    List.of(new AdminMessageBundle("sample", "i18n.sample")));
         }
     }
 
@@ -96,7 +96,7 @@ class AdminFlowAutoConfigurationTest {
     }
 
     private static AdminModule module(String moduleId, String bundleBaseName) {
-        var permission = PermissionCode.of(moduleId + ":order:read");
+        var permission = PermissionCode.of(moduleId + ":record:read");
         return new AdminModule(moduleId,
                 List.of(new AdminNavigationGroup("business-" + moduleId, moduleId + ".navigation", 100)),
                 List.of(new AdminPage(moduleId + ".list", "business-" + moduleId, moduleId + ".list.title",

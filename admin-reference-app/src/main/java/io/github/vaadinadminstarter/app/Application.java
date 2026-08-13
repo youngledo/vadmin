@@ -9,9 +9,10 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 @EnableVaadin({
         "io.github.vaadinadminstarter.app",
         "io.github.vaadinadminstarter.flow.error",
+        "io.github.vaadinadminstarter.starter",
         "io.github.vaadinadminstarter.springsecurity.ui"
 })
-@EntityScan(basePackages = {"io.github.vaadinadminstarter.springjpa", "io.github.vaadinadminstarter.app.customer"})
+@EntityScan(basePackages = "io.github.vaadinadminstarter.springjpa")
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

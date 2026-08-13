@@ -1,20 +1,14 @@
 # Theme Tokens
 
-The host application owns the Vaadin Flow theme. In the reference application,
-`ApplicationShell` declares `@Theme("admin-theme")`, and
-`admin-theme/styles.css` is the reference implementation of this token
-contract.
-
-Business modules consume these semantic CSS custom properties. They must not
-declare a global `@Theme`, modify Lumo variables globally, or select a theme at
-runtime. This keeps a module visually consistent with every host that adopts
-the contract, while the host remains free to apply its own brand.
+`admin-spring-starter` owns the default Vaadin Flow theme. Its
+`DefaultApplicationShell` registers `@Theme("admin-theme")`, and the starter's
+`admin-theme/styles.css` implements this token contract. Normal consumers and
+business modules use the tokens; they do not define a shell or global theme.
 
 ## Token Contract
 
-The following tokens are available in both the default and dark theme scopes.
-Their values are intentionally semantic: modules should choose the token for
-its meaning, never for a particular color or size.
+Tokens are available in default and dark scopes. Use a token for its semantic
+meaning, never for a particular color or size.
 
 | Token | Meaning |
 | --- | --- |
@@ -29,106 +23,53 @@ its meaning, never for a particular color or size.
 | `--admin-danger` | Destructive action or error outcome. |
 | `--admin-focus` | Keyboard focus indicator. |
 | `--admin-font-family` | Application font stack. |
-| `--admin-space-sm` | Compact, related spacing. |
+| `--admin-space-sm` | Compact related spacing. |
 | `--admin-space-md` | Standard layout and control spacing. |
-| `--admin-space-lg` | Content-canvas spacing and larger layout separation. |
-| `--admin-control-height` | Standard interactive-control height for the active density. |
-| `--admin-grid-cell-padding` | Grid cell padding for the active density. |
-| `--admin-utility-size` | Stable square dimension for compact shell utility controls. |
+| `--admin-space-lg` | Content-canvas spacing and larger separation. |
+| `--admin-control-height` | Standard control height for the active density. |
+| `--admin-grid-cell-padding` | Grid padding for the active density. |
+| `--admin-utility-size` | Stable square dimension for shell utility controls. |
 | `--admin-radius-control` | Standard interactive-control corner radius. |
 | `--admin-radius-surface` | Corner radius for contained work surfaces. |
 | `--admin-elevation-raised` | Shadow for raised application chrome. |
-| `--admin-elevation-workspace` | Reserved elevation for a data workspace surface. |
-| `--admin-control-fill` | Normal fill of a standard form control. |
-| `--admin-control-border` | Resting border of a standard form control. |
-| `--admin-control-hover-border` | Border treatment for an enabled control on hover. |
-| `--admin-control-disabled-fill` | Non-interactive fill for a disabled control. |
+| `--admin-elevation-workspace` | Reserved elevation for a data workspace. |
+| `--admin-control-fill` | Normal fill of a form control. |
+| `--admin-control-border` | Resting border of a form control. |
+| `--admin-control-hover-border` | Enabled-control hover border. |
+| `--admin-control-disabled-fill` | Non-interactive control fill. |
 | `--admin-overlay-surface` | Surface for menus, pickers, dialogs, and notifications. |
-| `--admin-overlay-shadow` | Elevation for menus, pickers, dialogs, and notifications. |
+| `--admin-overlay-shadow` | Elevation for overlays. |
 | `--admin-workspace-header-fill` | Header surface for dense data workspaces. |
-| `--admin-workspace-header-text` | Secondary text used in workspace headers. |
-| `--admin-workspace-row-hover` | Hover surface for an enabled workspace row. |
+| `--admin-workspace-header-text` | Secondary workspace-header text. |
+| `--admin-workspace-row-hover` | Hover surface for enabled workspace rows. |
 | `--admin-workspace-row-selected` | Selected-row and selection-summary surface. |
-| `--admin-workspace-divider` | Low-emphasis separator between workspace regions. |
-| `--admin-workspace-status-fill` | Busy, empty, and failure state surface inside a workspace. |
+| `--admin-workspace-divider` | Low-emphasis workspace separator. |
+| `--admin-workspace-status-fill` | Busy, empty, and failure state surface. |
 | `--admin-workspace-danger-fill` | Consequence surface for a destructive confirmation. |
 
-The reference theme maps Vaadin Lumo variables from these semantic tokens.
-In particular, `--lumo-font-family` is mapped from `--admin-font-family`, and
-the primary 10% and 50% Lumo state colors are derived from `--admin-accent`.
-The standard Lumo success, warning, and error colors are mapped from
-`--admin-success`, `--admin-warning`, and `--admin-danger`; Vaadin's normal
-control focus ring is mapped from `--admin-focus`.
-Flow applies the theme attribute to `body`, so the reference theme repeats its
-Lumo and Vaadin mappings in the dark selector. This ensures those variables
-resolve the dark semantic tokens instead of inheriting values computed at the
-root scope.
-Legacy `--admin-primary`, `--admin-text`, `--admin-space-compact`,
-`--admin-space-standard`, `--admin-radius`, and `--admin-elevation` aliases
-remain for compatibility. New module CSS must use the canonical names in the
-table.
+The default theme maps the relevant Vaadin Lumo variables from these semantic
+tokens in both light and dark scopes. Legacy aliases remain only for
+compatibility; new module CSS uses the canonical names above.
 
 ## Appearance Axes
 
-Visual language, color mode, and density are independent appearance axes. The
-reference application currently supports the `vaadin` and `ant` visual
-languages, light and dark session color modes, and `comfortable` and `compact`
-densities. The host selects visual language and density; the existing session
-appearance control selects only light or dark mode. See
-[Appearance Profiles](appearance-profiles.md) for host configuration.
+Visual language, color mode, and density are independent. The starter supports
+`vaadin` and `ant` visual languages, session-scoped light/dark mode, and
+comfortable/compact density. Modules consume tokens and shared Flow patterns;
+they must not select a visual language or density, modify global Lumo variables,
+or depend on profile-specific selectors.
 
-Modules consume the semantic tokens and shared Flow patterns. They must not
-select a visual language or density, mutate Lumo variables globally, or depend
-on profile-specific selectors such as `[data-admin-visual-language="ant"]`.
+Use `AdminIcon` and `AdminIconName` from `admin-flow` for standard actions.
+Do not import starter theme icons, assign `data-admin-icon`, or set icon-mask
+variables from a business module. The starter owns profile-specific icon assets
+and Vaadin fallbacks.
 
-Semantic icons follow the same ownership rule. Use `AdminIcon` and
-`AdminIconName` from `admin-flow` for standard actions, but do not import
-`admin-theme/icons`, assign `data-admin-icon`, or set icon mask variables from
-a module. The host provides the Ant SVG masks and keeps the Vaadin fallback
-visible in the Vaadin profile.
+## Business Module CSS
 
-Controls and overlays follow the same boundary. Modules rely on Vaadin's
-native invalid, disabled, focus, dialog, and notification semantics, but do
-not target overlay internals or Ant-only selectors. The host maps those
-states through this semantic token contract for its active profile.
-
-Dense workspace presentation follows the same boundary. Modules compose
-`DataWorkspace` with `PagedGrid.getPaginationBar()` and use normal Grid,
-selection, status, and dialog APIs. They must not target Grid internals,
-profile selectors, or Ant workspace rules.
-
-## Host Overrides
-
-A host may override a token in its own theme while retaining the same semantic
-meaning. Define default values in `:root` and provide a corresponding dark-mode
-value when the visual decision needs one:
+Keep CSS scoped to a module-owned component class:
 
 ```css
-:root {
-  --admin-accent: #0f766e;
-  --admin-focus: #0f766e;
-  --admin-font-family: "IBM Plex Sans", sans-serif;
-}
-
-html[theme~="dark"],
-[theme~="dark"] {
-  --admin-accent: #5eead4;
-  --admin-focus: #5eead4;
-}
-```
-
-Override tokens in the host theme after the reference declarations. Do not
-override a Lumo variable directly when a matching `--admin-*` token exists.
-The host alone controls theme registration and light/dark mode; the reference
-application stores its mode choice in the Vaadin session.
-
-## Module CSS
-
-Module CSS should remain scoped to a module-owned component class and compose
-the token contract. For example:
-
-```css
-.orders-summary {
+.inventory-summary {
   background: var(--admin-surface-raised);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius-control);
@@ -137,7 +78,13 @@ the token contract. For example:
 }
 ```
 
-Do not hard-code a competing brand color, replace global page backgrounds, or
-ship arbitrary global selectors. Reuse the Java Flow page patterns from
-`admin-flow` for standard administration workflows and use scoped CSS only for
-genuine module-specific presentation.
+Do not hard-code a competing brand color, replace global page backgrounds, ship
+arbitrary global selectors, or target Flow overlay and Grid internals. Use the
+shared `admin-flow` page patterns and normal Vaadin state APIs.
+
+## Full Shell Replacement
+
+Only a consumer deliberately replacing the complete shell owns an alternative
+`AppShellConfigurator`, `@Theme`, and token implementation. It must preserve a
+coherent accessible appearance for all assembled modules. Partial replacement
+of starter shell pieces or selected system pages is not supported.

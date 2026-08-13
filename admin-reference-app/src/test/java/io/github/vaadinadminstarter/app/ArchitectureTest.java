@@ -7,7 +7,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
-@AnalyzeClasses(packages = {"io.github.vaadinadminstarter", "com.example.orders"})
+@AnalyzeClasses(packages = "io.github.vaadinadminstarter")
 class ArchitectureTest {
     @ArchTest
     static final ArchRule core_does_not_depend_on_spring = noClasses()
@@ -22,9 +22,14 @@ class ArchitectureTest {
                     "org.springframework..", "jakarta.persistence..", "org.flywaydb..", "..app..");
 
     @ArchTest
-    static final ArchRule orders_example_does_not_depend_on_reference_app = noClasses()
-            .that().resideInAnyPackage("com.example.orders..")
-            .should().dependOnClassesThat().resideInAnyPackage("..app..");
+    static final ArchRule reference_app_does_not_own_starter_shell_or_system_administration = noClasses()
+            .that().resideInAnyPackage("io.github.vaadinadminstarter.app..")
+            .should().haveSimpleNameStartingWith("Default")
+            .orShould().haveSimpleNameEndingWith("View")
+            .orShould().haveSimpleNameContaining("Administration")
+            .orShould().haveSimpleNameContaining("Appearance")
+            .orShould().haveSimpleNameContaining("Theme")
+            .orShould().haveSimpleNameContaining("ModuleConfiguration");
 
     @ArchTest
     static final ArchRule flow_module_does_not_depend_on_spring = noClasses()
@@ -32,8 +37,8 @@ class ArchitectureTest {
             .should().dependOnClassesThat().resideInAnyPackage("org.springframework..");
 
     @ArchTest
-    static final ArchRule only_the_host_and_flow_adapter_depend_on_springflow = noClasses()
-            .that().resideOutsideOfPackages("..app..", "..springflow..")
+    static final ArchRule only_the_starter_and_flow_adapter_depend_on_springflow = noClasses()
+            .that().resideOutsideOfPackages("..app..", "..springflow..", "..starter..")
             .should().dependOnClassesThat().resideInAnyPackage("..springflow..");
 
     @ArchTest

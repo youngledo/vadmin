@@ -20,24 +20,24 @@ class CompositeAdminI18NProviderTest {
 
     private final CompositeAdminI18NProvider provider = new CompositeAdminI18NProvider(List.of(
             new AdminMessageBundle("core", "i18n.core"),
-            new AdminMessageBundle("orders", "i18n.orders")));
+            new AdminMessageBundle("sample", "i18n.sample")));
 
     @Test
     void usesTheSelectedModuleBundleAndFormatsParameters() {
-        assertThat(provider.getTranslation("orders.greeting", EN_US, "A-1024"))
-                .isEqualTo("Order A-1024");
+        assertThat(provider.getTranslation("sample.greeting", EN_US, "A-1024"))
+                .isEqualTo("Sample A-1024");
     }
 
     @Test
     void fallsBackToChineseWhenTheSelectedLocaleDoesNotContainTheKey() {
-        assertThat(provider.getTranslation("orders.status.pending", EN_US))
+        assertThat(provider.getTranslation("sample.status.pending", EN_US))
                 .isEqualTo("待处理");
     }
 
     @Test
     void doesNotSearchOtherModuleBundlesForAKey() {
-        assertThat(provider.getTranslation("orders.shared", ZH_CN))
-                .isEqualTo("!zh-CN: orders.shared!");
+        assertThat(provider.getTranslation("sample.shared", ZH_CN))
+                .isEqualTo("!zh-CN: sample.shared!");
     }
 
     @Test
@@ -47,10 +47,10 @@ class CompositeAdminI18NProviderTest {
         events.start();
         logger.addAppender(events);
         try {
-            assertThat(provider.getTranslation("orders.missing", EN_US))
-                    .isEqualTo("!en-US: orders.missing!");
+            assertThat(provider.getTranslation("sample.missing", EN_US))
+                    .isEqualTo("!en-US: sample.missing!");
             assertThat(events.list).extracting(ILoggingEvent::getFormattedMessage)
-                    .anySatisfy(message -> assertThat(message).contains("!en-US: orders.missing!"));
+                    .anySatisfy(message -> assertThat(message).contains("!en-US: sample.missing!"));
         } finally {
             logger.detachAppender(events);
             events.stop();

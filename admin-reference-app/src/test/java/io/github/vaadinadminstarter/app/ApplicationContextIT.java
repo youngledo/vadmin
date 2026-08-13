@@ -2,21 +2,16 @@ package io.github.vaadinadminstarter.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import com.example.orders.admin.OrderQueryService;
-import com.example.orders.admin.OrdersAdminModule;
-import io.github.vaadinadminstarter.app.administration.AdministrationQueryService;
+import io.github.vaadinadminstarter.starter.administration.AdministrationQueryService;
 import io.github.vaadinadminstarter.contracts.auth.LocalUserAccountLookup;
 import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
 import io.github.vaadinadminstarter.contracts.auth.CurrentUser;
-import io.github.vaadinadminstarter.contracts.file.FileStorage;
-import io.github.vaadinadminstarter.app.customer.CustomerService;
+import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionCommand;
 import io.github.vaadinadminstarter.platform.access.GrantPermissionUseCase;
 import io.github.vaadinadminstarter.springsecurity.auth.SpringAuthorizationService;
-import javax.sql.DataSource;
+import com.vaadin.flow.server.auth.NavigationAccessChecker;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.context.ApplicationContext;
@@ -47,15 +42,6 @@ class ApplicationContextIT {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private CustomerService customerService;
-
-    @Autowired
-    private FileStorage fileStorage;
-
-    @Autowired
     private GrantPermissionUseCase grantPermissionUseCase;
 
     @Autowired
@@ -67,7 +53,6 @@ class ApplicationContextIT {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
-        registry.add("app.file-storage.directory", () -> "target/test-files");
     }
 
     @Test
@@ -86,68 +71,13 @@ class ApplicationContextIT {
     void assemblesBuiltInAdministrationModulesAndTheirPermissionCatalog() {
         var administrator = new CurrentUser(UUID.randomUUID(), "admin", Set.of(
                 PermissionCode.of("system:user:read"), PermissionCode.of("system:role:read"),
-                PermissionCode.of("system:permission:read"), PermissionCode.of("system:audit:read"),
-                PermissionCode.of("customer:customer:read")), 0);
+                PermissionCode.of("system:permission:read"), PermissionCode.of("system:audit:read")), 0);
 
         assertThat(modules.pagesVisibleTo(administrator, new SpringAuthorizationService()))
                 .extracting(page -> page.route())
-                .containsExactly("users", "roles", "permissions", "audit", "customers");
+                .containsExactly("users", "roles", "permissions", "audit");
         assertThat(modules.permissionCatalog()).contains(
-                PermissionCode.of("system:user:read"),
-                PermissionCode.of("customer:attachment:upload"));
-    }
-
-    @Test
-    void assemblesTheIndependentOrdersModuleIntoTheHostPermissionCatalog() {
-        var ordersReader = new CurrentUser(UUID.randomUUID(), "orders-reader", Set.of(
-                PermissionCode.of("orders:order:read")), 0);
-
-        assertThat(modules.groupsVisibleTo(ordersReader, new SpringAuthorizationService()))
-                .extracting(group -> group.id())
-                .containsExactly("business");
-        assertThat(modules.pagesVisibleTo(ordersReader, new SpringAuthorizationService()))
-                .extracting(page -> page.route())
-                .containsExactly("orders");
-        assertThat(modules.permissionCatalog()).contains(OrdersAdminModule.ORDERS_READ);
-        assertThat(applicationContext.getBean(OrderQueryService.class).orders(
-                new io.github.vaadinadminstarter.contracts.navigation.PagedQuery(0, 10, "number", true, java.util.Map.of()))
-                .items()).isNotEmpty();
-    }
-
-    @Test
-    void installsTheIndependentCustomerModule() throws Exception {
-        try (var connection = dataSource.getConnection();
-             var statement = connection.prepareStatement("select count(*) from information_schema.tables where table_name = 'customers'")) {
-            try (var result = statement.executeQuery()) {
-                result.next();
-                assertThat(result.getInt(1)).isOne();
-            }
-        }
-        assertThat(applicationContext.containsBean("customerService")).isTrue();
-    }
-
-    @Test
-    void exposesTheDevelopmentFileStorageAdapter() {
-        assertThat(applicationContext.getBean(FileStorage.class)).isNotNull();
-    }
-
-    @Test
-    void storesCustomerAttachmentMetadataAndStreamsItsContent() throws Exception {
-        var administrator = accountLookup.findByUsername("admin").orElseThrow();
-        var actor = new CurrentUser(administrator.userId(), administrator.username(), Set.of(
-                PermissionCode.of("customer:customer:create"), PermissionCode.of("customer:customer:read"),
-                PermissionCode.of("customer:attachment:upload")), administrator.authVersion());
-        var customer = customerService.create(actor, "Acme", "contact@acme.test");
-        var stored = fileStorage.store("brief.txt", "text/plain",
-                new java.io.ByteArrayInputStream("attached content".getBytes()));
-
-        var attachment = customerService.attach(actor, customer.id(), stored);
-
-        assertThat(customerService.attachments(actor, customer.id()))
-                .extracting(item -> item.filename()).containsExactly("brief.txt");
-        try (var content = customerService.openAttachment(actor, attachment.id()).content()) {
-            assertThat(content.readAllBytes()).isEqualTo("attached content".getBytes());
-        }
+                PermissionCode.of("system:user:read"), PermissionCode.of("system:audit:read"));
     }
 
     @Test
@@ -162,16 +92,10 @@ class ApplicationContextIT {
     }
 
     @Test
-    void removesStoredAttachmentWhenAttachmentMetadataCannotBeCreated() throws Exception {
-        var administrator = accountLookup.findByUsername("admin").orElseThrow();
-        var actor = new CurrentUser(administrator.userId(), administrator.username(), Set.of(
-                PermissionCode.of("customer:attachment:upload")), administrator.authVersion());
-        var stored = fileStorage.store("orphan.txt", "text/plain",
-                new java.io.ByteArrayInputStream("orphan".getBytes()));
-
-        assertThatThrownBy(() -> customerService.attach(actor, UUID.randomUUID(), stored))
-                .hasMessageContaining("customer.not-found");
-        assertThatThrownBy(() -> fileStorage.open(stored.id()))
-                .isInstanceOf(java.io.UncheckedIOException.class);
+    void receivesTheDefaultStarterHostLayout() {
+        assertThat(applicationContext.getBean(AdminHostLayout.class).layoutType().getName())
+                .isEqualTo("io.github.vaadinadminstarter.starter.views.DefaultMainLayout");
+        assertThat(applicationContext.getBean("adminModuleNavigationAccessChecker", NavigationAccessChecker.class))
+                .isNotNull();
     }
 }

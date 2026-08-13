@@ -286,3 +286,13 @@ Run: `git status --short && rg -n "admin-example-orders|CustomersView|/orders|/c
 Expected: no production/current-guide references; historical records may remain under `docs/superpowers`.
 
 Run: `git add admin-reference-app docs && git commit -m "test: verify default starter consumer experience"`
+
+## Completion Record
+
+Tasks 1-8 completed on 2026-08-13. Verification passed for the focused Playwright
+acceptance suite, full normal reactor verification, full production reactor
+verification, and rendered Compose configuration. The Docker image build was attempted
+twice but was blocked before the Dockerfile build stages because Docker Hub manifest
+requests for the uncached `eclipse-temurin:25-jdk` and `eclipse-temurin:25-jre` images
+timed out. This is recorded as an external environment limitation rather than a source
+or image-definition failure.

@@ -19,4 +19,5 @@ public class DefaultAdminHostLayoutConfiguration {
     AdminHostLayout adminHostLayout() {
         return new AdminHostLayout(DefaultMainLayout.class);
     }
+
 }

@@ -11,18 +11,26 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.auth.NavigationAccessChecker;
+import com.vaadin.flow.spring.security.NavigationAccessControlConfigurer;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.spring.SpringBootAutoConfiguration;
+import com.vaadin.flow.spring.SpringSecurityAutoConfiguration;
 
 import io.github.vaadinadminstarter.contracts.auth.PermissionCatalog;
+import io.github.vaadinadminstarter.contracts.auth.AuthorizationService;
+import io.github.vaadinadminstarter.contracts.auth.CurrentUserProvider;
 import io.github.vaadinadminstarter.flow.navigation.AdminHostLayout;
 import io.github.vaadinadminstarter.flow.navigation.AdminMessageBundle;
 import io.github.vaadinadminstarter.flow.navigation.AdminModule;
 import io.github.vaadinadminstarter.flow.navigation.AdminModuleRegistry;
 import io.github.vaadinadminstarter.springflow.navigation.AdminModuleRouteRegistrar;
+import io.github.vaadinadminstarter.springflow.navigation.AdminModuleNavigationAccessChecker;
+import io.github.vaadinadminstarter.springflow.navigation.AdminModuleAccessCheckDecisionResolver;
 import io.github.vaadinadminstarter.springflow.navigation.SpringAdminModuleAssembler;
 import io.github.vaadinadminstarter.springflow.i18n.AdminLocalePreference;
 import io.github.vaadinadminstarter.springflow.i18n.AdminMessageBundleValidator;
@@ -30,7 +38,7 @@ import io.github.vaadinadminstarter.springflow.i18n.CompositeAdminI18NProvider;
 
 /** Spring Boot assembly for Flow administration modules hosted by an application layout. */
 @AutoConfiguration
-@AutoConfigureBefore(SpringBootAutoConfiguration.class)
+@AutoConfigureBefore({SpringBootAutoConfiguration.class, SpringSecurityAutoConfiguration.class})
 @ConditionalOnBean(AdminHostLayout.class)
 public class AdminFlowAutoConfiguration {
     static final String ADMIN_MODULE_PERMISSION_CATALOG_BEAN_NAME = "adminModulePermissionCatalog";
@@ -90,6 +98,25 @@ public class AdminFlowAutoConfiguration {
     @ConditionalOnMissingBean
     AdminModuleRouteRegistrar adminModuleRouteRegistrar(AdminModuleRegistry modules, AdminHostLayout hostLayout) {
         return new AdminModuleRouteRegistrar(modules, hostLayout);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean({CurrentUserProvider.class, AuthorizationService.class})
+    NavigationAccessChecker adminModuleNavigationAccessChecker(AdminModuleRegistry modules, CurrentUserProvider currentUser,
+                                                                AuthorizationService authorization) {
+        return new AdminModuleNavigationAccessChecker(modules, currentUser, authorization);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean(NavigationAccessChecker.class)
+    NavigationAccessControlConfigurer adminNavigationAccessControlConfigurer(
+            @Qualifier("adminModuleNavigationAccessChecker") NavigationAccessChecker moduleChecker) {
+        return new NavigationAccessControlConfigurer()
+                .withAnnotatedViewAccessChecker()
+                .withNavigationAccessChecker(moduleChecker)
+                .withDecisionResolver(new AdminModuleAccessCheckDecisionResolver(moduleChecker));
     }
 
     @Bean

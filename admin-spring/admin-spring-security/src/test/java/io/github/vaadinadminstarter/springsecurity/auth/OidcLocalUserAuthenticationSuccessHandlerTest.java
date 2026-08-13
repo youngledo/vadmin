@@ -110,12 +110,12 @@ class OidcLocalUserAuthenticationSuccessHandlerTest {
                 identity -> Optional.of(currentUser(account)), new AccountLookup(account));
         var request = new MockHttpServletRequest("GET", "/login/oauth2/code/test");
         request.getSession().setAttribute(NavigationAccessControl.SESSION_STORED_REDIRECT_ABSOLUTE,
-                "http://localhost/customers?status=active");
+                "http://localhost/users?status=active");
         var response = new MockHttpServletResponse();
 
         handler.onAuthenticationSuccess(request, response, oidcAuthentication());
 
-        assertThat(response.getRedirectedUrl()).isEqualTo("http://localhost/customers?status=active");
+        assertThat(response.getRedirectedUrl()).isEqualTo("http://localhost/users?status=active");
         assertThat(request.getSession(false).getAttribute(NavigationAccessControl.SESSION_STORED_REDIRECT_ABSOLUTE))
                 .isNull();
     }

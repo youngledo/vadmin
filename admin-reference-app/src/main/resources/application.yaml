@@ -13,8 +13,6 @@ spring:
 app:
   bootstrap:
     password: ${APP_BOOTSTRAP_PASSWORD:}
-  file-storage:
-    directory: ${APP_FILE_STORAGE_DIRECTORY:./data/files}
   appearance:
     visual-language: ${APP_APPEARANCE_VISUAL_LANGUAGE:vaadin}
     density: ${APP_APPEARANCE_DENSITY:comfortable}

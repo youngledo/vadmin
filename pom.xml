@@ -34,7 +34,6 @@
         <subproject>admin-platform</subproject>
         <subproject>admin-flow</subproject>
         <subproject>admin-spring</subproject>
-        <subproject>admin-examples</subproject>
         <subproject>admin-reference-app</subproject>
     </subprojects>
 

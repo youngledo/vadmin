@@ -54,7 +54,6 @@ class KeycloakOidcIT {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
-        registry.add("app.file-storage.directory", () -> "target/keycloak-oidc-test-files");
         registry.add("spring.security.oauth2.client.registration.oidc.client-id", () -> "vaadin-admin-test");
         registry.add("spring.security.oauth2.client.registration.oidc.client-secret", () -> "");
         registry.add("spring.security.oauth2.client.registration.oidc.client-authentication-method", () -> "none");
