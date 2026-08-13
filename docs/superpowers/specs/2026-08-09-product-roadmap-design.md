@@ -30,7 +30,7 @@ change.
 | Foundation | Java 25, Spring Boot 4, Vaadin Flow 25, contracts/platform/adapters, RBAC, audit, Problem Details, Testcontainers, and reference application. |
 | Flow Design System Phase 1 | Theme, shell, Java-only page patterns, responsive administration views, and automated browser coverage. |
 | Flow Design System Phase 2 | Detail, confirmation, and operation-feedback patterns; completed administration workflows and permission-filtered workplace entries. |
-| Phase 3: Extensibility And Delivery Maturity | Completed: Spring Flow module assembly, module i18n/theme-token contracts, independently packaged orders example, adoption E2E and architecture coverage, normal and production verification. |
+| Phase 3: Extensibility And Delivery Maturity | Completed: Spring Flow module assembly, module i18n/theme-token contracts, module adoption coverage, and normal and production verification. The former fictional orders example is superseded by the default-starter direction below. |
 | Phase 4: Identity And Enterprise Integration Readiness | Completed: opt-in, provider-neutral Spring OIDC discovery and authorization-code login; Spring-free external-identity mapper contract; explicit existing-local-account mapping; Keycloak test fixture; normal and production verification. |
 | Ant Flow Profile Maturity (Phases A-C) | Completed: profile-neutral icons and an Ant-inspired shell; Flow-native control and overlay skins; dense data workspaces, server-side pagination, state feedback, and narrow-screen verification. The Vaadin visual profile remains a parallel supported baseline. |
 
@@ -43,9 +43,11 @@ without adding a second runtime.
 
 **Delivered outcomes:** documented extension points for independently packaged
 navigation and page modules; `zh-CN` and `en-US` UI contracts; host-owned
-light/dark theme tokens; Spring Flow module assembly; an independent orders
-example; architecture and browser adoption coverage; and normal/production
-verification. The delivery remains Spring Boot only.
+light/dark theme tokens; Spring Flow module assembly; architecture and browser
+adoption coverage; and normal/production verification. The delivery remains
+Spring Boot only. The independently packaged orders example delivered during
+this phase is deliberately retired by the default-starter phase: it proved the
+module contract but is not product baseline.
 
 **Non-goals:** non-Spring runtime, multi-tenancy, external identity provider,
 new business vertical, dashboard analytics.
@@ -81,7 +83,33 @@ identity providers and security requirements are defined.
 with OIDC disabled by default; Keycloak remains a test-only interoperability
 fixture.
 
-### Phase 5: Ecosystem Adaptation And Long-Term Compatibility
+### Phase 5: Default Spring Admin Starter
+
+**Goal:** Make the Spring Boot baseline directly consumable as a complete Flow
+administration application rather than as reusable pieces that every adopter
+must compose.
+
+**Planned outcomes:** `admin-spring-starter` as the consumer-facing dependency;
+a default shell, theme, home page, and system administration for users, roles,
+permissions, and audit; a thin reference application that consumes that
+starter; and explicit host override rules. Remove the fictional orders and
+customer domains from the shipping baseline while retaining the `AdminModule`
+contract for genuine consumer-owned business modules.
+
+**Non-goals:** an additional runtime, Hilla/React/Vue, new fictional business
+verticals, multi-tabs, low-code menu configuration, or arbitrary end-user
+theme editors.
+
+**Entry criteria:** completed Flow design-system, module assembly, and identity
+integration foundations; a reviewed default-starter design specification.
+
+**Exit criteria:** a new Spring Boot application obtains a coherent,
+permission-filtered shell and baseline system administration by depending on
+one starter artifact; its own `AdminModule` contributions appear with working
+translations and authorization; normal, production, and browser verification
+pass.
+
+### Phase 6: Ecosystem Adaptation And Long-Term Compatibility
 
 **Goal:** Evaluate additional runtime or UI-adjacent adapters only after the
 Spring Boot baseline has stabilized in real use.
@@ -118,7 +146,8 @@ an extension concern.
 Ant Design React, Naive UI, or Element UI as runtime dependencies, or changes
 that weaken the Java-only contracts/platform/Flow boundaries.
 
-**Entry criteria:** stable Spring Boot release baseline, Phase 4 decision, and
+**Entry criteria:** stable Spring Boot release baseline, completed default
+starter phase, Phase 4 decision, and
 concrete adopter requirements.
 
 **Exit criteria:** an approved adapter roadmap with an explicit scope, or a
