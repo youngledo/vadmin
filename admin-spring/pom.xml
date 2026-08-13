@@ -18,5 +18,6 @@
         <subproject>admin-spring-jpa</subproject>
         <subproject>admin-spring-boot</subproject>
         <subproject>admin-spring-flow</subproject>
+        <subproject>admin-spring-starter</subproject>
     </subprojects>
 </project>
