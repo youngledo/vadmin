@@ -9,6 +9,4 @@ test-results/
 .worktrees/
 admin-reference-app/src/main/frontend/generated/
 admin-reference-app/src/main/bundles/
-verification/standalone-consumer/src/main/frontend/generated/
-verification/standalone-consumer/src/main/bundles/
 data/

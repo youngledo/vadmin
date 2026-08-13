@@ -131,20 +131,6 @@ ID、标题 key 和顺序完全相同时，多个模块才能共享导航分组�
   回退到 `zh-CN`。
 - 修改已组合的 View 集合后，运行宿主生产构建。
 
-### 验证本地使用方
-
-在 Docker 可用的前提下，于仓库根目录运行以下命令，可在发布前验证这条接入路径：
-
-```bash
-./scripts/verify-standalone-consumer.sh
-```
-
-脚本会先将所有第一方 `0.1.0-SNAPSHOT` 制品安装到本地 Maven 仓库，然后把
-`verification/standalone-consumer` 作为独立 Spring Boot 宿主构建。该宿主仅通过 Maven
-坐标依赖 starter 与 `admin-example-orders`，并拥有自己的布局和引导配置；它会使用本地开发
-管理员登录、打开动态注册的 `/orders` 页面，并执行使用方自身的生产前端打包。这是本地仓库
-接入验收，不是发布到 Maven Central，也不是第二个参考应用。
-
 ## 使用 Flow 设计系统
 
 `admin-flow` 提供可组合的 Java Flow 页面模式，而不是另一个前端组件运行时。页面继续直接
