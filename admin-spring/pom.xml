@@ -5,8 +5,8 @@
     <modelVersion>4.1.0</modelVersion>
 
     <parent>
-        <groupId>io.github.vaadinadminstarter</groupId>
-        <artifactId>vaadin-admin-starter</artifactId>
+        <groupId>io.github.youngledo</groupId>
+        <artifactId>vadmin</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
