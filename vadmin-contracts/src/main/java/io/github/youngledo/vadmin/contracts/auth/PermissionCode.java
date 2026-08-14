@@ -1,9 +1,10 @@
 package io.github.youngledo.vadmin.contracts.auth;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public record PermissionCode(String value) {
+public record PermissionCode(String value) implements Serializable {
     private static final Pattern PATTERN = Pattern.compile("[a-z][a-z0-9-]*:[a-z][a-z0-9-]*:[a-z][a-z0-9-]*");
 
     public PermissionCode {

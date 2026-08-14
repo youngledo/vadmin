@@ -8,6 +8,8 @@ import io.github.youngledo.vadmin.contracts.auth.LocalUserAccount;
 import io.github.youngledo.vadmin.contracts.auth.LocalUserAccountLookup;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 import io.github.youngledo.vadmin.contracts.error.BusinessFailure;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -36,6 +38,16 @@ class SpringSecurityBridgeTest {
                 .isInstanceOf(BusinessFailure.class)
                 .extracting("errorCode")
                 .hasToString("AUTHORIZATION_DENIED");
+    }
+
+    @Test
+    void serializesAuthorizationServiceForDistributedVaadinSessions() throws Exception {
+        var bytes = new ByteArrayOutputStream();
+        try (var stream = new ObjectOutputStream(bytes)) {
+            stream.writeObject(new SpringAuthorizationService());
+        }
+
+        assertThat(bytes.toByteArray()).isNotEmpty();
     }
 
     private record AccountLookup(LocalUserAccount account) implements LocalUserAccountLookup {
