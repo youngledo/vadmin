@@ -4,13 +4,11 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import io.github.youngledo.vadmin.app.testsupport.PlaywrightBrowserSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -68,10 +66,8 @@ class KeycloakOidcIT {
 
     @BeforeAll
     static void launchBrowser() {
-        playwright = Playwright.create(new Playwright.CreateOptions()
-                .setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setArgs(List.of("--disable-extensions")));
+        playwright = PlaywrightBrowserSupport.createPlaywright();
+        browser = PlaywrightBrowserSupport.launchChromium(playwright);
     }
 
     @AfterAll
@@ -82,7 +78,7 @@ class KeycloakOidcIT {
 
     @BeforeEach
     void setUp() {
-        browserContext = browser.newContext();
+        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions());
         page = browserContext.newPage();
         page.setDefaultTimeout(15_000);
     }

@@ -4,14 +4,12 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.ViewportSize;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import io.github.youngledo.vadmin.app.testsupport.PlaywrightBrowserSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,9 +55,8 @@ class BrowserE2EIT {
 
     @BeforeAll
     static void launchBrowser() {
-        playwright = Playwright.create(new Playwright.CreateOptions().setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setArgs(List.of("--disable-extensions")));
+        playwright = PlaywrightBrowserSupport.createPlaywright();
+        browser = PlaywrightBrowserSupport.launchChromium(playwright);
     }
 
     @AfterAll
@@ -68,7 +65,7 @@ class BrowserE2EIT {
     @BeforeEach
     void setUp() {
         resetData();
-        browserContext = browser.newContext(new Browser.NewContextOptions().setLocale("zh-CN"));
+        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions().setLocale("zh-CN"));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
     }
@@ -120,7 +117,8 @@ class BrowserE2EIT {
     @Test
     void narrowStarterShellKeepsUtilityControlsReachable() {
         browserContext.close();
-        browserContext = browser.newContext(new Browser.NewContextOptions().setViewportSize(new ViewportSize(390, 844)).setLocale("zh-CN"));
+        browserContext = PlaywrightBrowserSupport.newContext(browser,
+                new Browser.NewContextOptions().setViewportSize(new ViewportSize(390, 844)).setLocale("zh-CN"));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
         signInAs("admin", "change-me");

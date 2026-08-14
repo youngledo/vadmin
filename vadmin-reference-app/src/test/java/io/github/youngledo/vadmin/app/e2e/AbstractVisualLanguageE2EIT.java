@@ -4,12 +4,11 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.ViewportSize;
-import java.util.List;
+import io.github.youngledo.vadmin.app.testsupport.PlaywrightBrowserSupport;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,10 +50,8 @@ abstract class AbstractVisualLanguageE2EIT {
 
     @BeforeAll
     static void launchBrowser() {
-        playwright = Playwright.create(new Playwright.CreateOptions()
-                .setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setArgs(List.of("--disable-extensions")));
+        playwright = PlaywrightBrowserSupport.createPlaywright();
+        browser = PlaywrightBrowserSupport.launchChromium(playwright);
     }
 
     @AfterAll
@@ -65,7 +62,7 @@ abstract class AbstractVisualLanguageE2EIT {
 
     @BeforeEach
     void setUp() {
-        browserContext = browser.newContext(new Browser.NewContextOptions().setLocale("zh-CN"));
+        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions().setLocale("zh-CN"));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
     }
@@ -92,7 +89,7 @@ abstract class AbstractVisualLanguageE2EIT {
 
     void useNarrowBrowser() {
         browserContext.close();
-        browserContext = browser.newContext(new Browser.NewContextOptions()
+        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions()
                 .setViewportSize(new ViewportSize(390, 844))
                 .setIsMobile(true)
                 .setLocale("zh-CN"));
@@ -102,7 +99,7 @@ abstract class AbstractVisualLanguageE2EIT {
 
     void useNarrowDesktopBrowser() {
         browserContext.close();
-        browserContext = browser.newContext(new Browser.NewContextOptions()
+        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions()
                 .setViewportSize(new ViewportSize(390, 844))
                 .setLocale("zh-CN"));
         page = browserContext.newPage();
