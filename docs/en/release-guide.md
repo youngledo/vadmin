@@ -94,8 +94,10 @@ docker build -t vadmin:0.1.0-rc .
 The `central-release` Maven profile attaches source and Javadoc archives, signs
 all publication files with GPG, and uses the Maven Central Publisher Portal.
 The supported publication path is the manually triggered `Publish Release`
-GitHub Actions workflow. Before its first use, configure these repository
-Secrets, never source-controlled values:
+GitHub Actions workflow. Its release job is bound to the `vadmin` environment,
+so that environment's secrets are available in addition to repository secrets.
+Before its first use, configure these protected, never source-controlled
+values:
 
 - `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`: Maven Central Portal
   publishing credentials.

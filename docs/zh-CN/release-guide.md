@@ -77,7 +77,8 @@ docker build -t vadmin:0.1.0-rc .
 
 Maven 的 `central-release` profile 会附加源码和 Javadoc 归档、使用 GPG 签名全部发布文件，并
 通过 Maven Central Publisher Portal 发布。推荐的发布路径是手动触发 `Publish Release` GitHub
-Actions 工作流。首次使用前，在仓库中配置以下 GitHub Secrets，绝不可提交它们的值：
+Actions 工作流。其发布 job 绑定到 `vadmin` Environment，因此该环境中的 secrets 和仓库级
+secrets 均可用。首次使用前，配置以下受保护的值，绝不可提交它们：
 
 - `MAVEN_CENTRAL_USERNAME` 和 `MAVEN_CENTRAL_PASSWORD`：Maven Central Portal 发布凭据。
 - `GPG_PRIVATE_KEY`：ASCII-armored 格式的私有签名密钥。

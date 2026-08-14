@@ -18,6 +18,8 @@ concurrency:
 jobs:
   publish:
     name: Publish ${{ inputs.release_tag }}
+    environment:
+      name: vadmin
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
