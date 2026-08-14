@@ -1,5 +1,9 @@
 FROM eclipse-temurin:25-jdk AS build
 
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /workspace
 COPY . .
 RUN ./mvnw -B -ntp -Pproduction -pl vadmin-reference-app -am package -DskipTests
