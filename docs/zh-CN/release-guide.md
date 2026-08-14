@@ -6,9 +6,8 @@ VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
 
 ## 范围
 
-本指南用于准备首个公开 `0.1.0` 版本。它不会发布制品、创建标签、修改 Maven 版本，也不代表
-已获得 Maven Central 发布授权。该版本将 `vadmin-spring-boot-starter` 作为受支持的接入制品：默认
-外壳和主题、系统管理、模块组装，以及使用方所需的 Spring 适配器。
+本指南定义首个公开 `0.1.0` 版本。该版本将 `vadmin-spring-boot-starter` 作为受支持的接入制品：
+默认外壳和主题、系统管理、模块组装，以及使用方所需的 Spring 适配器。
 
 ## 已验证兼容性基线
 
@@ -53,7 +52,7 @@ VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
   外壳、主题和系统管理。
 - [ ] 当前指南不包含已移除的示例领域引用，也不声称普通使用方必须提供外壳或默认
   `AdminHostLayout`。
-- [ ] 根 `pom.xml` 从 `0.1.0-SNAPSHOT` 改为发布版本；第一方 reactor 制品均解析到该精确版本。
+- [ ] 根 `pom.xml` 使用发布版本；第一方 reactor 制品均解析到该精确版本。
 - [ ] 许可证、第三方 notices 和内置图标归属信息仍包含在源码和发布归档中。
 
 ### 验证与打包
@@ -74,13 +73,18 @@ docker build -t vadmin:0.1.0-rc .
 - [ ] 评审者登录后切换语言和浅色/深色，打开 Users、Roles、Permissions 和 Audit，再确认
   按权限过滤的使用方模块页面能在所选视觉语言和密度下正常显示。
 
-## 发布前置条件
+## 发布
 
-仓库尚未配置公开制品发布。上传 `0.1.0` 前，应在独立发布变更中配置并验证仓库坐标、凭据、
-签名、POM 元数据、适用时的源码和 Javadoc 制品以及来源证明要求。发布或提升前，应在干净的
-使用方项目中检查 staged 制品。
+Maven 的 `central-release` profile 会附加源码和 Javadoc 归档、使用 GPG 签名全部发布文件，并
+通过 Maven Central Publisher Portal 发布。凭据应只存在于本机 Maven `settings.xml` 中名为
+`central` 的 server 条目，绝不可提交。仅在 tag 对应提交已推送后执行：
 
-本地构建通过并不代表可以上传制品、推送发布标签、创建 GitHub Release 或暴露引导密码。
+```bash
+./mvnw -B -ntp -Pproduction,central-release deploy
+```
+
+该 profile 会等待 Central Portal 发布完成。然后在干净的使用方项目中确认
+`io.github.youngledo:vadmin-spring-boot-starter:0.1.0` 可以解析，再创建 GitHub Release。
 
 ## 发布后记录
 

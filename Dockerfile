@@ -11,7 +11,7 @@ RUN groupadd --gid 10001 appgroup \
 
 WORKDIR /app
 COPY --from=build --chown=appuser:appgroup \
-    /workspace/vadmin-reference-app/target/vadmin-reference-app-0.1.0-SNAPSHOT.jar /app/app.jar
+    /workspace/vadmin-reference-app/target/vadmin-reference-app-0.1.0.jar /app/app.jar
 
 USER appuser
 ENV SPRING_PROFILES_ACTIVE=prod

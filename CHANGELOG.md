@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-14
+
 ### Added
 
 - Java 25、Maven 4.0.0-rc-6、Spring Boot 4.1.0、Vaadin Flow 25.2.5、
@@ -13,6 +15,8 @@
 - Vaadin Flow 原生的 `ant` 外观配置：中性图标语言、应用壳、常用控件与覆盖层、
   数据工作区、服务端分页，以及桌面和窄屏浏览器验证；`vaadin` 外观仍保持为并行基线。
 - 可审计的 `0.1.0` 发布准备指南，记录当前验证基线、版本策略、升级规则和发布门禁。
+- `io.github.youngledo:vadmin-spring-boot-starter` 的首个公开 Maven Central 发布，包含源码、
+  Javadoc 与 GPG 签名制品。
 
 ### Upgrade policy
 
@@ -20,3 +24,7 @@
   并完成全部 CI 验证。
 - Maven 4 当前使用 RC6；升级到 Maven 4 GA 也按独立版本升级处理。
 - 发布前需同时验证常规构建与 `production` profile。
+
+### Breaking changes
+
+- 首个公开版本，无此前公开 API 或坐标可兼容。

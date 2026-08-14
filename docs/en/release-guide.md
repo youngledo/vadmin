@@ -6,11 +6,10 @@ VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
 
 ## Scope
 
-This guide prepares the first public `0.1.0` release. It does not publish
-artifacts, create a tag, change a Maven version, or authorize a Maven Central
-release. The release delivers `vadmin-spring-boot-starter` as the supported adoption
-artifact: default shell and theme, system administration, module assembly, and
-the Spring adapters needed by a consumer.
+This guide defines the first public `0.1.0` release. The release delivers
+`vadmin-spring-boot-starter` as the supported adoption artifact: default shell
+and theme, system administration, module assembly, and the Spring adapters
+needed by a consumer.
 
 ## Verified Compatibility Baseline
 
@@ -64,8 +63,8 @@ output, tool versions, image digest, release commit, and tag.
   administration.
 - [ ] Current guides contain no retired example-domain references or claims
   that a normal consumer must provide a shell or default `AdminHostLayout`.
-- [ ] The root `pom.xml` changes from `0.1.0-SNAPSHOT` to the release version;
-  first-party reactor artifacts resolve to that exact version.
+- [ ] The root `pom.xml` has the release version and first-party reactor
+  artifacts resolve to that exact version.
 - [ ] Licenses, third-party notices, and vendored icon attribution remain in
   source and release archives.
 
@@ -90,16 +89,20 @@ docker build -t vadmin:0.1.0-rc .
   Roles, Permissions, and Audit, then confirms a permission-filtered consumer
   module page under the selected visual language and density.
 
-## Publication Prerequisites
+## Publication
 
-The repository does not yet configure public artifact publication. Before
-uploading `0.1.0`, make and verify a separate publishing change for repository
-coordinates, credentials, signing, POM metadata, source and Javadoc artifacts
-where applicable, and provenance requirements. Inspect staged artifacts from a
-clean consumer project before publishing or promoting them.
+The `central-release` Maven profile attaches source and Javadoc archives, signs
+all publication files with GPG, and uses the Maven Central Publisher Portal.
+Credentials belong in the local Maven `settings.xml` server entry named
+`central`; never commit them. Publish only after the tag commit is pushed:
 
-Do not treat a green local build as authorization to upload artifacts, push a
-release tag, create a GitHub Release, or expose bootstrap credentials.
+```bash
+./mvnw -B -ntp -Pproduction,central-release deploy
+```
+
+The profile waits for Central Portal publication to complete. Then verify a
+clean consumer resolves `io.github.youngledo:vadmin-spring-boot-starter:0.1.0`
+before creating the GitHub Release.
 
 ## Post-Release Record
 
