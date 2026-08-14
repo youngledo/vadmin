@@ -76,15 +76,26 @@ docker build -t vadmin:0.1.0-rc .
 ## 发布
 
 Maven 的 `central-release` profile 会附加源码和 Javadoc 归档、使用 GPG 签名全部发布文件，并
-通过 Maven Central Publisher Portal 发布。凭据应只存在于本机 Maven `settings.xml` 中名为
-`central` 的 server 条目，绝不可提交。仅在 tag 对应提交已推送后执行：
+通过 Maven Central Publisher Portal 发布。推荐的发布路径是手动触发 `Publish Release` GitHub
+Actions 工作流。首次使用前，在仓库中配置以下 GitHub Secrets，绝不可提交它们的值：
+
+- `MAVEN_CENTRAL_USERNAME` 和 `MAVEN_CENTRAL_PASSWORD`：Maven Central Portal 发布凭据。
+- `GPG_PRIVATE_KEY`：ASCII-armored 格式的私有签名密钥。
+- `GPG_PASSPHRASE`：私钥口令。
+
+从已验证的发布提交创建并推送 `vX.Y.Z` 标签，然后在 Actions 页面使用该精确标签运行
+`Publish Release`。工作流会校验检出的标签与根 Maven 版本一致，使用 `central-release`
+profile 发布并等待 Central Portal 完成；仅在成功后才创建 GitHub Release。
+
+如确有必要在本地发布，凭据应只存在于本机 Maven `settings.xml` 中名为 `central` 的 server
+条目，绝不可提交：
 
 ```bash
 ./mvnw -B -ntp -Pproduction,central-release deploy
 ```
 
 该 profile 会等待 Central Portal 发布完成。然后在干净的使用方项目中确认
-`io.github.youngledo:vadmin-spring-boot-starter:0.1.0` 可以解析，再创建 GitHub Release。
+`io.github.youngledo:vadmin-spring-boot-starter:0.1.0` 可以解析。
 
 ## 发布后记录
 

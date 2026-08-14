@@ -93,16 +93,30 @@ docker build -t vadmin:0.1.0-rc .
 
 The `central-release` Maven profile attaches source and Javadoc archives, signs
 all publication files with GPG, and uses the Maven Central Publisher Portal.
-Credentials belong in the local Maven `settings.xml` server entry named
-`central`; never commit them. Publish only after the tag commit is pushed:
+The supported publication path is the manually triggered `Publish Release`
+GitHub Actions workflow. Before its first use, configure these repository
+Secrets, never source-controlled values:
+
+- `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`: Maven Central Portal
+  publishing credentials.
+- `GPG_PRIVATE_KEY`: ASCII-armored private signing key.
+- `GPG_PASSPHRASE`: signing key passphrase.
+
+Create and push a `vX.Y.Z` tag from the verified release commit, then run
+`Publish Release` from the Actions page with that exact tag. The workflow
+checks that the checked-out tag and root Maven version agree, publishes with
+the `central-release` profile, waits for Central Portal publication, and only
+then creates the GitHub Release.
+
+For an exceptional local publication, credentials belong in the local Maven
+`settings.xml` server entry named `central`; never commit them:
 
 ```bash
 ./mvnw -B -ntp -Pproduction,central-release deploy
 ```
 
 The profile waits for Central Portal publication to complete. Then verify a
-clean consumer resolves `io.github.youngledo:vadmin-spring-boot-starter:0.1.0`
-before creating the GitHub Release.
+clean consumer resolves `io.github.youngledo:vadmin-spring-boot-starter:0.1.0`.
 
 ## Post-Release Record
 
