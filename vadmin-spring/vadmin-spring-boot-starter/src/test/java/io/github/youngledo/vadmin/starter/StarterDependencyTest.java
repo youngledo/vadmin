@@ -22,8 +22,8 @@ class StarterDependencyTest {
             coordinates.put(text(dependency, "artifactId"), dependency);
         }
 
-        assertThat(coordinates).containsKeys("admin-spring-security", "admin-spring-jpa", "admin-spring-boot",
-                "admin-spring-flow", "spring-boot-starter", "vaadin-dev", "postgresql");
+        assertThat(coordinates).containsKeys("vadmin-spring-security", "vadmin-spring-jpa", "vadmin-spring-boot",
+                "vadmin-spring-flow", "spring-boot-starter", "vaadin-dev", "postgresql");
         assertThat(text(coordinates.get("vaadin-dev"), "optional")).isEqualTo("true");
         assertThat(text(coordinates.get("postgresql"), "scope")).isEqualTo("runtime");
         assertThat(coordinates).doesNotContainKeys("vadmin-reference-app", "admin-example-orders");

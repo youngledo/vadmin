@@ -23,10 +23,10 @@ configuration.
 | `admin-contracts` | Framework-free identity, authorization, audit, error, and file contracts. |
 | `admin-platform` | Framework-free RBAC use cases and ports. |
 | `admin-flow` | Spring-free Flow patterns, route guards, and module metadata. |
-| `admin-spring-security` | Local authentication and optional standards-based OIDC adapter. |
-| `admin-spring-jpa` | JPA/Flyway RBAC and audit adapters. |
-| `admin-spring-boot` | Correlation and Problem Details configuration. |
-| `admin-spring-flow` | Module assembly, dynamic routes, composite translations, and locale preference. |
+| `vadmin-spring-security` | Local authentication and optional standards-based OIDC adapter. |
+| `vadmin-spring-jpa` | JPA/Flyway RBAC and audit adapters. |
+| `vadmin-spring-boot` | Correlation and Problem Details configuration. |
+| `vadmin-spring-flow` | Module assembly, dynamic routes, composite translations, and locale preference. |
 | `vadmin-spring-boot-starter` | Default shell and theme, system administration UI and translations, and consumer-facing dependency composition. |
 | `vadmin-reference-app` | Thin starter consumer, launch configuration, seed data, and browser acceptance coverage. |
 
@@ -53,7 +53,7 @@ appearance profiles without defining a layout, theme, or system pages.
 
 Business features are declared as `AdminModule` beans. Each page has stable
 metadata, a required permission, a route, an icon key, a Flow view type, and
-two message bundles. At startup `admin-spring-flow` validates module IDs, page
+two message bundles. At startup `vadmin-spring-flow` validates module IDs, page
 IDs, routes, permissions, navigation groups, and translation resources, then
 assembles one permission catalog, `AdminModuleRegistry`, composite
 `I18NProvider`, and dynamic route registration.

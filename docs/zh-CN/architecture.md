@@ -20,10 +20,10 @@ Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring B
 | `admin-contracts` | 与框架无关的身份、授权、审计、错误和文件契约。 |
 | `admin-platform` | 与框架无关的 RBAC 用例和端口。 |
 | `admin-flow` | 无 Spring 依赖的 Flow 模式、路由守卫和模块元数据。 |
-| `admin-spring-security` | 本地认证及可选的标准 OIDC 适配器。 |
-| `admin-spring-jpa` | JPA/Flyway RBAC 与审计适配器。 |
-| `admin-spring-boot` | 关联 ID 与 Problem Details 配置。 |
-| `admin-spring-flow` | 模块组装、动态路由、组合翻译和语言偏好。 |
+| `vadmin-spring-security` | 本地认证及可选的标准 OIDC 适配器。 |
+| `vadmin-spring-jpa` | JPA/Flyway RBAC 与审计适配器。 |
+| `vadmin-spring-boot` | 关联 ID 与 Problem Details 配置。 |
+| `vadmin-spring-flow` | 模块组装、动态路由、组合翻译和语言偏好。 |
 | `vadmin-spring-boot-starter` | 默认外壳和主题、系统管理 UI 与翻译、面向使用方的依赖组合。 |
 | `vadmin-reference-app` | 精简 starter 使用方、启动配置、种子数据和浏览器验收覆盖。 |
 
@@ -46,7 +46,7 @@ Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring B
 Audit、`zh-CN`/`en-US` 翻译、浅色/深色模式以及 Vaadin 或 Ant 风格外观。
 
 业务功能通过 `AdminModule` Bean 声明。每个页面都有稳定元数据、所需权限、路由、图标 key、
-Flow View 类型和两套消息资源包。启动时，`admin-spring-flow` 校验模块 ID、页面 ID、路由、
+Flow View 类型和两套消息资源包。启动时，`vadmin-spring-flow` 校验模块 ID、页面 ID、路由、
 权限、导航分组和翻译资源，然后组装统一权限目录、`AdminModuleRegistry`、组合
 `I18NProvider` 与动态路由注册。
 

@@ -60,7 +60,7 @@ final class InventoryView extends VerticalLayout {
 }
 ```
 
-该 View 有意不声明 `@Route`。`admin-spring-flow` 根据 `AdminPage` 注册路由，并在创建 View
+该 View 有意不声明 `@Route`。`vadmin-spring-flow` 根据 `AdminPage` 注册路由，并在创建 View
 前应用所需权限。权限必须同时在页面和模块中声明。重复的模块 ID、页面 ID、路由、导航分组、
 权限或不兼容的翻译资源会导致应用启动失败。
 

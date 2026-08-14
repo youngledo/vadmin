@@ -62,7 +62,7 @@ final class InventoryView extends VerticalLayout {
 }
 ```
 
-The view intentionally has no `@Route`. `admin-spring-flow` registers the
+The view intentionally has no `@Route`. `vadmin-spring-flow` registers the
 route from `AdminPage` and applies its required permission before construction.
 The permission must be declared in both the page and module. Duplicate module
 IDs, page IDs, routes, navigation groups, permissions, or incompatible
