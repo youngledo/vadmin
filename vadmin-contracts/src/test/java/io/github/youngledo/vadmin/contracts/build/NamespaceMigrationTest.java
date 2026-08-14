@@ -33,7 +33,7 @@ class NamespaceMigrationTest {
             return paths.filter(Files::isRegularFile)
                     .filter(NamespaceMigrationTest::isSourceOrRuntimeResource)
                     .filter(path -> !path.getFileName().toString().startsWith("."))
-                    .filter(path -> !path.getFileName().toString().equals("NamespaceMigrationTest.java"))
+                    .filter(path -> !isNegativeAssertionTest(path))
                     .toList();
         }
     }
@@ -44,6 +44,12 @@ class NamespaceMigrationTest {
                 && (normalized.contains("/src/main/java/")
                 || normalized.contains("/src/test/java/")
                 || normalized.contains("/src/main/resources/"));
+    }
+
+    private static boolean isNegativeAssertionTest(Path path) {
+        String filename = path.getFileName().toString();
+        return filename.equals("NamespaceMigrationTest.java")
+                || filename.equals("CurrentDocumentationTest.java");
     }
 
     private String read(Path path) {
