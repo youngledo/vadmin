@@ -108,7 +108,9 @@ Create and push a `vX.Y.Z` tag from the verified release commit, then run
 `Publish Release` from the Actions page with that exact tag. The workflow
 checks that the checked-out tag and root Maven version agree, publishes with
 the `central-release` profile, waits for Central Portal publication, and only
-then creates the GitHub Release.
+then creates the GitHub Release. Its `dry_run` input defaults to `true`: first
+run the signed production build without publication, then rerun the same tag
+with `dry_run` disabled only after that preflight succeeds.
 
 For an exceptional local publication, credentials belong in the local Maven
 `settings.xml` server entry named `central`; never commit them:

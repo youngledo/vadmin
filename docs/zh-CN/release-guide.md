@@ -86,7 +86,9 @@ secrets 均可用。首次使用前，配置以下受保护的值，绝不可提
 
 从已验证的发布提交创建并推送 `vX.Y.Z` 标签，然后在 Actions 页面使用该精确标签运行
 `Publish Release`。工作流会校验检出的标签与根 Maven 版本一致，使用 `central-release`
-profile 发布并等待 Central Portal 完成；仅在成功后才创建 GitHub Release。
+profile 发布并等待 Central Portal 完成；仅在成功后才创建 GitHub Release。`dry_run` 输入默认
+为 `true`：先执行只构建和签名、不发布的生产预检；预检成功后，再使用同一标签并关闭
+`dry_run` 执行正式发布。
 
 如确有必要在本地发布，凭据应只存在于本机 Maven `settings.xml` 中名为 `central` 的 server
 条目，绝不可提交：
