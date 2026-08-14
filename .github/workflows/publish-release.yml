@@ -81,7 +81,7 @@ jobs:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./mvnw -B -ntp -Pproduction,central-release verify
+        run: ./mvnw -B -ntp -Pproduction,central-release -DskipPublishing=true deploy
 
       - name: Publish to Maven Central
         if: inputs.dry_run == false
