@@ -9,6 +9,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.ViewportSize;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
@@ -57,7 +58,8 @@ class BrowserE2EIT {
     @BeforeAll
     static void launchBrowser() {
         playwright = Playwright.create(new Playwright.CreateOptions().setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions());
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+                .setArgs(List.of("--disable-extensions")));
     }
 
     @AfterAll
