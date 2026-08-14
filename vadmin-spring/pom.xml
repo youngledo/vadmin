@@ -10,14 +10,14 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>admin-spring</artifactId>
+    <artifactId>vadmin-spring</artifactId>
     <packaging>pom</packaging>
 
     <subprojects>
-        <subproject>admin-spring-security</subproject>
-        <subproject>admin-spring-jpa</subproject>
-        <subproject>admin-spring-boot</subproject>
-        <subproject>admin-spring-flow</subproject>
-        <subproject>admin-spring-starter</subproject>
+        <subproject>vadmin-spring-security</subproject>
+        <subproject>vadmin-spring-jpa</subproject>
+        <subproject>vadmin-spring-boot</subproject>
+        <subproject>vadmin-spring-flow</subproject>
+        <subproject>vadmin-spring-boot-starter</subproject>
     </subprojects>
 </project>

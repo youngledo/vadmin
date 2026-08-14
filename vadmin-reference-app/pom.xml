@@ -6,9 +6,9 @@
         <artifactId>vadmin</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>admin-reference-app</artifactId>
+    <artifactId>vadmin-reference-app</artifactId>
     <dependencies>
-        <dependency><groupId>io.github.vaadinadminstarter</groupId><artifactId>admin-spring-starter</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>io.github.youngledo</groupId><artifactId>vadmin-spring-boot-starter</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>com.vaadin</groupId><artifactId>vaadin-dev</artifactId><version>${vaadin.version}</version><optional>true</optional></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
         <dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers</artifactId><scope>test</scope></dependency>

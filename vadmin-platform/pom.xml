@@ -6,8 +6,13 @@
         <artifactId>vadmin</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>admin-contracts</artifactId>
+    <artifactId>vadmin-platform</artifactId>
     <dependencies>
+        <dependency>
+            <groupId>io.github.youngledo</groupId>
+            <artifactId>vadmin-contracts</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
