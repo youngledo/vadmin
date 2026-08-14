@@ -117,7 +117,8 @@ class KeycloakOidcIT {
         startExternalLogin("oidc-admin");
         waitForUsersRoute();
 
-        PlaywrightBrowserSupport.clickThroughInjectedOverlay(page.getByLabel("当前用户菜单"));
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
+                page.locator("vaadin-menu-bar.admin-user-menu vaadin-menu-bar-button:not([hidden])"));
         page.getByText("退出登录", new Page.GetByTextOptions().setExact(true)).click();
 
         page.waitForURL(baseUrl() + "/login");

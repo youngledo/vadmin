@@ -22,6 +22,6 @@ public final class PlaywrightBrowserSupport {
     }
 
     public static void clickThroughInjectedOverlay(Locator target) {
-        target.click(new Locator.ClickOptions().setForce(true));
+        target.evaluate("element => element.click()");
     }
 }
