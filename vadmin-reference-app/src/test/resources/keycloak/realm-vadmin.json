@@ -1,10 +1,10 @@
 {
-  "realm": "vaadin-admin",
+  "realm": "vadmin",
   "enabled": true,
   "clients": [
     {
-      "clientId": "vaadin-admin-test",
-      "name": "Vaadin Admin Starter OIDC integration test",
+      "clientId": "vadmin-test",
+      "name": "VAdmin OIDC integration test",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": true,

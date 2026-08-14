@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * OIDC login settings owned by the starter.
  */
-@ConfigurationProperties("vaadin-admin.oidc")
+@ConfigurationProperties("vadmin.oidc")
 public record OidcLoginProperties(String registrationId) {
     public static final String DEFAULT_REGISTRATION_ID = "oidc";
 

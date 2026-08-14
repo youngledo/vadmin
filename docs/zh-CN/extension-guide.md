@@ -1,8 +1,10 @@
 # 扩展指南
 
+VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
+
 [English](../en/extension-guide.md) | 简体中文
 
-`admin-spring-starter` 拥有默认外壳、主题、首页和系统管理。普通使用方通过贡献业务
+`vadmin-spring-boot-starter` 拥有默认外壳、主题、首页和系统管理。普通使用方通过贡献业务
 `AdminModule` 扩展应用；不要复制或创建外壳、布局、主题或系统模块。
 
 本指南使用中性的 `inventory` 模块。模块在启动时组装，并非运行时插件。
@@ -16,11 +18,11 @@
 package com.example.inventory;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
-import io.github.vaadinadminstarter.flow.navigation.AdminMessageBundle;
-import io.github.vaadinadminstarter.flow.navigation.AdminModule;
-import io.github.vaadinadminstarter.flow.navigation.AdminNavigationGroup;
-import io.github.vaadinadminstarter.flow.navigation.AdminPage;
+import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
+import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
+import io.github.youngledo.vadmin.flow.navigation.AdminModule;
+import io.github.youngledo.vadmin.flow.navigation.AdminNavigationGroup;
+import io.github.youngledo.vadmin.flow.navigation.AdminPage;
 import java.util.List;
 import java.util.Set;
 import org.springframework.context.annotation.Bean;
@@ -133,7 +135,7 @@ View 使用与框架无关的用例和授权契约，绝不直接使用 JPA repo
 
 ## 模块清单
 
-- 在应用中依赖 `admin-spring-starter`。
+- 在应用中依赖 `vadmin-spring-boot-starter`。
 - 贡献一个 `AdminModule` Bean，使用模块拥有的 ID、路由、权限、图标 key，以及 `zh-CN` 和
   `en-US` 两套消息资源。
 - 每个动态注册 View 都是 Spring Bean，通常使用 prototype 作用域，且不声明 `@Route`。

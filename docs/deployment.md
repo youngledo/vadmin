@@ -1,5 +1,7 @@
 # 部署与运维
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 ## 容器镜像
 
 `Dockerfile` 在 Java 25 JDK 阶段执行生产构建，最终阶段使用 Java 25 JRE，只复制
@@ -7,13 +9,13 @@
 `SPRING_PROFILES_ACTIVE=prod`。
 
 ```bash
-docker build -t vaadin-admin-starter:local .
+docker build -t vadmin:local .
 docker run --rm -p 8080:8080 \
-  -e DATABASE_URL=jdbc:postgresql://db.example:5432/vaadin_admin \
-  -e DATABASE_USERNAME=vaadin_admin \
+  -e DATABASE_URL=jdbc:postgresql://db.example:5432/vadmin \
+  -e DATABASE_USERNAME=vadmin \
   -e DATABASE_PASSWORD='replace-me' \
   -e APP_BOOTSTRAP_PASSWORD='replace-on-first-start' \
-  vaadin-admin-starter:local
+  vadmin:local
 ```
 
 生产部署应让数据库密码、引导密码和任何对象存储凭据由平台的密钥机制提供。不要把

@@ -1,5 +1,7 @@
 # 外观配置档案
 
+VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
+
 参考应用将外观划分为三个相互独立的维度：
 
 | 维度 | 可选值 | 所有者 |

@@ -8,15 +8,15 @@ import org.testcontainers.utility.MountableFile;
 
 final class KeycloakFixture extends GenericContainer<KeycloakFixture> {
     private static final int HTTP_PORT = 8080;
-    private static final String REALM = "vaadin-admin";
+    private static final String REALM = "vadmin";
 
     KeycloakFixture() {
         super(DockerImageName.parse("quay.io/keycloak/keycloak:26.4.0"));
         withExposedPorts(HTTP_PORT);
         withEnv("KC_BOOTSTRAP_ADMIN_USERNAME", "admin");
         withEnv("KC_BOOTSTRAP_ADMIN_PASSWORD", "admin");
-        withCopyFileToContainer(MountableFile.forClasspathResource("keycloak/realm-vaadin-admin.json"),
-                "/opt/keycloak/data/import/realm-vaadin-admin.json");
+        withCopyFileToContainer(MountableFile.forClasspathResource("keycloak/realm-vadmin.json"),
+                "/opt/keycloak/data/import/realm-vadmin.json");
         withCommand("start-dev", "--import-realm");
         waitingFor(Wait.forHttp("/realms/" + REALM + "/.well-known/openid-configuration")
                 .forStatusCode(200)

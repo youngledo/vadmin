@@ -1,6 +1,8 @@
 # Theme Tokens
 
-`admin-spring-starter` owns the default Vaadin Flow theme. Its
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
+`vadmin-spring-boot-starter` owns the default Vaadin Flow theme. Its
 `DefaultApplicationShell` registers `@Theme("admin-theme")`, and the starter's
 `admin-theme/styles.css` implements this token contract. Normal consumers and
 business modules use the tokens; they do not define a shell or global theme.

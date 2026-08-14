@@ -1,10 +1,12 @@
-# Vaadin Admin Starter - 架构
+# VAdmin - 架构
+
+VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
 
 [English](../en/architecture.md) | 简体中文
 
 ## 范围
 
-Vaadin Admin Starter 是面向 Java 内部业务应用的生产级基线。第 1 版支持 Java 25、
+VAdmin 是面向 Java 内部业务应用的生产级基线。第 1 版支持 Java 25、
 Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring Boot 是唯一
 运行时，Vaadin Flow 是唯一 UI 编程模型。
 
@@ -22,24 +24,24 @@ Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring B
 | `admin-spring-jpa` | JPA/Flyway RBAC 与审计适配器。 |
 | `admin-spring-boot` | 关联 ID 与 Problem Details 配置。 |
 | `admin-spring-flow` | 模块组装、动态路由、组合翻译和语言偏好。 |
-| `admin-spring-starter` | 默认外壳和主题、系统管理 UI 与翻译、面向使用方的依赖组合。 |
-| `admin-reference-app` | 精简 starter 使用方、启动配置、种子数据和浏览器验收覆盖。 |
+| `vadmin-spring-boot-starter` | 默认外壳和主题、系统管理 UI 与翻译、面向使用方的依赖组合。 |
+| `vadmin-reference-app` | 精简 starter 使用方、启动配置、种子数据和浏览器验收覆盖。 |
 
-`admin-spring-starter` 提供外壳、主题、首页，以及 Users、Roles、Permissions、Audit 系统
-管理模块。`admin-reference-app` 不再拥有复制的基线，而是验证普通应用仅依赖 starter 并添加
+`vadmin-spring-boot-starter` 提供外壳、主题、首页，以及 Users、Roles、Permissions、Audit 系统
+管理模块。`vadmin-reference-app` 不再拥有复制的基线，而是验证普通应用仅依赖 starter 并添加
 自身功能即可运行。
 
 ## 默认使用路径
 
 ```text
 使用方应用
-  -> admin-spring-starter
+  -> vadmin-spring-boot-starter
        -> Spring security、JPA、Boot 和 Flow 适配器
        -> 默认外壳/主题和系统管理
   -> 使用方 AdminModule Bean 与 Flow View Bean
 ```
 
-普通使用方配置数据源和 Flyway 迁移位置、依赖 `admin-spring-starter` 后即可启动。无需定义
+普通使用方配置数据源和 Flyway 迁移位置、依赖 `vadmin-spring-boot-starter` 后即可启动。无需定义
 布局、主题或系统页面，即可获得本地登录、按权限过滤的外壳、Users、Roles、Permissions、
 Audit、`zh-CN`/`en-US` 翻译、浅色/深色模式以及 Vaadin 或 Ant 风格外观。
 

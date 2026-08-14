@@ -1,5 +1,7 @@
 # Appearance Profiles
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 The reference application has three independent appearance axes:
 
 | Axis | Values | Owner |

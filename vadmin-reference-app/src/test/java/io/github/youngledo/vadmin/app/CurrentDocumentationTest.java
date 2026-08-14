@@ -11,14 +11,21 @@ import org.junit.jupiter.api.Test;
 class CurrentDocumentationTest {
     private static final List<String> CURRENT_GUIDES = List.of(
             "README.md",
+            "docs/requirements.md",
+            "docs/contributing.md",
+            "docs/deployment.md",
+            "docs/security.md",
             "docs/en/architecture.md",
             "docs/en/quick-start.md",
             "docs/en/extension-guide.md",
             "docs/en/release-guide.md",
+            "docs/en/theme-tokens.md",
+            "docs/en/appearance-profiles.md",
             "docs/zh-CN/architecture.md",
             "docs/zh-CN/quick-start.md",
             "docs/zh-CN/extension-guide.md",
-            "docs/zh-CN/release-guide.md");
+            "docs/zh-CN/release-guide.md",
+            "docs/zh-CN/appearance-profiles.md");
 
     @Test
     void currentAdoptionGuidesDescribeTheStarterInsteadOfRetiredExamplesOrARequiredCustomShell() throws IOException {
@@ -30,7 +37,9 @@ class CurrentDocumentationTest {
                     .doesNotContain("admin-example-orders", "CustomersView", "/orders", "/customers")
                     .doesNotContain("must create `MainLayout`", "必须创建 `MainLayout`",
                             "InventoryViewProductionAnchor")
-                    .contains("admin-spring-starter");
+                    .contains("VAdmin", "io.github.youngledo", "vadmin-spring-boot-starter")
+                    .doesNotContain("Vaadin Admin Starter", "vaadin-admin-starter",
+                            "io.github.vaadinadminstarter", "admin-spring-starter");
         }
     }
 }

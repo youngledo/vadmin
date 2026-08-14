@@ -1,11 +1,13 @@
-# Vaadin Admin Starter - Requirements
+# VAdmin - Requirements
+
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
 
 Status: Draft 0.1  
 Date: 2026-08-04
 
 ## 1. Product Definition
 
-Vaadin Admin Starter is a production-oriented starter for Java teams that
+VAdmin is a production-oriented starter for Java teams that
 build internal business web applications. It is based on Vaadin Flow and offers
 a consistent application shell, security baseline, common business interaction
 patterns, operational defaults, and a runnable reference application.

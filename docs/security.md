@@ -1,5 +1,7 @@
 # 安全说明
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 ## 身份与引导账户
 
 默认登录方式是本地用户名和密码。数据库为空时，启动过程会创建一个 `admin`

@@ -1,5 +1,7 @@
 # 贡献指南
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 ## 兼容性基线
 
 提交必须在 Java 25 和项目 Maven Wrapper（Maven 4.0.0-rc-6）上构建。当前经过验证的
@@ -15,7 +17,7 @@ Java、Maven、Spring Boot 或 Vaadin 的主版本升级必须通过独立 PR �
 ./mvnw -B -ntp verify
 ./mvnw -B -ntp -Pproduction verify
 docker compose --env-file .env.example config
-docker build -t vaadin-admin-starter:local .
+docker build -t vadmin:local .
 ```
 
 修改核心权限、数据库迁移、安全适配器或 Flow 交互时，应增加相应的单元、集成或

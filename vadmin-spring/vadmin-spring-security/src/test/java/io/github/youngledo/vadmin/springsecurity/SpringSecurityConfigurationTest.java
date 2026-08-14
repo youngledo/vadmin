@@ -29,7 +29,7 @@ class SpringSecurityConfigurationTest {
 
     @Test
     void bindsTheStarterNamespacedRegistrationId() {
-        propertiesContext.withPropertyValues("vaadin-admin.oidc.registration-id=corp-sso")
+        propertiesContext.withPropertyValues("vadmin.oidc.registration-id=corp-sso")
                 .run(context -> assertThat(context.getBean(OidcLoginProperties.class).registrationId())
                         .isEqualTo("corp-sso"));
     }

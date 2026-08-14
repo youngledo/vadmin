@@ -25,7 +25,7 @@ public final class ProblemDetailMapper {
     public ProblemDetail map(BusinessFailure failure) {
         var status = STATUSES.getOrDefault(failure.errorCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         var detail = ProblemDetail.forStatusAndDetail(status, failure.detailKey());
-        detail.setType(URI.create("urn:vaadin-admin-starter:error:" + failure.errorCode().value()));
+        detail.setType(URI.create("urn:vadmin:error:" + failure.errorCode().value()));
         detail.setTitle(titleFor(failure.errorCode()));
         detail.setProperty("errorCode", failure.errorCode().value());
         detail.setProperty("fieldErrors", failure.fieldErrors());

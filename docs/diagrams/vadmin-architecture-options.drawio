@@ -20,7 +20,7 @@
         <mxCell id="14" value="Spring / Quarkus / Helidon&#xa;adapters designed from day one" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" vertex="1" parent="12"><mxGeometry x="80" y="230" width="310" height="80" as="geometry"/></mxCell>
         <mxCell id="15" value="Highest isolation, but APIs become abstract&#xa;before real second-runtime feedback exists" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" vertex="1" parent="12"><mxGeometry x="80" y="370" width="310" height="75" as="geometry"/></mxCell>
         <mxCell id="16" value="Defer until a second runtime is needed" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="12"><mxGeometry x="80" y="510" width="310" height="55" as="geometry"/></mxCell>
-        <mxCell id="17" value="Vaadin Admin Starter - Architecture Options" style="text;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="380" y="10" width="840" height="40" as="geometry"/></mxCell>
+        <mxCell id="17" value="VAdmin - Architecture Options" style="text;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="380" y="10" width="840" height="40" as="geometry"/></mxCell>
       </root>
     </mxGraphModel>
   </diagram>

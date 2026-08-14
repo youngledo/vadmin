@@ -1,8 +1,10 @@
 # 快速开始
 
+VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
+
 [English](../en/quick-start.md) | 简体中文
 
-`admin-spring-starter` 是正常接入时使用的依赖。它提供默认 Flow 外壳和主题、本地登录、
+`vadmin-spring-boot-starter` 是正常接入时使用的依赖。它提供默认 Flow 外壳和主题、本地登录、
 系统管理、模块组装和 Spring 适配器。应用只需提供数据源、Flyway 迁移和业务模块。
 
 ## 前置条件
@@ -17,9 +19,9 @@
 
 ```xml
 <dependency>
-  <groupId>io.github.vaadinadminstarter</groupId>
-  <artifactId>admin-spring-starter</artifactId>
-  <version>${vaadin-admin-starter.version}</version>
+  <groupId>io.github.youngledo</groupId>
+  <artifactId>vadmin-spring-boot-starter</artifactId>
+  <version>${vadmin.version}</version>
 </dependency>
 ```
 
@@ -27,8 +29,8 @@
 不是自行组装外壳：
 
 ```java
-@EnableVaadin({"com.example.inventory", "io.github.vaadinadminstarter.starter",
-        "io.github.vaadinadminstarter.springsecurity.ui"})
+@EnableVaadin({"com.example.inventory", "io.github.youngledo.vadmin.starter",
+        "io.github.youngledo.vadmin.springsecurity.ui"})
 @SpringBootApplication
 public class InventoryApplication {
 }
@@ -84,7 +86,7 @@ export DATABASE_URL="jdbc:postgresql://localhost:5432/${POSTGRES_DB}"
 export DATABASE_USERNAME="${POSTGRES_USER}"
 export DATABASE_PASSWORD="${POSTGRES_PASSWORD}"
 SPRING_PROFILES_ACTIVE=development \
-  ./mvnw -B -ntp -pl :admin-reference-app -am spring-boot:run
+  ./mvnw -B -ntp -pl :vadmin-reference-app -am spring-boot:run
 ```
 
 启动完整容器栈：
@@ -98,9 +100,9 @@ docker compose --env-file .env up --build
 `APP_BOOTSTRAP_PASSWORD`。生产制品不包含 Vaadin 开发服务器：
 
 ```bash
-./mvnw -B -ntp -Pproduction -pl :admin-reference-app -am package -DskipTests
+./mvnw -B -ntp -Pproduction -pl :vadmin-reference-app -am package -DskipTests
 SPRING_PROFILES_ACTIVE=prod \
-  java -jar admin-reference-app/target/admin-reference-app-0.1.0-SNAPSHOT.jar
+  java -jar vadmin-reference-app/target/vadmin-reference-app-0.1.0-SNAPSHOT.jar
 ```
 
 清除本地演示数据会删除 Compose 卷。执行前确认没有需要保留的数据：

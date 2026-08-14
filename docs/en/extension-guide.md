@@ -1,8 +1,10 @@
 # Extension Guide
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 [简体中文](../zh-CN/extension-guide.md) | English
 
-`admin-spring-starter` owns the default shell, theme, home page, and system
+`vadmin-spring-boot-starter` owns the default shell, theme, home page, and system
 administration. Extend a normal consumer by contributing a business
 `AdminModule`; do not copy or create a shell, layout, theme, or system module.
 
@@ -18,11 +20,11 @@ translation bundles. Page title and intent keys must start with the module ID.
 package com.example.inventory;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import io.github.vaadinadminstarter.contracts.auth.PermissionCode;
-import io.github.vaadinadminstarter.flow.navigation.AdminMessageBundle;
-import io.github.vaadinadminstarter.flow.navigation.AdminModule;
-import io.github.vaadinadminstarter.flow.navigation.AdminNavigationGroup;
-import io.github.vaadinadminstarter.flow.navigation.AdminPage;
+import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
+import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
+import io.github.youngledo.vadmin.flow.navigation.AdminModule;
+import io.github.youngledo.vadmin.flow.navigation.AdminNavigationGroup;
+import io.github.youngledo.vadmin.flow.navigation.AdminPage;
 import java.util.List;
 import java.util.Set;
 import org.springframework.context.annotation.Bean;
@@ -146,7 +148,7 @@ guards. Consumers that only add business pages should retain the default shell.
 
 ## Module Checklist
 
-- Depend on `admin-spring-starter` in the application.
+- Depend on `vadmin-spring-boot-starter` in the application.
 - Contribute one `AdminModule` bean with module-owned IDs, routes, permissions,
   icon keys, and both `zh-CN` and `en-US` message resources.
 - Make each dynamically registered View a Spring bean, normally with prototype

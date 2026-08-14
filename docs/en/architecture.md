@@ -1,10 +1,12 @@
-# Vaadin Admin Starter - Architecture
+# VAdmin - Architecture
+
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
 
 English | [简体中文](../zh-CN/architecture.md)
 
 ## Scope
 
-Vaadin Admin Starter is a production-oriented baseline for Java internal
+VAdmin is a production-oriented baseline for Java internal
 applications. Release 1 supports Java 25, Spring Boot 4.x, Vaadin Flow 25.x,
 PostgreSQL, and Flyway SQL migrations. Spring Boot is the only runtime and
 Vaadin Flow is the only UI programming model.
@@ -25,11 +27,11 @@ configuration.
 | `admin-spring-jpa` | JPA/Flyway RBAC and audit adapters. |
 | `admin-spring-boot` | Correlation and Problem Details configuration. |
 | `admin-spring-flow` | Module assembly, dynamic routes, composite translations, and locale preference. |
-| `admin-spring-starter` | Default shell and theme, system administration UI and translations, and consumer-facing dependency composition. |
-| `admin-reference-app` | Thin starter consumer, launch configuration, seed data, and browser acceptance coverage. |
+| `vadmin-spring-boot-starter` | Default shell and theme, system administration UI and translations, and consumer-facing dependency composition. |
+| `vadmin-reference-app` | Thin starter consumer, launch configuration, seed data, and browser acceptance coverage. |
 
-`admin-spring-starter` supplies the shell, theme, home page, and the Users,
-Roles, Permissions, and Audit administration module. `admin-reference-app`
+`vadmin-spring-boot-starter` supplies the shell, theme, home page, and the Users,
+Roles, Permissions, and Audit administration module. `vadmin-reference-app`
 does not own a copied baseline; it proves that a normal application can depend
 on the starter and contribute only its own functionality.
 
@@ -37,14 +39,14 @@ on the starter and contribute only its own functionality.
 
 ```text
 Consumer application
-  -> admin-spring-starter
+  -> vadmin-spring-boot-starter
        -> Spring security, JPA, Boot, and Flow adapters
        -> default shell/theme and system administration
   -> consumer AdminModule beans and Flow view beans
 ```
 
 A normal consumer configures its datasource and Flyway migration location,
-depends on `admin-spring-starter`, and starts the application. It receives
+depends on `vadmin-spring-boot-starter`, and starts the application. It receives
 local login, the permission-filtered shell, Users, Roles, Permissions, Audit,
 `zh-CN`/`en-US` translations, light/dark mode, and Vaadin or Ant-inspired
 appearance profiles without defining a layout, theme, or system pages.

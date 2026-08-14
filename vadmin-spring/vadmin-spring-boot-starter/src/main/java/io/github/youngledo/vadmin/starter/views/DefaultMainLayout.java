@@ -70,7 +70,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         this.appearance = appearance;
         var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
-        var productName = new Span("Vaadin Admin Starter");
+        var productName = new Span("VAdmin");
         productName.addClassName("admin-shell-brand");
         currentLocation.addClassName("admin-shell-location");
 

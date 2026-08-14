@@ -32,7 +32,7 @@ class LoginViewTest {
         var translations = mock(I18NProvider.class);
         when(translations.getDefaultLocale()).thenReturn(Locale.US);
         when(translations.getProvidedLocales()).thenReturn(List.of(Locale.US));
-        when(translations.getTranslation("flow.login.heading", Locale.US)).thenReturn("Vaadin Admin Starter");
+        when(translations.getTranslation("flow.login.heading", Locale.US)).thenReturn("VAdmin");
         when(translations.getTranslation("flow.login.title", Locale.US)).thenReturn("Sign in");
         when(translations.getTranslation("flow.login.sso", Locale.US)).thenReturn("Continue with single sign-on");
         when(translations.getTranslation("flow.login.denied", Locale.US)).thenReturn("Sign-in was not permitted");

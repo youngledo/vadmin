@@ -1,11 +1,13 @@
 # 发布指南
 
+VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
+
 [English](../en/release-guide.md) | 简体中文
 
 ## 范围
 
 本指南用于准备首个公开 `0.1.0` 版本。它不会发布制品、创建标签、修改 Maven 版本，也不代表
-已获得 Maven Central 发布授权。该版本将 `admin-spring-starter` 作为受支持的接入制品：默认
+已获得 Maven Central 发布授权。该版本将 `vadmin-spring-boot-starter` 作为受支持的接入制品：默认
 外壳和主题、系统管理、模块组装，以及使用方所需的 Spring 适配器。
 
 ## 已验证兼容性基线
@@ -26,7 +28,7 @@
 
 ## 使用方升级规则
 
-1. 将所有 `io.github.vaadinadminstarter` 依赖升级到相同目标版本。不得混用已发布制品和
+1. 将所有 `io.github.youngledo` 依赖升级到相同目标版本。不得混用已发布制品和
    snapshot 同级制品。
 2. 使用 Java 25 运行使用方，并让 Spring Boot 与 Vaadin 与已验证版本表保持一致。
 3. 在类生产数据库副本上审查 Flyway 迁移。每个迁移只执行一次，且不得改写已应用的迁移。
@@ -47,7 +49,7 @@
 - [ ] 清理有意生成的制品后，`git status --short` 为空。
 - [ ] `git diff --check` 没有输出。
 - [ ] `CHANGELOG.md` 将发布内容移出 `Unreleased`，包含发布日期并标明不兼容变更。
-- [ ] README、架构、快速开始、扩展和发布指南一致说明：`admin-spring-starter` 提供默认
+- [ ] README、架构、快速开始、扩展和发布指南一致说明：`vadmin-spring-boot-starter` 提供默认
   外壳、主题和系统管理。
 - [ ] 当前指南不包含已移除的示例领域引用，也不声称普通使用方必须提供外壳或默认
   `AdminHostLayout`。
@@ -60,7 +62,7 @@
 ./mvnw -B -ntp verify
 ./mvnw -B -ntp -Pproduction verify
 docker compose --env-file .env.example config
-docker build -t vaadin-admin-starter:0.1.0-rc .
+docker build -t vadmin:0.1.0-rc .
 ```
 
 - [ ] 两条 Maven 命令均以 `BUILD SUCCESS` 结束。

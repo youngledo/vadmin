@@ -1,8 +1,10 @@
 # Quick Start
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 [简体中文](../zh-CN/quick-start.md) | English
 
-`admin-spring-starter` is the normal adoption dependency. It supplies the
+`vadmin-spring-boot-starter` is the normal adoption dependency. It supplies the
 default Flow shell and theme, local login, system administration, module
 assembly, and Spring adapters. Your application supplies its datasource,
 Flyway migrations, and business modules.
@@ -19,9 +21,9 @@ Add the single first-party dependency to a Spring Boot application:
 
 ```xml
 <dependency>
-  <groupId>io.github.vaadinadminstarter</groupId>
-  <artifactId>admin-spring-starter</artifactId>
-  <version>${vaadin-admin-starter.version}</version>
+  <groupId>io.github.youngledo</groupId>
+  <artifactId>vadmin-spring-boot-starter</artifactId>
+  <version>${vadmin.version}</version>
 </dependency>
 ```
 
@@ -30,8 +32,8 @@ packages. This is Vaadin's route-discovery requirement, not custom shell
 composition:
 
 ```java
-@EnableVaadin({"com.example.inventory", "io.github.vaadinadminstarter.starter",
-        "io.github.vaadinadminstarter.springsecurity.ui"})
+@EnableVaadin({"com.example.inventory", "io.github.youngledo.vadmin.starter",
+        "io.github.youngledo.vadmin.springsecurity.ui"})
 @SpringBootApplication
 public class InventoryApplication {
 }
@@ -92,7 +94,7 @@ export DATABASE_URL="jdbc:postgresql://localhost:5432/${POSTGRES_DB}"
 export DATABASE_USERNAME="${POSTGRES_USER}"
 export DATABASE_PASSWORD="${POSTGRES_PASSWORD}"
 SPRING_PROFILES_ACTIVE=development \
-  ./mvnw -B -ntp -pl :admin-reference-app -am spring-boot:run
+  ./mvnw -B -ntp -pl :vadmin-reference-app -am spring-boot:run
 ```
 
 For the complete container stack:
@@ -107,9 +109,9 @@ protected `APP_BOOTSTRAP_PASSWORD` for a production-like database. The
 production artifact excludes the Vaadin development server:
 
 ```bash
-./mvnw -B -ntp -Pproduction -pl :admin-reference-app -am package -DskipTests
+./mvnw -B -ntp -Pproduction -pl :vadmin-reference-app -am package -DskipTests
 SPRING_PROFILES_ACTIVE=prod \
-  java -jar admin-reference-app/target/admin-reference-app-0.1.0-SNAPSHOT.jar
+  java -jar vadmin-reference-app/target/vadmin-reference-app-0.1.0-SNAPSHOT.jar
 ```
 
 Removing local demonstration data deletes Compose volumes. Confirm that no

@@ -26,7 +26,7 @@ class StarterDependencyTest {
                 "admin-spring-flow", "spring-boot-starter", "vaadin-dev", "postgresql");
         assertThat(text(coordinates.get("vaadin-dev"), "optional")).isEqualTo("true");
         assertThat(text(coordinates.get("postgresql"), "scope")).isEqualTo("runtime");
-        assertThat(coordinates).doesNotContainKeys("admin-reference-app", "admin-example-orders");
+        assertThat(coordinates).doesNotContainKeys("vadmin-reference-app", "admin-example-orders");
     }
 
     private static String text(Element parent, String tagName) {

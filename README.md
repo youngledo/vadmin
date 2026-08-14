@@ -1,7 +1,9 @@
-# Vaadin Admin Starter
+# VAdmin
 
-Vaadin Admin Starter is a Spring Boot and Vaadin Flow baseline for internal
-business applications. Add `admin-spring-starter` to receive local login,
+VAdmin is published as `io.github.youngledo:vadmin-spring-boot-starter`.
+
+VAdmin is a Spring Boot and Vaadin Flow baseline for internal
+business applications. Add `vadmin-spring-boot-starter` to receive local login,
 permission-filtered navigation, the default shell and theme, Users, Roles,
 Permissions, Audit, locale selection, and appearance controls. It is not a
 collection of showcase pages or a runtime plugin platform.
@@ -44,7 +46,7 @@ Open `http://localhost:8080` and sign in with `admin` and the value of
 ./mvnw -B -ntp verify
 ./mvnw -B -ntp -Pproduction verify
 docker compose --env-file .env.example config
-docker build -t vaadin-admin-starter:local .
+docker build -t vadmin:local .
 ```
 
 Vaadin is a trademark of Vaadin Ltd. This project is not affiliated with,

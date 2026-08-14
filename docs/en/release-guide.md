@@ -1,12 +1,14 @@
 # Release Guide
 
+VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
+
 [简体中文](../zh-CN/release-guide.md) | English
 
 ## Scope
 
 This guide prepares the first public `0.1.0` release. It does not publish
 artifacts, create a tag, change a Maven version, or authorize a Maven Central
-release. The release delivers `admin-spring-starter` as the supported adoption
+release. The release delivers `vadmin-spring-boot-starter` as the supported adoption
 artifact: default shell and theme, system administration, module assembly, and
 the Spring adapters needed by a consumer.
 
@@ -28,7 +30,7 @@ updated compatibility evidence, and both normal and production verification.
 
 ## Consumer Upgrade Rules
 
-1. Update all `io.github.vaadinadminstarter` dependencies to the same target
+1. Update all `io.github.youngledo` dependencies to the same target
    version. Do not mix released artifacts with snapshot siblings.
 2. Run the consumer with Java 25 and align Spring Boot and Vaadin with the
    verified release table.
@@ -58,7 +60,7 @@ output, tool versions, image digest, release commit, and tag.
 - [ ] `CHANGELOG.md` moves release content out of `Unreleased`, includes the
   release date, and identifies breaking changes.
 - [ ] README, architecture, quick start, extension, and release guides agree
-  that `admin-spring-starter` supplies the default shell, theme, and system
+  that `vadmin-spring-boot-starter` supplies the default shell, theme, and system
   administration.
 - [ ] Current guides contain no retired example-domain references or claims
   that a normal consumer must provide a shell or default `AdminHostLayout`.
@@ -73,7 +75,7 @@ output, tool versions, image digest, release commit, and tag.
 ./mvnw -B -ntp verify
 ./mvnw -B -ntp -Pproduction verify
 docker compose --env-file .env.example config
-docker build -t vaadin-admin-starter:0.1.0-rc .
+docker build -t vadmin:0.1.0-rc .
 ```
 
 - [ ] Both Maven commands complete with `BUILD SUCCESS`.

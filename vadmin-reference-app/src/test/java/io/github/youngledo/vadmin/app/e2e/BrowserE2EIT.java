@@ -77,7 +77,7 @@ class BrowserE2EIT {
     @Test
     void starterConsumerReceivesTheCompleteSystemAdministrationShell() {
         signInAs("admin", "change-me");
-        assertThat(page.getByText("Vaadin Admin Starter", new Page.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(page.getByText("VAdmin", new Page.GetByTextOptions().setExact(true))).isVisible();
         assertThat(page.getByLabel("系统管理").getByRole(AriaRole.LINK,
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("用户"))).isVisible();
         assertThat(page.getByLabel("系统管理").getByRole(AriaRole.LINK,
