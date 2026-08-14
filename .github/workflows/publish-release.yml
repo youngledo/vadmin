@@ -64,7 +64,11 @@ jobs:
             exit 1
           fi
 
-          version=$(./mvnw -q -DforceStdout help:evaluate -Dexpression=project.version)
+          version=$(./mvnw -q -DforceStdout help:evaluate -Dexpression=project.version | sed -n 's/^\[INFO\] \[stdout\] //p; /^[0-9][0-9.]*$/p' | tail -n 1)
+          if [[ -z "$version" ]]; then
+            echo "Could not read the Maven project version."
+            exit 1
+          fi
           if [[ "$RELEASE_TAG" != "v$version" ]]; then
             echo "Tag $RELEASE_TAG does not match Maven version $version."
             exit 1
