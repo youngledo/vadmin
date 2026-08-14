@@ -27,6 +27,7 @@ import io.github.youngledo.vadmin.flow.patterns.PageToolbar;
 import io.github.youngledo.vadmin.flow.navigation.PermissionProtectedView;
 import io.github.youngledo.vadmin.flow.navigation.AdminIcon;
 import io.github.youngledo.vadmin.flow.navigation.AdminIconName;
+import io.github.youngledo.vadmin.starter.localiam.ConditionalOnVadminLocalIam;
 import jakarta.annotation.security.PermitAll;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@ConditionalOnVadminLocalIam
 public final class UsersView extends PermissionProtectedView implements LocaleChangeObserver, HasDynamicTitle {
     public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:user:read");
     private static final PermissionCode CREATE = PermissionCode.of("system:user:create");

@@ -13,11 +13,13 @@ import io.github.youngledo.vadmin.flow.patterns.DataWorkspace;
 import io.github.youngledo.vadmin.flow.patterns.PagedGrid;
 import io.github.youngledo.vadmin.flow.patterns.PageHeader;
 import io.github.youngledo.vadmin.flow.navigation.PermissionProtectedView;
+import io.github.youngledo.vadmin.starter.localiam.ConditionalOnVadminLocalIam;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@ConditionalOnVadminLocalIam
 public final class AuditView extends PermissionProtectedView implements LocaleChangeObserver, HasDynamicTitle {
     public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:audit:read");
     private final Grid<AdministrationQueryService.AuditRow> grid = new Grid<>(AdministrationQueryService.AuditRow.class, false);

@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.youngledo</groupId>
         <artifactId>vadmin-spring</artifactId>
-        <version>0.1.0</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
     <artifactId>vadmin-spring-boot-starter</artifactId>
     <name>VAdmin Spring Boot Starter</name>

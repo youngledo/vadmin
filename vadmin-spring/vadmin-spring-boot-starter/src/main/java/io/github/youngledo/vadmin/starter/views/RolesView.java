@@ -24,12 +24,14 @@ import io.github.youngledo.vadmin.platform.access.GrantPermissionUseCase;
 import io.github.youngledo.vadmin.flow.navigation.PermissionProtectedView;
 import io.github.youngledo.vadmin.flow.navigation.AdminIcon;
 import io.github.youngledo.vadmin.flow.navigation.AdminIconName;
+import io.github.youngledo.vadmin.starter.localiam.ConditionalOnVadminLocalIam;
 import jakarta.annotation.security.PermitAll;
 import java.util.Comparator;
 
 @PermitAll
 @org.springframework.stereotype.Component
 @org.springframework.context.annotation.Scope(org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@ConditionalOnVadminLocalIam
 public final class RolesView extends PermissionProtectedView implements LocaleChangeObserver, HasDynamicTitle {
     public static final PermissionCode REQUIRED_PERMISSION = PermissionCode.of("system:role:read");
     private static final PermissionCode GRANT = PermissionCode.of("system:role:grant");

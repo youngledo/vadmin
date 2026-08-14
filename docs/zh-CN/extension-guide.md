@@ -7,6 +7,38 @@ VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
 `vadmin-spring-boot-starter` 拥有默认外壳、主题、首页和系统管理。普通使用方通过贡献业务
 `AdminModule` 扩展应用；不要复制或创建外壳、布局、主题或系统模块。
 
+## 使用宿主认证
+
+默认情况下，starter 启用 VAdmin 本地 IAM：本地用户、角色、权限、审计和系统管理页面。
+如果宿主已经拥有账号、会话和授权边界，可设置下列配置关闭这些本地能力：
+
+```yaml
+vadmin:
+  local-iam:
+    enabled: false
+```
+
+同时从 starter 排除本地 JPA 适配器，避免其 Spring Data JPA 运行时和迁移资源进入宿主：
+
+```xml
+<dependency>
+  <groupId>io.github.youngledo</groupId>
+  <artifactId>vadmin-spring-boot-starter</artifactId>
+  <version>0.1.1-SNAPSHOT</version>
+  <exclusions>
+    <exclusion>
+      <groupId>io.github.youngledo</groupId>
+      <artifactId>vadmin-spring-jpa</artifactId>
+    </exclusion>
+  </exclusions>
+</dependency>
+```
+
+宿主随后负责登录、退出、会话失效，并提供 `CurrentUserProvider` 与
+`AuthorizationService` Bean。VAdmin 保持 `CurrentUser` 与 `PermissionCode` 契约，
+不依赖宿主的 principal 类型、用户表或认证协议。该模式不会装配本地 IAM 服务和 Users、Roles、
+Permissions、Audit 页面；宿主仍可贡献业务 `AdminModule` 与 Flow View。
+
 本指南使用中性的 `inventory` 模块。模块在启动时组装，并非运行时插件。
 
 ## Inventory 模块

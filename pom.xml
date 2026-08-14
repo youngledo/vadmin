@@ -6,7 +6,7 @@
 
     <groupId>io.github.youngledo</groupId>
     <artifactId>vadmin</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>VAdmin</name>
@@ -32,7 +32,7 @@
         <connection>scm:git:git://github.com/youngledo/vadmin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/youngledo/vadmin.git</developerConnection>
         <url>https://github.com/youngledo/vadmin</url>
-        <tag>v0.1.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>

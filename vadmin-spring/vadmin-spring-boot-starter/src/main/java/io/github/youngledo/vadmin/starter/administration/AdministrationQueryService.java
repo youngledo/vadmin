@@ -2,6 +2,7 @@ package io.github.youngledo.vadmin.starter.administration;
 
 import io.github.youngledo.vadmin.contracts.navigation.PagedQuery;
 import io.github.youngledo.vadmin.contracts.navigation.PagedResult;
+import io.github.youngledo.vadmin.starter.localiam.ConditionalOnVadminLocalIam;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ConditionalOnVadminLocalIam
 public class AdministrationQueryService {
     private final JdbcTemplate jdbcTemplate;
 

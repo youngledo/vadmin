@@ -18,8 +18,9 @@ class AdminIconTest {
 
     @Test
     void resolvesEverySupportedNavigationKeyToAStableIconName() {
-        assertThat(AdminIconCatalog.iconName("shopping-cart")).isEqualTo(AdminIconName.SHOPPING_CART);
-        assertThat(AdminIconCatalog.iconName("users")).isEqualTo(AdminIconName.USERS);
+        for (var iconName : AdminIconName.values()) {
+            assertThat(AdminIconCatalog.iconName(iconName.cssValue())).isEqualTo(iconName);
+        }
         assertThatIllegalArgumentException().isThrownBy(() -> AdminIconCatalog.iconName("untrusted"));
     }
 }

@@ -8,6 +8,7 @@ import io.github.youngledo.vadmin.contracts.auth.CurrentUser;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 import io.github.youngledo.vadmin.contracts.error.BusinessFailure;
 import io.github.youngledo.vadmin.contracts.error.ErrorCode;
+import io.github.youngledo.vadmin.starter.localiam.ConditionalOnVadminLocalIam;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ConditionalOnVadminLocalIam
 public class UserAdministrationService {
     private static final PermissionCode CREATE = PermissionCode.of("system:user:create");
     private static final PermissionCode UPDATE = PermissionCode.of("system:user:update");

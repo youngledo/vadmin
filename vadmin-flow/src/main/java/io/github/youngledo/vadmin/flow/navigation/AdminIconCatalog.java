@@ -1,20 +1,16 @@
 package io.github.youngledo.vadmin.flow.navigation;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.icon.Icon;
 
 /** Stable catalog of navigation icons that administration modules may declare. */
 public final class AdminIconCatalog {
-    private static final Map<String, AdminIconName> ICONS = Map.of(
-            "briefcase", AdminIconName.BRIEFCASE,
-            "clock", AdminIconName.CLOCK,
-            "history", AdminIconName.HISTORY,
-            "key", AdminIconName.KEY,
-            "shield", AdminIconName.SHIELD,
-            "shopping-cart", AdminIconName.SHOPPING_CART,
-            "users", AdminIconName.USERS);
+    private static final Map<String, AdminIconName> ICONS = Arrays.stream(AdminIconName.values())
+            .collect(Collectors.toUnmodifiableMap(AdminIconName::cssValue, icon -> icon));
 
     private AdminIconCatalog() {
     }

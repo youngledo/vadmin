@@ -5,6 +5,7 @@ import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
 import io.github.youngledo.vadmin.flow.navigation.AdminModule;
 import io.github.youngledo.vadmin.flow.navigation.AdminNavigationGroup;
 import io.github.youngledo.vadmin.flow.navigation.AdminPage;
+import io.github.youngledo.vadmin.starter.localiam.ConditionalOnVadminLocalIam;
 import io.github.youngledo.vadmin.starter.views.AuditView;
 import io.github.youngledo.vadmin.starter.views.PermissionsView;
 import io.github.youngledo.vadmin.starter.views.RolesView;
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
+@ConditionalOnVadminLocalIam
 public class SystemAdministrationModuleConfiguration {
     @Bean
     public AdminModule systemAdministration() {
