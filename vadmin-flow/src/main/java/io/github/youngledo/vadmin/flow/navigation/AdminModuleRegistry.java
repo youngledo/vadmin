@@ -1,5 +1,6 @@
 package io.github.youngledo.vadmin.flow.navigation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -16,7 +17,7 @@ import io.github.youngledo.vadmin.contracts.auth.CurrentUser;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 
 /** Validated, deterministic aggregation of all administration module metadata. */
-public final class AdminModuleRegistry {
+public final class AdminModuleRegistry implements Serializable {
     private static final Comparator<AdminNavigationGroup> GROUP_ORDER = Comparator
             .comparingInt(AdminNavigationGroup::order)
             .thenComparing(AdminNavigationGroup::id);

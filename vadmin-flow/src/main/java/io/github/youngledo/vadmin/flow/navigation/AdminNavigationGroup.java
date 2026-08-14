@@ -1,9 +1,10 @@
 package io.github.youngledo.vadmin.flow.navigation;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /** Immutable metadata for a top-level administration navigation group. */
-public record AdminNavigationGroup(String id, String titleKey, int order) {
+public record AdminNavigationGroup(String id, String titleKey, int order) implements Serializable {
     public AdminNavigationGroup {
         id = requireText(id, "id");
         titleKey = requireText(titleKey, "titleKey");

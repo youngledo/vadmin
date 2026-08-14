@@ -1,5 +1,6 @@
 package io.github.youngledo.vadmin.springflow.i18n;
 
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,7 +19,7 @@ import com.vaadin.flow.i18n.I18NProvider;
 import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
 
 /** I18N provider that resolves each translation only from its declared module resources. */
-public final class CompositeAdminI18NProvider implements I18NProvider {
+public final class CompositeAdminI18NProvider implements I18NProvider, Serializable {
     public static final Locale ZH_CN = Locale.forLanguageTag("zh-CN");
     public static final Locale EN_US = Locale.forLanguageTag("en-US");
 

@@ -1,5 +1,6 @@
 package io.github.youngledo.vadmin.springflow.i18n;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -8,7 +9,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 
 /** Stores a supported administration locale in the current Vaadin session. */
-public final class AdminLocalePreference {
+public final class AdminLocalePreference implements Serializable {
     public static final String LOCALE_SESSION_KEY = "io.github.youngledo.vadmin.springflow.locale";
 
     public Locale selectInitialLocale(Locale browserLocale) {
