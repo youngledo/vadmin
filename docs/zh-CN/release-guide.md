@@ -76,8 +76,9 @@ docker build -t vadmin:0.1.0-rc .
 ## 发布
 
 Maven 的 `release` profile 会要求非 SNAPSHOT 版本、附加源码和 Javadoc 归档、使用 GPG 签名
-全部发布文件，并通过 Maven Central Publisher Portal 发布。VAdmin 有意使用仓库内置的 Maven 4
-Wrapper 构建和发布；其 Maven 4.1 POM 模型不兼容 Maven 3。
+全部发布文件，并通过 Maven Central Publisher Portal 发布。VAdmin 的日常开发和 CI 使用仓库内置的
+Maven 4 Wrapper；Maven Central 的发布则有意使用 Apache Maven 3.9.16，因为 Central 发布链路目前
+不能可靠支持 Maven 4 项目模型。因此项目 POM 保持 Maven 3 兼容的 `4.0.0` model 语法。
 
 推荐的发布路径是手动触发 `Publish Release` GitHub Actions 工作流。它必须从 `main` 发起，但会
 检出不可变的 annotated release tag。其发布 job 绑定到 `vadmin` Environment，因此该环境中的

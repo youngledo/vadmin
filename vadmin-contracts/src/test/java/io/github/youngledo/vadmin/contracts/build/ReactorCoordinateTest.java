@@ -36,19 +36,19 @@ class ReactorCoordinateTest {
         List<Path> pomFiles = new ArrayList<>();
         Path rootPom = root.resolve("pom.xml");
         pomFiles.add(rootPom);
-        for (String module : subprojects(rootPom)) {
+        for (String module : modules(rootPom)) {
             Path modulePom = root.resolve(module).resolve("pom.xml");
             pomFiles.add(modulePom);
-            for (String child : subprojects(modulePom)) {
+            for (String child : modules(modulePom)) {
                 pomFiles.add(modulePom.getParent().resolve(child).resolve("pom.xml"));
             }
         }
         return pomFiles;
     }
 
-    private static List<String> subprojects(Path pom) throws Exception {
+    private static List<String> modules(Path pom) throws Exception {
         Element project = document(pom).getDocumentElement();
-        return directChildren(directChildren(project, "subprojects").stream().findFirst().orElse(null), "subproject")
+        return directChildren(directChildren(project, "modules").stream().findFirst().orElse(null), "module")
                 .stream()
                 .map(Element::getTextContent)
                 .map(String::strip)

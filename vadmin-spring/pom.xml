@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.1.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>io.github.youngledo</groupId>
@@ -13,11 +13,11 @@
     <artifactId>vadmin-spring</artifactId>
     <packaging>pom</packaging>
 
-    <subprojects>
-        <subproject>vadmin-spring-security</subproject>
-        <subproject>vadmin-spring-jpa</subproject>
-        <subproject>vadmin-spring-boot</subproject>
-        <subproject>vadmin-spring-flow</subproject>
-        <subproject>vadmin-spring-boot-starter</subproject>
-    </subprojects>
+    <modules>
+        <module>vadmin-spring-security</module>
+        <module>vadmin-spring-jpa</module>
+        <module>vadmin-spring-boot</module>
+        <module>vadmin-spring-flow</module>
+        <module>vadmin-spring-boot-starter</module>
+    </modules>
 </project>

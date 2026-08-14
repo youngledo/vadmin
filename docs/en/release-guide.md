@@ -93,8 +93,11 @@ docker build -t vadmin:0.1.0-rc .
 
 The `release` Maven profile requires a non-SNAPSHOT version, attaches source
 and Javadoc archives, signs every publication file with GPG, and uses the Maven
-Central Publisher Portal. VAdmin deliberately builds and publishes with its
-checked-in Maven 4 wrapper; its Maven 4.1 POM model is not Maven 3 compatible.
+Central Publisher Portal. VAdmin uses its checked-in Maven 4 wrapper for normal
+development and CI. Maven Central release publication deliberately uses Apache
+Maven 3.9.16 because the Central publishing path is not yet reliable for Maven
+4 project models; the project POMs therefore retain Maven 3-compatible
+`4.0.0` model syntax.
 
 The supported publication path is the manually triggered `Publish Release`
 GitHub Actions workflow. It must be started from `main`, but checks out the
