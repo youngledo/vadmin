@@ -91,32 +91,42 @@ docker build -t vadmin:0.1.0-rc .
 
 ## Publication
 
-The `central-release` Maven profile attaches source and Javadoc archives, signs
-all publication files with GPG, and uses the Maven Central Publisher Portal.
+The `release` Maven profile requires a non-SNAPSHOT version, attaches source
+and Javadoc archives, signs every publication file with GPG, and uses the Maven
+Central Publisher Portal. VAdmin deliberately builds and publishes with its
+checked-in Maven 4 wrapper; its Maven 4.1 POM model is not Maven 3 compatible.
+
 The supported publication path is the manually triggered `Publish Release`
-GitHub Actions workflow. Its release job is bound to the `vadmin` environment,
-so that environment's secrets are available in addition to repository secrets.
-Before its first use, configure these protected, never source-controlled
-values:
+GitHub Actions workflow. It must be started from `main`, but checks out the
+immutable annotated release tag. Its release job is bound to the `vadmin`
+environment, so that environment's secrets are available in addition to
+repository secrets. Before its first use, configure these protected, never
+source-controlled values:
 
 - `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`: Maven Central Portal
   publishing credentials.
 - `GPG_PRIVATE_KEY`: ASCII-armored private signing key.
 - `GPG_PASSPHRASE`: signing key passphrase.
 
-Create and push a `vX.Y.Z` tag from the verified release commit, then run
-`Publish Release` from the Actions page with that exact tag. The workflow
-checks that the checked-out tag and root Maven version agree, publishes with
-the `central-release` profile, waits for Central Portal publication, and only
-then creates the GitHub Release. Its `dry_run` input defaults to `true`: first
-run the signed production build without publication, then rerun the same tag
-with `dry_run` disabled only after that preflight succeeds.
+After a successful `Verify` workflow, create and push an annotated `vX.Y.Z`
+tag from the verified release commit, then run `Publish Release` from the
+Actions page with that exact tag. The workflow verifies that the tag is
+annotated, clean, reachable from `main`, and matches the root Maven version.
+It signs and verifies the full reactor, requires the Central Publisher to
+report a deployment ID, waits until the starter POM is publicly downloadable,
+and resolves that artifact from a clean Maven consumer repository. Only then
+does it create or update the GitHub Release and upload Central deployment
+evidence.
+
+Do not move a tag after Central has accepted its version. Before a version is
+published, replacing a mistaken tag is acceptable, but the final tag must be
+annotated and point at the exact verified release commit.
 
 For an exceptional local publication, credentials belong in the local Maven
 `settings.xml` server entry named `central`; never commit them:
 
 ```bash
-./mvnw -B -ntp -Pproduction,central-release deploy
+./mvnw -B -ntp -Pproduction,release deploy
 ```
 
 The profile waits for Central Portal publication to complete. Then verify a

@@ -75,26 +75,32 @@ docker build -t vadmin:0.1.0-rc .
 
 ## 发布
 
-Maven 的 `central-release` profile 会附加源码和 Javadoc 归档、使用 GPG 签名全部发布文件，并
-通过 Maven Central Publisher Portal 发布。推荐的发布路径是手动触发 `Publish Release` GitHub
-Actions 工作流。其发布 job 绑定到 `vadmin` Environment，因此该环境中的 secrets 和仓库级
-secrets 均可用。首次使用前，配置以下受保护的值，绝不可提交它们：
+Maven 的 `release` profile 会要求非 SNAPSHOT 版本、附加源码和 Javadoc 归档、使用 GPG 签名
+全部发布文件，并通过 Maven Central Publisher Portal 发布。VAdmin 有意使用仓库内置的 Maven 4
+Wrapper 构建和发布；其 Maven 4.1 POM 模型不兼容 Maven 3。
+
+推荐的发布路径是手动触发 `Publish Release` GitHub Actions 工作流。它必须从 `main` 发起，但会
+检出不可变的 annotated release tag。其发布 job 绑定到 `vadmin` Environment，因此该环境中的
+secrets 和仓库级 secrets 均可用。首次使用前，配置以下受保护的值，绝不可提交它们：
 
 - `MAVEN_CENTRAL_USERNAME` 和 `MAVEN_CENTRAL_PASSWORD`：Maven Central Portal 发布凭据。
 - `GPG_PRIVATE_KEY`：ASCII-armored 格式的私有签名密钥。
 - `GPG_PASSPHRASE`：私钥口令。
 
-从已验证的发布提交创建并推送 `vX.Y.Z` 标签，然后在 Actions 页面使用该精确标签运行
-`Publish Release`。工作流会校验检出的标签与根 Maven 版本一致，使用 `central-release`
-profile 发布并等待 Central Portal 完成；仅在成功后才创建 GitHub Release。`dry_run` 输入默认
-为 `true`：先执行只构建和签名、不发布的生产预检；预检成功后，再使用同一标签并关闭
-`dry_run` 执行正式发布。
+在 `Verify` 工作流成功后，从已验证的发布提交创建并推送 annotated `vX.Y.Z` 标签，再在 Actions
+页面使用该精确标签运行 `Publish Release`。工作流会校验标签为 annotated、工作树干净、提交可从
+`main` 到达，且与根 Maven 版本一致；随后签名并验证完整 reactor，要求 Central Publisher 报告
+deployment ID，等待 starter POM 可被公开下载，再通过干净 Maven 使用方仓库解析该制品。只有这些
+检查全部成功后，才会创建或更新 GitHub Release 并上传 Central 发布证据。
+
+Central 接受某个版本后不得移动其标签。在版本尚未发布前，可以替换错误标签；最终标签必须为
+annotated tag，且准确指向已验证的发布提交。
 
 如确有必要在本地发布，凭据应只存在于本机 Maven `settings.xml` 中名为 `central` 的 server
 条目，绝不可提交：
 
 ```bash
-./mvnw -B -ntp -Pproduction,central-release deploy
+./mvnw -B -ntp -Pproduction,release deploy
 ```
 
 该 profile 会等待 Central Portal 发布完成。然后在干净的使用方项目中确认

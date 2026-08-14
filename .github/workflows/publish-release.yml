@@ -4,38 +4,86 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing release tag to publish, for example v0.1.0
+        description: Annotated release tag to publish, for example v0.1.0.
         required: true
         type: string
-      dry_run:
-        description: Build and sign without uploading to Maven Central
-        required: true
-        default: true
-        type: boolean
-
-permissions:
-  contents: write
 
 concurrency:
-  group: maven-central-publication
+  group: release-${{ inputs.release_tag }}
   cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: write
+  security-events: read
 
 jobs:
   publish:
-    name: Publish ${{ inputs.release_tag }}
-    environment:
-      name: vadmin
+    name: Verify and publish Maven Central release
     runs-on: ubuntu-latest
+    environment: vadmin
     timeout-minutes: 45
     steps:
-      - name: Check out release tag
-        uses: actions/checkout@v7
+      - name: Verify release workflow source
+        run: test "${GITHUB_REF}" = "refs/heads/main"
+
+      - name: Checkout immutable release tag
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.release_tag }}
           fetch-depth: 0
 
-      - name: Set up Java and publishing credentials
-        uses: actions/setup-java@v5
+      - name: Verify immutable release source
+        id: release_source
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+
+          git check-ref-format "refs/tags/${RELEASE_TAG}"
+          git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"
+          test "$(git cat-file -t "refs/tags/${RELEASE_TAG}")" = "tag"
+          test "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "${RELEASE_TAG}")"
+          test -z "$(git status --porcelain)"
+          git fetch origin +refs/heads/main:refs/remotes/origin/main --no-tags
+          git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
+
+          version="$(sed -n 's@^[[:space:]]*<version>\([^<]*\)</version>.*@\1@p' pom.xml | head -n 1)"
+          test -n "${version}"
+          test "${RELEASE_TAG}" = "v${version}"
+          case "${version}" in
+            *-SNAPSHOT)
+              echo "Release tag resolves to a SNAPSHOT version: ${version}" >&2
+              exit 1
+              ;;
+          esac
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify complete CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          commit="$(git rev-parse HEAD)"
+          run_id="$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow Verify --commit "${commit}" \
+            --limit 100 --json databaseId,status,conclusion,createdAt \
+            --jq '[.[] | select(.status == "completed" and .conclusion == "success")] | sort_by(.createdAt) | last | .databaseId')"
+          if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+            echo "No successful Verify workflow run exists for release commit ${commit}." >&2
+            exit 1
+          fi
+
+          job_results="$(gh run view "${run_id}" --repo "${GITHUB_REPOSITORY}" --json jobs \
+            --jq '[.jobs[] | {key: .name, value: .conclusion}] | from_entries')"
+          conclusion="$(jq -r '."Java 25 Maven verification" // empty' <<< "${job_results}")"
+          if [[ "${conclusion}" != "success" ]]; then
+            echo "Verify run ${run_id} lacks a successful Java 25 Maven verification job." >&2
+            exit 1
+          fi
+
+      - name: Set up Java and Maven Central credentials
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '25'
@@ -49,54 +97,139 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Validate release tag and Maven version
-        id: release
+      - name: Verify signed release artifacts
         env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./mvnw -B -ntp -Pproduction,release -DskipTests verify -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}"
+
+      - name: Check Maven Central publication
+        id: central_publication
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
         run: |
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Release tag must use the vX.Y.Z format."
-            exit 1
-          fi
+          set -euo pipefail
 
-          if [[ "$(git describe --tags --exact-match HEAD)" != "$RELEASE_TAG" ]]; then
-            echo "Checked-out commit is not the requested release tag."
-            exit 1
-          fi
+          central_pom_url="https://repo.maven.apache.org/maven2/io/github/youngledo/vadmin-spring-boot-starter/${RELEASE_VERSION}/vadmin-spring-boot-starter-${RELEASE_VERSION}.pom"
+          central_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head "${central_pom_url}")"
+          case "${central_status}" in
+            200) echo "already_published=true" >> "${GITHUB_OUTPUT}" ;;
+            404) echo "already_published=false" >> "${GITHUB_OUTPUT}" ;;
+            *)
+              echo "Central publication lookup returned unexpected HTTP status: ${central_status}" >&2
+              exit 1
+              ;;
+          esac
 
-          version=$(sed -n 's@^[[:space:]]*<version>\([^<]*\)</version>.*@\1@p' pom.xml | head -n 1)
-          if [[ -z "$version" ]]; then
-            echo "Could not read the Maven project version."
-            exit 1
-          fi
-          if [[ "$RELEASE_TAG" != "v$version" ]]; then
-            echo "Tag $RELEASE_TAG does not match Maven version $version."
-            exit 1
-          fi
-
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
-      - name: Build and sign release artifacts
+      - name: Publish Maven Central deployment
+        id: publish_central
+        if: steps.central_publication.outputs.already_published != 'true'
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./mvnw -B -ntp -Pproduction,central-release -DskipPublishing=true deploy
+        run: |
+          set -euo pipefail
 
-      - name: Publish to Maven Central
-        if: inputs.dry_run == false
+          ./mvnw -B -ntp -Pproduction,release -DskipTests deploy \
+            -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" 2>&1 | tee central-deploy.log
+          deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
+          if [[ -z "${deployment_id}" ]]; then
+            echo "Central Publishing did not report a deploymentId." >&2
+            exit 1
+          fi
+          echo "Central deployment created: ${deployment_id}"
+
+      - name: Record existing Maven Central publication
+        id: record_existing_publication
+        if: steps.central_publication.outputs.already_published == 'true'
         env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./mvnw -B -ntp -Pproduction,central-release deploy
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+          printf 'Maven Central already contains io.github.youngledo:vadmin-spring-boot-starter:%s. Deployment was not retried.\n' \
+            "${RELEASE_VERSION}" > central-deploy.log
 
-      - name: Create GitHub Release
-        if: inputs.dry_run == false
+      - name: Verify Maven Central publication
+        id: central_publication_complete
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          central_pom_url="https://repo.maven.apache.org/maven2/io/github/youngledo/vadmin-spring-boot-starter/${RELEASE_VERSION}/vadmin-spring-boot-starter-${RELEASE_VERSION}.pom"
+          for attempt in $(seq 1 40); do
+            central_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head \
+              --connect-timeout 5 --max-time 5 "${central_pom_url}")"
+            case "${central_status}" in
+              200)
+                echo "published=true" >> "${GITHUB_OUTPUT}"
+                exit 0
+                ;;
+              404) ;;
+              *)
+                echo "Central publication lookup returned unexpected HTTP status: ${central_status}" >&2
+                exit 1
+                ;;
+            esac
+            sleep 10
+          done
+
+          echo "Maven Central did not expose vadmin-spring-boot-starter:${RELEASE_VERSION} within 10 minutes." >&2
+          exit 1
+
+      - name: Verify Maven Central consumer resolution
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+          consumer_repository="${RUNNER_TEMP}/vadmin-central-consumer-repository"
+          mvn -B -ntp -Dmaven.repo.local="${consumer_repository}" \
+            org.apache.maven.plugins:maven-dependency-plugin:3.8.1:get \
+            -Dartifact="io.github.youngledo:vadmin-spring-boot-starter:${RELEASE_VERSION}"
+
+      - name: Capture Maven Central deployment details
+        if: always()
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-evidence
+          {
+            echo "release_version=${RELEASE_VERSION}"
+            echo "central_repository_group=io.github.youngledo"
+            echo "central_repository_artifact=vadmin-spring-boot-starter"
+            echo "central_repository_published=${{ steps.central_publication_complete.outputs.published }}"
+            echo
+            if [[ -f central-deploy.log ]]; then
+              grep -Ei 'deployment|publish|status' central-deploy.log || true
+            else
+              echo "central-deploy.log was not created before the release workflow stopped."
+            fi
+          } > release-evidence/central-deployment.txt
+
+      - name: Upload Maven Central deployment details
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ inputs.release_tag }}-central-deployment
+          path: |
+            release-evidence/central-deployment.txt
+            central-deploy.log
+          if-no-files-found: error
+
+      - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
-          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
         run: |
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
-            gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "VAdmin $RELEASE_VERSION"
+          set -euo pipefail
+
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" \
+              --title "VAdmin ${RELEASE_VERSION}" --draft=false --prerelease=false
+            exit 0
+          fi
+
+          gh release create "${RELEASE_TAG}" --verify-tag --generate-notes \
+            --repo "${GITHUB_REPOSITORY}" --title "VAdmin ${RELEASE_VERSION}"
