@@ -62,7 +62,7 @@ abstract class AbstractVisualLanguageE2EIT {
 
     @BeforeEach
     void setUp() {
-        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions().setLocale("zh-CN"));
+        browserContext = browser.newContext(new Browser.NewContextOptions().setLocale("zh-CN"));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
     }
@@ -89,7 +89,7 @@ abstract class AbstractVisualLanguageE2EIT {
 
     void useNarrowBrowser() {
         browserContext.close();
-        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions()
+        browserContext = browser.newContext(new Browser.NewContextOptions()
                 .setViewportSize(new ViewportSize(390, 844))
                 .setIsMobile(true)
                 .setLocale("zh-CN"));
@@ -99,7 +99,7 @@ abstract class AbstractVisualLanguageE2EIT {
 
     void useNarrowDesktopBrowser() {
         browserContext.close();
-        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions()
+        browserContext = browser.newContext(new Browser.NewContextOptions()
                 .setViewportSize(new ViewportSize(390, 844))
                 .setLocale("zh-CN"));
         page = browserContext.newPage();

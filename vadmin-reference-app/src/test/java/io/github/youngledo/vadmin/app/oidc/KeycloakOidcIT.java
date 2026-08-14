@@ -78,7 +78,7 @@ class KeycloakOidcIT {
 
     @BeforeEach
     void setUp() {
-        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions());
+        browserContext = browser.newContext();
         page = browserContext.newPage();
         page.setDefaultTimeout(15_000);
     }
@@ -117,7 +117,7 @@ class KeycloakOidcIT {
         startExternalLogin("oidc-admin");
         waitForUsersRoute();
 
-        page.getByLabel("当前用户菜单").click();
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(page.getByLabel("当前用户菜单"));
         page.getByText("退出登录", new Page.GetByTextOptions().setExact(true)).click();
 
         page.waitForURL(baseUrl() + "/login");

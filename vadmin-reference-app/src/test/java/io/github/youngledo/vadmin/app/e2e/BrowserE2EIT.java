@@ -65,7 +65,7 @@ class BrowserE2EIT {
     @BeforeEach
     void setUp() {
         resetData();
-        browserContext = PlaywrightBrowserSupport.newContext(browser, new Browser.NewContextOptions().setLocale("zh-CN"));
+        browserContext = browser.newContext(new Browser.NewContextOptions().setLocale("zh-CN"));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
     }
@@ -117,8 +117,7 @@ class BrowserE2EIT {
     @Test
     void narrowStarterShellKeepsUtilityControlsReachable() {
         browserContext.close();
-        browserContext = PlaywrightBrowserSupport.newContext(browser,
-                new Browser.NewContextOptions().setViewportSize(new ViewportSize(390, 844)).setLocale("zh-CN"));
+        browserContext = browser.newContext(new Browser.NewContextOptions().setViewportSize(new ViewportSize(390, 844)).setLocale("zh-CN"));
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
         signInAs("admin", "change-me");
@@ -142,7 +141,8 @@ class BrowserE2EIT {
     }
 
     private void openShellMenu(String className) {
-        page.locator("vaadin-menu-bar." + className + " vaadin-menu-bar-button:not([hidden])").click();
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
+                page.locator("vaadin-menu-bar." + className + " vaadin-menu-bar-button:not([hidden])"));
     }
 
     private void createUser(String username, String password, UUID roleId) {
