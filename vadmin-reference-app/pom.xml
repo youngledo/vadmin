@@ -7,6 +7,7 @@
         <version>0.1.0</version>
     </parent>
     <artifactId>vadmin-reference-app</artifactId>
+    <name>VAdmin Reference App</name>
     <dependencies>
         <dependency><groupId>io.github.youngledo</groupId><artifactId>vadmin-spring-boot-starter</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>com.vaadin</groupId><artifactId>vaadin-dev</artifactId><version>${vaadin.version}</version><optional>true</optional></dependency>

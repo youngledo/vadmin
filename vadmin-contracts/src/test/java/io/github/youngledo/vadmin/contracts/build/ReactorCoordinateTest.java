@@ -29,6 +29,8 @@ class ReactorCoordinateTest {
                 .doesNotContain("io.github.youngledo.vadmin", "<artifactId>admin-");
         assertThat(pomFiles.stream().skip(1).map(ReactorCoordinateTest::parentGroupId))
                 .containsOnly("io.github.youngledo");
+        assertThat(pomFiles.stream().map(ReactorCoordinateTest::name))
+                .allMatch(moduleName -> !moduleName.isBlank());
     }
 
     private static List<Path> reactorPoms() throws Exception {
@@ -68,6 +70,14 @@ class ReactorCoordinateTest {
             return directText(directChildren(document(pom).getDocumentElement(), "parent").getFirst(), "groupId");
         } catch (Exception exception) {
             throw new IllegalStateException("Cannot read " + pom, exception);
+        }
+    }
+
+    private static String name(Path pom) {
+        try {
+            return directText(document(pom).getDocumentElement(), "name");
+        } catch (Exception exception) {
+            throw new IllegalStateException("Cannot read name from " + pom, exception);
         }
     }
 
