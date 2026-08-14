@@ -97,4 +97,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
-        run: gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "VAdmin $RELEASE_VERSION"
+        run: |
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "VAdmin $RELEASE_VERSION"
