@@ -64,7 +64,7 @@ jobs:
             exit 1
           fi
 
-          version=$(./mvnw -q -DforceStdout help:evaluate -Dexpression=project.version | sed -n 's/^\[INFO\] \[stdout\] //p; /^[0-9][0-9.]*$/p' | tail -n 1)
+          version=$(sed -n 's@^[[:space:]]*<version>\([^<]*\)</version>.*@\1@p' pom.xml | head -n 1)
           if [[ -z "$version" ]]; then
             echo "Could not read the Maven project version."
             exit 1
