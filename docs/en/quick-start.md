@@ -79,6 +79,15 @@ Users, Roles, Permissions, Audit, `zh-CN` and `en-US`, light/dark mode, and
 the selected visual language and density. A normal consumer does not define a
 Flow shell, `AdminHostLayout`, `AppShellConfigurator`, or `@Theme`.
 
+Optionally set the product name shown by the default shell without replacing
+that layout:
+
+```yaml
+app:
+  brand:
+    name: Inventory Operations
+```
+
 ## Run The Reference Application
 
 The repository reference application is a thin starter consumer and acceptance

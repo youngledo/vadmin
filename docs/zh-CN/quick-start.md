@@ -72,6 +72,14 @@ APP_BOOTSTRAP_PASSWORD='replace-this-secret' ./mvnw -B -ntp spring-boot:run
 `zh-CN` 与 `en-US`、浅色/深色模式，以及所选视觉语言和密度。普通使用方不定义 Flow 外壳、
 `AdminHostLayout`、`AppShellConfigurator` 或 `@Theme`。
 
+可选地用配置指定宿主应用显示在默认外壳中的产品名称，而无需替换布局：
+
+```yaml
+app:
+  brand:
+    name: 库存运营台
+```
+
 ## 运行参考应用
 
 仓库中的参考应用是精简的 starter 使用方和验收夹具。使用 PostgreSQL 在本地运行：

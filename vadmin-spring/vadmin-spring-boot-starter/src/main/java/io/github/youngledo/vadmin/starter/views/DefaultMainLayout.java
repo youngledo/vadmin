@@ -21,6 +21,7 @@ import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
 import io.github.youngledo.vadmin.starter.theme.AdminAppearanceProperties;
 import io.github.youngledo.vadmin.contracts.auth.AuthorizationService;
 import io.github.youngledo.vadmin.contracts.auth.CurrentUser;
@@ -58,7 +59,7 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     public DefaultMainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
                       I18NProvider translations, AdminAppearanceProperties appearance,
-                      AuthenticationContext authenticationContext) {
+                      AuthenticationContext authenticationContext, AdminBrandProperties brandProperties) {
         this.modules = modules;
         this.authorization = authorization;
         this.localePreference = localePreference;
@@ -67,7 +68,7 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         this.authenticationContext = authenticationContext;
         var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
-        var productName = new Span("VAdmin");
+        var productName = new Span(brandProperties.name());
         productName.addClassName("admin-shell-brand");
         var brand = createBrand(productMark, productName);
 
