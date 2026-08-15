@@ -24,6 +24,7 @@ public final class PageToolbar extends HorizontalLayout {
         addClassName("admin-page-controls");
         filters.setPadding(false);
         filters.setSpacing(true);
+        filters.setWrap(true);
         actions.setPadding(false);
         actions.setSpacing(true);
         add(filters, actions);

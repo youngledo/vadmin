@@ -7,6 +7,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.Test;
 
 class PageToolbarTest {
+
+    @Test
+    void wrapsFiltersWhileKeepingActionsInTheSharedToolbar() {
+        var toolbar = new PageToolbar();
+
+        assertThat(toolbar.getFilters().isWrap()).isTrue();
+        assertThat(toolbar.getActions().isWrap()).isFalse();
+    }
+
     @Test
     void keepsFiltersSeparateFromResetPrimaryAndSupplementaryActions() {
         var toolbar = new PageToolbar();
