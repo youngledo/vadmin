@@ -4,13 +4,21 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import io.github.youngledo.vadmin.contracts.error.BusinessFailure;
 import io.github.youngledo.vadmin.contracts.error.ErrorCode;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /** Presents successful commands locally while preserving Flow's global failure handling boundary. */
-public final class OperationFeedback {
-    private final Consumer<String> successPresenter;
-    private final Consumer<String> errorPresenter;
+public final class OperationFeedback implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // Presenters can be arbitrary lambdas; restore the built-in variants after a Flow session is deserialized.
+    private transient Consumer<String> successPresenter;
+    private transient Consumer<String> errorPresenter;
 
     public OperationFeedback() {
         this(OperationFeedback::showSuccess, OperationFeedback::showError);
@@ -44,6 +52,13 @@ public final class OperationFeedback {
     private static void show(String message, NotificationVariant variant) {
         var notification = Notification.show(message, 5_000, Notification.Position.TOP_CENTER);
         notification.addThemeVariants(variant);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+        input.defaultReadObject();
+        successPresenter = OperationFeedback::showSuccess;
+        errorPresenter = OperationFeedback::showError;
     }
 
     /**

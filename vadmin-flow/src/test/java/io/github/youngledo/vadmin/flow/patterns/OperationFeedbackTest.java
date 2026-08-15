@@ -5,11 +5,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.youngledo.vadmin.contracts.error.BusinessFailure;
 import io.github.youngledo.vadmin.contracts.error.ErrorCode;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class OperationFeedbackTest {
+    @Test
+    void supportsRedisSessionSerialization() throws Exception {
+        var bytes = new ByteArrayOutputStream();
+        try (var output = new ObjectOutputStream(bytes)) {
+            output.writeObject(new OperationFeedback());
+        }
+
+        try (var input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+            assertThat(input.readObject()).isInstanceOf(OperationFeedback.class);
+        }
+    }
+
     @Test
     void presentsSuccessOnlyThroughTheConfiguredLocalPresenter() {
         var message = new AtomicReference<String>();
