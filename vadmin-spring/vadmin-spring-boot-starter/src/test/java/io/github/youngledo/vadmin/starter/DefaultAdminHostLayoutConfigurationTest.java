@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vaadin.flow.component.applayout.AppLayout;
 import io.github.youngledo.vadmin.flow.navigation.AdminHostLayout;
+import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
 import io.github.youngledo.vadmin.starter.views.DefaultMainLayout;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -25,6 +26,12 @@ class DefaultAdminHostLayoutConfigurationTest {
     void backsOffWhenTheConsumerProvidesItsOwnHostLayout() {
         context.withUserConfiguration(ConsumerHostConfiguration.class).run(application ->
                 assertThat(application.getBean(AdminHostLayout.class).layoutType()).isEqualTo(ConsumerLayout.class));
+    }
+
+    @Test
+    void contributesTranslationsNeededByTheDefaultShellIndependentlyOfLocalIam() {
+        context.run(application -> assertThat(application.getBean("defaultShellMessageBundle", AdminMessageBundle.class))
+                .isEqualTo(new AdminMessageBundle("system", "i18n.system")));
     }
 
     @Configuration(proxyBeanMethods = false)

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -80,12 +81,15 @@ public class AdminFlowAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    I18NProvider adminI18NProvider(AdminModuleRegistry modules, List<AdminModule> moduleDescriptors) {
+    I18NProvider adminI18NProvider(AdminModuleRegistry modules, List<AdminModule> moduleDescriptors,
+                                   @Qualifier("defaultShellMessageBundle") ObjectProvider<AdminMessageBundle> shellMessages) {
         var bundles = new java.util.ArrayList<AdminMessageBundle>();
         bundles.add(new AdminMessageBundle("flow", "i18n.flow"));
+        shellMessages.ifAvailable(bundles::add);
         bundles.addAll(modules.messageBundles());
-        AdminMessageBundleValidator.validate(bundles, moduleDescriptors);
-        return new CompositeAdminI18NProvider(bundles);
+        var distinctBundles = bundles.stream().distinct().toList();
+        AdminMessageBundleValidator.validate(distinctBundles, moduleDescriptors);
+        return new CompositeAdminI18NProvider(distinctBundles);
     }
 
     @Bean

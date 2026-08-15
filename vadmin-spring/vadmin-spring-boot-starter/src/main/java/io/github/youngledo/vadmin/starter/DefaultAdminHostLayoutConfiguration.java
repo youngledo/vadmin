@@ -1,6 +1,7 @@
 package io.github.youngledo.vadmin.starter;
 
 import io.github.youngledo.vadmin.flow.navigation.AdminHostLayout;
+import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
 import io.github.youngledo.vadmin.springflow.AdminFlowAutoConfiguration;
 import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
 import io.github.youngledo.vadmin.starter.theme.AdminAppearanceProperties;
@@ -21,4 +22,8 @@ public class DefaultAdminHostLayoutConfiguration {
         return new AdminHostLayout(DefaultMainLayout.class);
     }
 
+    @Bean(name = "defaultShellMessageBundle")
+    AdminMessageBundle defaultShellMessageBundle() {
+        return new AdminMessageBundle("system", "i18n.system");
+    }
 }
