@@ -52,11 +52,14 @@ local login, the permission-filtered shell, Users, Roles, Permissions, Audit,
 appearance profiles without defining a layout, theme, or system pages.
 
 The default administration shell is a VAdmin product responsibility. It supplies
-stable application navigation, global actions, and shared page workflows instead
-of asking business modules to assemble a Flow application from primitive layout
-components. Business modules contribute domain data, pages, commands,
-permissions, and translations. VAdmin is not a low-code page builder and does
-not determine a domain page's content.
+responsive navigation, global utilities, system administration, accessibility,
+and shared page workflows instead of asking business modules to assemble a Flow
+application from primitive layout components. Business modules contribute only
+domain data, commands, permissions, translations, and the domain-specific
+content of a page. When a repeated administration workflow is missing, it
+belongs in a VAdmin Flow pattern rather than being rebuilt independently by
+every consumer. VAdmin is not a low-code page builder and does not determine a
+domain page's content.
 
 Business features are declared as `AdminModule` beans. Each page has stable
 metadata, a required permission, a route, an icon key, a Flow view type, and
@@ -82,8 +85,9 @@ language are different responsibilities.
 
 The explicit `ant` language owns scoped CSS overrides to reproduce an
 Ant Design-inspired visual language. Modules consume the shared Flow patterns;
-they do not register a global theme or modify global theme properties. System,
-light, and dark modes use only `ColorScheme` and `Page.setColorScheme()`.
+they do not register a global theme, mutate global theme properties, or depend
+on Ant-only CSS. System, light, and dark modes use only `ColorScheme` and
+`Page.setColorScheme()`.
 
 Dynamic routes need a static production frontend anchor. A consumer that adds
 a dynamic business view declares `@Uses(ThatView.class)` once on a host-owned

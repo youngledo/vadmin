@@ -1,6 +1,7 @@
 package io.github.youngledo.vadmin.flow.patterns;
 
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import io.github.youngledo.vadmin.contracts.error.BusinessFailure;
 import io.github.youngledo.vadmin.contracts.error.ErrorCode;
 import java.util.Objects;
@@ -11,7 +12,7 @@ public final class OperationFeedback {
     private final Consumer<String> successPresenter;
 
     public OperationFeedback() {
-        this(Notification::show);
+        this(OperationFeedback::showSuccess);
     }
 
     public OperationFeedback(Consumer<String> successPresenter) {
@@ -20,6 +21,11 @@ public final class OperationFeedback {
 
     public void success(String message) {
         successPresenter.accept(Objects.requireNonNull(message));
+    }
+
+    private static void showSuccess(String message) {
+        var notification = Notification.show(message, 5_000, Notification.Position.TOP_CENTER);
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     /**

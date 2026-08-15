@@ -76,7 +76,7 @@ APP_BOOTSTRAP_PASSWORD='replace-this-secret' ./mvnw -B -ntp spring-boot:run
 
 Open `http://localhost:8080`. The starter supplies the home page, navigation,
 Users, Roles, Permissions, Audit, `zh-CN` and `en-US`, light/dark mode, and
-the selected visual language and density. A normal consumer does not define a
+the selected visual language. A normal consumer does not define a
 Flow shell, `AdminHostLayout`, `AppShellConfigurator`, or `@Theme`.
 
 Optionally set the product name shown by the default shell without replacing

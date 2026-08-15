@@ -55,6 +55,16 @@ class PermissionProtectedViewTest {
         assertThat(event.getRerouteUrl()).isEqualTo("access-denied");
     }
 
+    @Test
+    void leavesPageChromeToTheSharedAdministrationPatterns() {
+        var view = new TestPermissionProtectedView(() -> Optional.empty(), authorization());
+
+        assertThat(view.isPadding()).isFalse();
+        assertThat(view.isSpacing()).isTrue();
+        assertThat(view.getWidth()).isEqualTo("100%");
+        assertThat(view.getHeight()).isEqualTo("100%");
+    }
+
     private static AuthorizationService authorization() {
         return new AuthorizationService() {
             @Override

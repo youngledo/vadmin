@@ -69,7 +69,7 @@ APP_BOOTSTRAP_PASSWORD='replace-this-secret' ./mvnw -B -ntp spring-boot:run
 ```
 
 访问 `http://localhost:8080`。starter 提供首页、导航、Users、Roles、Permissions、Audit、
-`zh-CN` 与 `en-US`、浅色/深色模式，以及所选视觉语言和密度。普通使用方不定义 Flow 外壳、
+`zh-CN` 与 `en-US`、浅色/深色模式，以及所选视觉语言。普通使用方不定义 Flow 外壳、
 `AdminHostLayout`、`AppShellConfigurator` 或 `@Theme`。
 
 可选地用配置指定宿主应用显示在默认外壳中的产品名称，而无需替换布局：

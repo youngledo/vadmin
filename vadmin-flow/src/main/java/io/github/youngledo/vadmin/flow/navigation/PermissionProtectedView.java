@@ -12,7 +12,7 @@ import io.github.youngledo.vadmin.contracts.auth.CurrentUserProvider;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 import jakarta.annotation.security.PermitAll;
 
-/** Base class for external administration pages that require a single permission to enter. */
+/** Authorization-only base class for administration pages that require a single permission to enter. */
 @PermitAll
 public abstract class PermissionProtectedView extends VerticalLayout implements BeforeEnterObserver {
     private final CurrentUserProvider currentUserProvider;
@@ -22,7 +22,7 @@ public abstract class PermissionProtectedView extends VerticalLayout implements 
         this.currentUserProvider = Objects.requireNonNull(currentUserProvider, "currentUserProvider");
         this.authorization = Objects.requireNonNull(authorization, "authorization");
         setSizeFull();
-        setPadding(true);
+        setPadding(false);
     }
 
     protected abstract PermissionCode requiredPermission();

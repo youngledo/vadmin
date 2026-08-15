@@ -127,11 +127,14 @@ repositories. A page declaration controls navigation visibility and direct
 route access; every mutation must still authorize in the application or
 platform use case before changing state.
 
-Use `AdminPageFrame`, `PageHeader`, `PageToolbar`, `DataWorkspace`, dialogs,
-and feedback patterns from `admin-flow` for standard Flow administration
-workflows. Keep business-specific CSS scoped to the module and use the
-semantic `--admin-*` tokens. Modules must not register a global `@Theme`,
-modify global Lumo variables, or target starter theme internals.
+Use the highest-level matching `admin-flow` pattern (`AdminPageFrame`,
+`PageHeader`, `PageToolbar`, `DataWorkspace`, dialogs, and feedback patterns)
+for standard administration workflows. A repeated workflow missing from those
+patterns is a VAdmin extension concern, not an invitation for each consumer to
+rebuild its own page chrome. Keep any truly domain-specific CSS local to a
+module and based on documented Vaadin component APIs. Modules must not register
+a global `@Theme`, mutate global theme properties, target component internals,
+or depend on VAdmin visual-language CSS.
 
 ## Intentional Shell Replacement
 
@@ -155,7 +158,7 @@ guards. Consumers that only add business pages should retain the default shell.
   scope, and omit `@Route`.
 - Add one host `@Uses(ModuleView.class)` production anchor for each consumer
   dynamic View.
-- Authorize mutations in use cases and use shared Flow patterns and semantic
-  theme tokens.
+- Authorize mutations in use cases and use shared Flow patterns and Vaadin
+  component APIs.
 - Leave the default shell, theme, system administration, and its production
   anchors to the starter unless intentionally replacing the complete shell.

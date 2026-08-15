@@ -150,10 +150,11 @@ public final class InventoryApplication {
 View 使用与框架无关的用例和授权契约，绝不直接使用 JPA repository。页面声明控制导航可见性
 和直接路由访问；每个变更操作仍必须在应用或平台用例中再次授权后才能改变状态。
 
-标准 Flow 管理工作流使用 `admin-flow` 提供的 `AdminPageFrame`、`PageHeader`、`PageToolbar`、
-`DataWorkspace`、对话框和反馈模式。业务专属 CSS 应限制在模块范围内，并使用语义化
-`--admin-*` token。模块不得注册全局 `@Theme`、修改全局 Lumo 变量或定位 starter 主题内部
-结构。
+标准 Flow 管理工作流应优先使用 `admin-flow` 提供的高层模式：`AdminPageFrame`、`PageHeader`、
+`PageToolbar`、`DataWorkspace`、对话框和反馈模式。缺少的重复管理工作流应当扩展到 VAdmin，
+而不是由每个使用方各自重建页面框架。真正领域专属的 CSS 必须限制在模块范围内，并基于
+Vaadin 已公开的组件 API；模块不得注册全局 `@Theme`、修改全局主题属性、定位组件内部结构，
+或依赖 VAdmin 的视觉语言 CSS。
 
 ## 有意替换外壳
 
@@ -172,5 +173,5 @@ View 使用与框架无关的用例和授权契约，绝不直接使用 JPA repo
   `en-US` 两套消息资源。
 - 每个动态注册 View 都是 Spring Bean，通常使用 prototype 作用域，且不声明 `@Route`。
 - 为每个使用方动态 View 增加一个宿主 `@Uses(ModuleView.class)` 生产锚点。
-- 在用例中授权变更操作，并使用共享 Flow 模式和语义主题 token。
+- 在用例中授权变更操作，并使用共享 Flow 模式和 Vaadin 组件 API。
 - 除非有意完全替换外壳，否则将默认外壳、主题、系统管理及其生产锚点交由 starter 管理。

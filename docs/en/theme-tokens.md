@@ -3,9 +3,10 @@
 VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
 
 `vadmin-spring-boot-starter` owns the default Vaadin Flow shell. Its
-`DefaultApplicationShell` explicitly loads Aura without a VAdmin stylesheet.
-Normal consumers and business
-modules do not define a competing shell or global theme.
+`DefaultApplicationShell` explicitly loads Aura; the bundled Ant resource is
+fully scoped and has no effect unless the host selects the `ant` language.
+Normal consumers and business modules do not define a competing shell or global
+theme.
 
 ## Default Vaadin Language
 

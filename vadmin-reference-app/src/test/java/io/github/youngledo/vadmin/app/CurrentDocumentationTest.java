@@ -37,6 +37,8 @@ class CurrentDocumentationTest {
                     .doesNotContain("admin-example-orders", "CustomersView", "/orders", "/customers")
                     .doesNotContain("must create `MainLayout`", "必须创建 `MainLayout`",
                             "InventoryViewProductionAnchor")
+                    .doesNotContain("comfortable/compact", "舒适/紧凑", "semantic `--admin-*` tokens",
+                            "语义主题 token")
                     .contains("VAdmin", "io.github.youngledo", "vadmin-spring-boot-starter")
                     .doesNotContain("Vaadin Admin Starter", "vaadin-admin-starter",
                             "io.github.vaadinadminstarter", "admin-spring-starter");
