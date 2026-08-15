@@ -19,6 +19,7 @@ import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
@@ -34,6 +35,7 @@ import io.github.youngledo.vadmin.flow.navigation.AdminPage;
 import io.github.youngledo.vadmin.springflow.i18n.AdminLocalePreference;
 import jakarta.annotation.security.PermitAll;
 import java.util.Locale;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @Layout
 @PermitAll
@@ -50,7 +52,6 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private final AdminLocalePreference localePreference;
     private final I18NProvider translations;
     private final AdminAppearanceProperties appearance;
-    private final AuthenticationContext authenticationContext;
     private final VerticalLayout drawer = new VerticalLayout();
     private final DrawerToggle toggle = new DrawerToggle();
     private final MenuBar userMenu;
@@ -59,13 +60,12 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     public DefaultMainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
                       I18NProvider translations, AdminAppearanceProperties appearance,
-                      AuthenticationContext authenticationContext, AdminBrandProperties brandProperties) {
+                      AdminBrandProperties brandProperties) {
         this.modules = modules;
         this.authorization = authorization;
         this.localePreference = localePreference;
         this.translations = translations;
         this.appearance = appearance;
-        this.authenticationContext = authenticationContext;
         var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
         var productName = new Span(brandProperties.name());
@@ -231,8 +231,16 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         addColorSchemeChoice(appearance, "light");
         addColorSchemeChoice(appearance, "dark");
         trigger.getSubMenu().addItem(text("system.shell.logout"), event -> {
-            if (event.isFromClient()) authenticationContext.logout();
+            if (event.isFromClient()) logout();
         });
+    }
+
+    private void logout() {
+        var request = VaadinServletRequest.getCurrent();
+        if (request == null) return;
+        WebApplicationContextUtils.getRequiredWebApplicationContext(request.getHttpServletRequest().getServletContext())
+                .getBean(AuthenticationContext.class)
+                .logout();
     }
 
     private void addLanguageChoice(MenuItem trigger, Locale locale) {
