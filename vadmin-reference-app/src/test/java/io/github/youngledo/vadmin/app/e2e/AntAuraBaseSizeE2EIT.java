@@ -9,19 +9,18 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"app.appearance.visual-language=ant", "app.appearance.density=compact"})
+        properties = {"app.appearance.visual-language=ant", "app.appearance.aura-base-size=16"})
 @Testcontainers
 @ActiveProfiles("development")
-class AntCompactVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
+class AntAuraBaseSizeE2EIT extends AbstractVisualLanguageE2EIT {
     @Test
-    void compactAntProfileKeepsTheStarterShellAndUsersWorkspaceWithinANarrowViewport() {
+    void antLanguageUsesTheConfiguredAuraBaseSizeWithoutASeparateDensitySystem() {
         useNarrowDesktopBrowser();
         signInAsAdministrator();
         page.navigate(baseUrl() + "/users");
 
-        assertThat(page.locator("html")).hasAttribute("data-admin-visual-language", "ant");
-        assertThat(page.locator("html")).hasAttribute("data-admin-density", "compact");
-        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--admin-control-height")).isEqualTo("2rem");
+        assertThat(page.locator("html")).hasAttribute("data-vadmin-visual-language", "ant");
+        org.assertj.core.api.Assertions.assertThat(computedThemeVariable("--aura-base-size")).isEqualTo("16");
         var workspace = page.getByTestId("users-workspace");
         assertWithinViewport(workspace);
         var disable = page.getByLabel("停用所选用户");

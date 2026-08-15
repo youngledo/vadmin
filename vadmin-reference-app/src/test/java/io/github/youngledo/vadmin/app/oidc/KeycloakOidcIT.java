@@ -96,7 +96,7 @@ class KeycloakOidcIT {
 
         waitForUsersRoute();
         assertThat(page.getByLabel("当前用户菜单")).isVisible();
-        assertThat(page.locator(".admin-user-menu-label")).hasText("admin");
+        assertThat(page.locator(".admin-user-menu vaadin-avatar")).isVisible();
     }
 
     @Test

@@ -1,26 +1,30 @@
 package io.github.youngledo.vadmin.starter.theme;
 
 import java.io.Serializable;
+import java.util.Optional;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("app.appearance")
 public final class AdminAppearanceProperties implements Serializable {
     private String visualLanguage = "vaadin";
-    private String density = "comfortable";
+    private Integer auraBaseSize;
 
     public AdminVisualLanguage visualLanguage() {
         return AdminVisualLanguage.from(visualLanguage);
     }
 
-    public AdminDensity density() {
-        return AdminDensity.from(density);
+    public Optional<Integer> auraBaseSize() {
+        if (auraBaseSize == null || auraBaseSize < 12 || auraBaseSize > 24) {
+            return Optional.empty();
+        }
+        return Optional.of(auraBaseSize);
     }
 
     public void setVisualLanguage(String visualLanguage) {
         this.visualLanguage = visualLanguage;
     }
 
-    public void setDensity(String density) {
-        this.density = density;
+    public void setAuraBaseSize(Integer auraBaseSize) {
+        this.auraBaseSize = auraBaseSize;
     }
 }

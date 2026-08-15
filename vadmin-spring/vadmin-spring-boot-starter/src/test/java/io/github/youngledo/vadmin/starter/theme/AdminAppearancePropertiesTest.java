@@ -9,19 +9,19 @@ class AdminAppearancePropertiesTest {
     void resolvesKnownAppearanceValuesCaseInsensitively() {
         var properties = new AdminAppearanceProperties();
         properties.setVisualLanguage("AnT");
-        properties.setDensity("COMPACT");
+        properties.setAuraBaseSize(16);
 
         assertThat(properties.visualLanguage()).isEqualTo(AdminVisualLanguage.ANT);
-        assertThat(properties.density()).isEqualTo(AdminDensity.COMPACT);
+        assertThat(properties.auraBaseSize()).contains(16);
     }
 
     @Test
     void fallsBackToSafeValuesForUnknownAppearanceValues() {
         var properties = new AdminAppearanceProperties();
         properties.setVisualLanguage("untrusted-selector");
-        properties.setDensity(" ");
+        properties.setAuraBaseSize(11);
 
         assertThat(properties.visualLanguage()).isEqualTo(AdminVisualLanguage.VAADIN);
-        assertThat(properties.density()).isEqualTo(AdminDensity.COMFORTABLE);
+        assertThat(properties.auraBaseSize()).isEmpty();
     }
 }

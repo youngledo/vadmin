@@ -43,7 +43,7 @@ Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring B
 
 普通使用方配置数据源和 Flyway 迁移位置、依赖 `vadmin-spring-boot-starter` 后即可启动。无需定义
 布局、主题或系统页面，即可获得本地登录、按权限过滤的外壳、Users、Roles、Permissions、
-Audit、`zh-CN`/`en-US` 翻译、浅色/深色模式以及 Vaadin 或 Ant 风格外观。
+Audit、`zh-CN`/`en-US` 翻译、跟随系统/浅色/深色配色方案以及 Vaadin 或 Ant 风格外观。
 
 业务功能通过 `AdminModule` Bean 声明。每个页面都有稳定元数据、所需权限、路由、图标 key、
 Flow View 类型和两套消息资源包。启动时，`vadmin-spring-flow` 校验模块 ID、页面 ID、路由、
@@ -55,9 +55,9 @@ Flow View 类型和两套消息资源包。启动时，`vadmin-spring-flow` 校�
 
 ## 主题与生产构建
 
-starter 默认应用外壳注册 `admin-theme`。它的语义化 `--admin-*` token 契约支持浅色/深色、
-`vaadin` 与 `ant` 视觉语言及舒适/紧凑密度。模块使用公开 token 和共享 Flow 模式，不注册
-全局主题，也不修改全局 Lumo 变量。
+starter 默认应用外壳显式加载 Aura 与结构样式表。默认 `vaadin` 语言使用 Aura 属性、
+组件 variant、`ColorScheme` 和已文档化的 App Layout 属性；显式 `ant` 语言拥有其自身作用域内的
+覆写。模块使用共享 Flow 模式，不注册全局主题，也不修改全局主题属性。
 
 动态路由需要静态生产前端锚点。使用方新增动态业务 View 时，在自己拥有的应用配置类型上
 为该 View 声明一次 `@Uses(该View.class)`。View 本身不声明 `@Route`；模块元数据才是路由

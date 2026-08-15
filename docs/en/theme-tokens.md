@@ -1,65 +1,30 @@
-# Theme Tokens
+# Theme Policy
 
 VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
 
-`vadmin-spring-boot-starter` owns the default Vaadin Flow theme. Its
-`DefaultApplicationShell` registers `@Theme("admin-theme")`, and the starter's
-`admin-theme/styles.css` implements this token contract. Normal consumers and
-business modules use the tokens; they do not define a shell or global theme.
+`vadmin-spring-boot-starter` owns the default Vaadin Flow shell. Its
+`DefaultApplicationShell` explicitly loads Aura without a VAdmin stylesheet.
+Normal consumers and business
+modules do not define a competing shell or global theme.
 
-## Token Contract
+## Default Vaadin Language
 
-Tokens are available in default and dark scopes. Use a token for its semantic
-meaning, never for a particular color or size.
+`vaadin` is the default visual language. It uses Aura and Vaadin base-style
+properties directly: `--aura-*` and `--vaadin-*`. Use component variants before
+writing CSS. Color scheme selection uses `ColorScheme` and
+`Page.setColorScheme()` with System preference, Light, and Dark choices.
 
-| Token | Meaning |
-| --- | --- |
-| `--admin-surface` | Default surface for content and controls. |
-| `--admin-surface-raised` | Raised surface, such as application chrome. |
-| `--admin-text-primary` | Primary readable text. |
-| `--admin-text-secondary` | Supporting text and less prominent labels. |
-| `--admin-border` | Neutral structural border. |
-| `--admin-accent` | Primary action and selected-state accent. |
-| `--admin-success` | Successful outcome. |
-| `--admin-warning` | Warning outcome. |
-| `--admin-danger` | Destructive action or error outcome. |
-| `--admin-focus` | Keyboard focus indicator. |
-| `--admin-font-family` | Application font stack. |
-| `--admin-space-sm` | Compact related spacing. |
-| `--admin-space-md` | Standard layout and control spacing. |
-| `--admin-space-lg` | Content-canvas spacing and larger separation. |
-| `--admin-control-height` | Standard control height for the active density. |
-| `--admin-grid-cell-padding` | Grid padding for the active density. |
-| `--admin-utility-size` | Stable square dimension for shell utility controls. |
-| `--admin-radius-control` | Standard interactive-control corner radius. |
-| `--admin-radius-surface` | Corner radius for contained work surfaces. |
-| `--admin-elevation-raised` | Shadow for raised application chrome. |
-| `--admin-elevation-workspace` | Reserved elevation for a data workspace. |
-| `--admin-control-fill` | Normal fill of a form control. |
-| `--admin-control-border` | Resting border of a form control. |
-| `--admin-control-hover-border` | Enabled-control hover border. |
-| `--admin-control-disabled-fill` | Non-interactive control fill. |
-| `--admin-overlay-surface` | Surface for menus, pickers, dialogs, and notifications. |
-| `--admin-overlay-shadow` | Elevation for overlays. |
-| `--admin-workspace-header-fill` | Header surface for dense data workspaces. |
-| `--admin-workspace-header-text` | Secondary workspace-header text. |
-| `--admin-workspace-row-hover` | Hover surface for enabled workspace rows. |
-| `--admin-workspace-row-selected` | Selected-row and selection-summary surface. |
-| `--admin-workspace-divider` | Low-emphasis workspace separator. |
-| `--admin-workspace-status-fill` | Busy, empty, and failure state surface. |
-| `--admin-workspace-danger-fill` | Consequence surface for a destructive confirmation. |
+The shell does not override App Layout, Grid, fields, buttons, dialogs,
+overlays, or notifications. The official Aura `--aura-base-size` property is available as
+the optional `app.appearance.aura-base-size` setting; it accepts values from 12
+through 24 and is passed through unchanged.
 
-The default theme maps the relevant Vaadin Lumo variables from these semantic
-tokens in both light and dark scopes. Legacy aliases remain only for
-compatibility; new module CSS uses the canonical names above.
+## Ant Visual Language
 
-## Appearance Axes
-
-Visual language, color mode, and density are independent. The starter supports
-`vaadin` and `ant` visual languages, session-scoped light/dark mode, and
-comfortable/compact density. Modules consume tokens and shared Flow patterns;
-they must not select a visual language or density, modify global Lumo variables,
-or depend on profile-specific selectors.
+`ant` is an explicit alternative visual language. Its selectors are scoped by
+`[data-vadmin-visual-language="ant"]`, and its `--vadmin-ant-*` tokens and
+targeted `::part()` overrides implement Ant Design behavior. No module may
+depend on those selectors or tokens.
 
 Use `AdminIcon` and `AdminIconName` from `admin-flow` for standard actions.
 Do not import starter theme icons, assign `data-admin-icon`, or set icon-mask
@@ -72,11 +37,11 @@ Keep CSS scoped to a module-owned component class:
 
 ```css
 .inventory-summary {
-  background: var(--admin-surface-raised);
-  border: 1px solid var(--admin-border);
-  border-radius: var(--admin-radius-control);
-  color: var(--admin-text-primary);
-  padding: var(--admin-space-md);
+  background: var(--aura-surface-color);
+  border: 1px solid var(--vaadin-border-color-secondary);
+  border-radius: var(--vaadin-radius-m);
+  color: var(--vaadin-text-color);
+  padding: var(--vaadin-padding-m);
 }
 ```
 

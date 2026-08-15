@@ -104,6 +104,7 @@ public class SpringSecurityConfiguration {
                                             VaadinDefaultRequestCache requestCache) throws Exception {
         http.authenticationProvider(authenticationProvider);
         http.addFilterBefore(new AuthenticationVersionFilter(sessionLookup), AuthorizationFilter.class);
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/vadmin/**").permitAll());
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer.loginView(LoginView.class));
         if (oidcLoginAvailability.isAvailable()) {
             var mapper = identityMappers.getIfUnique();

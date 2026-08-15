@@ -48,7 +48,7 @@ Consumer application
 A normal consumer configures its datasource and Flyway migration location,
 depends on `vadmin-spring-boot-starter`, and starts the application. It receives
 local login, the permission-filtered shell, Users, Roles, Permissions, Audit,
-`zh-CN`/`en-US` translations, light/dark mode, and Vaadin or Ant-inspired
+`zh-CN`/`en-US` translations, system/light/dark color schemes, and Vaadin or Ant-inspired
 appearance profiles without defining a layout, theme, or system pages.
 
 Business features are declared as `AdminModule` beans. Each page has stable
@@ -65,11 +65,11 @@ experience, while the use-case check is the authoritative boundary.
 
 ## Themes And Production Builds
 
-The starter's default application shell registers `admin-theme`. Its semantic
-`--admin-*` token contract supports light/dark mode, `vaadin` and `ant` visual
-languages, and comfortable/compact density. Modules consume the public tokens
-and shared Flow patterns; they do not register a global theme or modify global
-Lumo variables.
+The starter's default application shell explicitly loads Aura followed by its
+structural stylesheet. The default `vaadin` language uses Aura properties, component
+variants, `ColorScheme`, and documented App Layout properties. The explicit
+`ant` language owns its own scoped overrides. Modules consume the shared Flow
+patterns; they do not register a global theme or modify global theme properties.
 
 Dynamic routes need a static production frontend anchor. A consumer that adds
 a dynamic business view declares `@Uses(ThatView.class)` once on a host-owned

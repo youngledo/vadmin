@@ -8,17 +8,6 @@
     </parent>
     <artifactId>vadmin-spring-boot-starter</artifactId>
     <name>VAdmin Spring Boot Starter</name>
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/frontend/themes</directory>
-                <targetPath>META-INF/resources/themes</targetPath>
-            </resource>
-        </resources>
-    </build>
     <dependencies>
         <dependency><groupId>io.github.youngledo</groupId><artifactId>vadmin-spring-security</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>io.github.youngledo</groupId><artifactId>vadmin-spring-jpa</artifactId><version>${project.version}</version></dependency>

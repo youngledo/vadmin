@@ -2,6 +2,7 @@ package io.github.youngledo.vadmin.flow.patterns;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.Test;
 
@@ -28,5 +29,14 @@ class DetailDialogTest {
         dialog.getCloseAction().click();
 
         assertThat(dialog.isOpened()).isFalse();
+    }
+
+    @Test
+    void usesTheNativeWrappingFooterLayout() {
+        var dialog = new DetailDialog("User details");
+        var footerActions = (HorizontalLayout) dialog.getFooter().getElement().getChildren()
+                .findFirst().flatMap(element -> element.getComponent()).orElseThrow();
+
+        assertThat(footerActions.isWrap()).isTrue();
     }
 }

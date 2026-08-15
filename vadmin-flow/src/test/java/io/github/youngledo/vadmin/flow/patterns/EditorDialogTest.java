@@ -100,6 +100,6 @@ class EditorDialogTest {
         assertThat(footerActions.getChildren().toList())
                 .containsExactly(dialog.getCancelAction(), dialog.getPrimaryAction());
         assertThat(footerActions.getWidth()).isEqualTo("100%");
-        assertThat(footerActions.getStyle().get("flex-wrap")).isEqualTo("wrap");
+        assertThat(footerActions.isWrap()).isTrue();
     }
 }

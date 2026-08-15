@@ -15,7 +15,6 @@ app:
     password: ${APP_BOOTSTRAP_PASSWORD:}
   appearance:
     visual-language: ${APP_APPEARANCE_VISUAL_LANGUAGE:vaadin}
-    density: ${APP_APPEARANCE_DENSITY:comfortable}
   identity:
     oidc:
       links: []

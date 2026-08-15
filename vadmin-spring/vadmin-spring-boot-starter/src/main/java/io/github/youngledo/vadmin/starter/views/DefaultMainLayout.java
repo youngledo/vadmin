@@ -7,6 +7,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.page.ColorScheme;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -42,7 +43,7 @@ import java.util.Locale;
 @Uses(PermissionsView.class)
 @Uses(AuditView.class)
 public final class DefaultMainLayout extends AppLayout implements AfterNavigationObserver, LocaleChangeObserver {
-    private static final String THEME_MODE_KEY = DefaultMainLayout.class.getName() + ".theme-mode";
+    private static final String COLOR_SCHEME_KEY = DefaultMainLayout.class.getName() + ".color-scheme";
 
     private final AdminModuleRegistry modules;
     private final CurrentUser user;
@@ -97,7 +98,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         addHeader(toggle, productMark, productName, currentLocation, createUtilityControls());
 
         drawer.setPadding(false);
-        drawer.setSpacing(false);
+        drawer.setSpacing(true);
         drawer.addClassName("admin-drawer-content");
         rebuildDrawer();
         addToDrawer(drawer);
@@ -107,6 +108,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         var header = new HorizontalLayout(components);
         header.setWidthFull();
         header.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        header.setWrap(true);
         header.addClassName("admin-shell-header");
         addToNavbar(header);
     }
@@ -123,7 +125,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         applyHostAppearance();
-        applyTheme(sessionThemeMode());
+        applyColorScheme(sessionColorScheme());
     }
 
     @Override
@@ -139,17 +141,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         menu.setOpenOnHover(false);
         menu.addClassName("admin-user-menu");
         var avatar = new Avatar(username);
-        avatar.setAbbreviation(username.substring(0, 1).toUpperCase());
-        avatar.getElement().setAttribute("title", username);
-        var userLabel = new Span(username);
-        userLabel.addClassName("admin-user-menu-label");
-        userLabel.getElement().setAttribute("title", username);
-        var userControl = new HorizontalLayout(avatar, userLabel);
-        userControl.setPadding(false);
-        userControl.setSpacing(true);
-        userControl.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        userControl.addClassName("admin-user-control");
-        var trigger = menu.addItem(userControl);
+        var trigger = menu.addItem(avatar);
         trigger.getSubMenu().addItem(text("system.shell.logout"), event -> {
             if (event.isFromClient()) authenticationContext.logout();
         });
@@ -197,24 +189,31 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         return new Component[]{section, navigation};
     }
 
-    private void selectThemeMode(String themeMode) {
-        VaadinSession.getCurrent().setAttribute(THEME_MODE_KEY, themeMode);
-        applyTheme(themeMode);
+    private void selectColorScheme(String colorScheme) {
+        VaadinSession.getCurrent().setAttribute(COLOR_SCHEME_KEY, colorScheme);
+        applyColorScheme(colorScheme);
         updateAppearanceMenu();
     }
 
-    private String sessionThemeMode() {
-        var mode = VaadinSession.getCurrent().getAttribute(THEME_MODE_KEY);
-        return "dark".equals(mode) ? "dark" : "light";
+    private String sessionColorScheme() {
+        var scheme = VaadinSession.getCurrent().getAttribute(COLOR_SCHEME_KEY);
+        if ("light".equals(scheme) || "dark".equals(scheme)) return (String) scheme;
+        return "system";
     }
 
     private void applyHostAppearance() {
         var root = UI.getCurrent().getElement();
-        root.setAttribute("data-admin-visual-language", appearance.visualLanguage().cssValue());
-        root.setAttribute("data-admin-density", appearance.density().cssValue());
+        root.setAttribute("data-vadmin-visual-language", appearance.visualLanguage().cssValue());
     }
 
-    private void applyTheme(String themeMode) { UI.getCurrent().getElement().getThemeList().set("dark", "dark".equals(themeMode)); }
+    private void applyColorScheme(String colorScheme) {
+        var value = switch (colorScheme) {
+            case "light" -> ColorScheme.Value.LIGHT;
+            case "dark" -> ColorScheme.Value.DARK;
+            default -> ColorScheme.Value.SYSTEM;
+        };
+        UI.getCurrent().getPage().setColorScheme(value);
+    }
 
     private void updateHeaderText() {
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
@@ -258,16 +257,17 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         var trigger = appearanceMenu.addItem(AdminIcon.of(AdminIconName.PALETTE));
         trigger.setAriaLabel(text("system.shell.appearance"));
         trigger.setTooltipText(text("system.shell.appearance"));
-        addThemeChoice(trigger, "light");
-        addThemeChoice(trigger, "dark");
+        addColorSchemeChoice(trigger, "system");
+        addColorSchemeChoice(trigger, "light");
+        addColorSchemeChoice(trigger, "dark");
     }
 
-    private void addThemeChoice(MenuItem trigger, String themeMode) {
-        var choice = trigger.getSubMenu().addItem(text("system.shell.appearance." + themeMode), event -> {
-            if (event.isFromClient()) selectThemeMode(themeMode);
+    private void addColorSchemeChoice(MenuItem trigger, String colorScheme) {
+        var choice = trigger.getSubMenu().addItem(text("system.shell.appearance." + colorScheme), event -> {
+            if (event.isFromClient()) selectColorScheme(colorScheme);
         });
         choice.setCheckable(true);
-        choice.setChecked(sessionThemeMode().equals(themeMode));
+        choice.setChecked(sessionColorScheme().equals(colorScheme));
     }
 
     private String titleFor(AdminPage page) { return text(page.titleKey()); }

@@ -1,0 +1,268 @@
+/* Explicit Ant Design language. Never applies to the default Aura language. */
+[data-vadmin-visual-language="ant"] {
+  --vadmin-ant-canvas: light-dark(#f5f5f5, #141414);
+  --vadmin-ant-surface: light-dark(#ffffff, #1f1f1f);
+  --vadmin-ant-border: light-dark(#d9d9d9, #424242);
+  --vadmin-ant-accent: light-dark(#1677ff, #1668dc);
+  --vadmin-ant-accent-hover: light-dark(#4096ff, #3c89e8);
+  --vadmin-ant-text: light-dark(rgb(0 0 0 / 88%), rgb(255 255 255 / 85%));
+  --vadmin-ant-text-secondary: light-dark(rgb(0 0 0 / 65%), rgb(255 255 255 / 65%));
+  --vadmin-ant-disabled: light-dark(rgb(0 0 0 / 25%), rgb(255 255 255 / 30%));
+  --vadmin-ant-success: light-dark(#52c41a, #49aa19);
+  --vadmin-ant-warning: light-dark(#faad14, #d89614);
+  --vadmin-ant-danger: light-dark(#ff4d4f, #dc4446);
+  --vadmin-ant-overlay-shadow: light-dark(0 6px 16px rgb(0 0 0 / 8%), 0 6px 16px rgb(0 0 0 / 45%));
+  --aura-background-color-light: #f5f5f5;
+  --aura-background-color-dark: #141414;
+  --aura-accent-color-light: #1677ff;
+  --aura-accent-color-dark: #1668dc;
+  --aura-base-radius: 6;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-app-layout::part(navbar),
+[data-vadmin-visual-language="ant"] vaadin-app-layout::part(drawer) {
+  background: var(--vadmin-ant-surface);
+  border-color: var(--vadmin-ant-border);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-app-layout::part(navbar) {
+  border-bottom: 1px solid var(--vadmin-ant-border);
+  min-height: 3rem;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-app-layout::part(drawer) {
+  border-inline-end: 1px solid var(--vadmin-ant-border);
+  width: 13rem;
+}
+
+[data-vadmin-visual-language="ant"] .admin-content-canvas {
+  background: var(--vadmin-ant-canvas);
+}
+
+[data-vadmin-visual-language="ant"] .admin-page-controls {
+  box-shadow: none;
+}
+
+[data-vadmin-visual-language="ant"] .admin-page-workspace {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-button {
+  --vaadin-button-background: var(--vadmin-ant-surface);
+  --vaadin-button-border-color: var(--vadmin-ant-border);
+  --vaadin-button-border-radius: 6px;
+  --vaadin-button-text-color: var(--vadmin-ant-text);
+  font-weight: 500;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-button[theme~="primary"] {
+  --vaadin-button-background: var(--vadmin-ant-accent);
+  --vaadin-button-border-color: var(--vadmin-ant-accent);
+  --vaadin-button-text-color: #ffffff;
+  box-shadow: none;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-button:not([disabled]):hover {
+  --vaadin-button-border-color: var(--vadmin-ant-accent-hover);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-button[theme~="primary"]:not([disabled]):hover {
+  --vaadin-button-background: var(--vadmin-ant-accent-hover);
+  --vaadin-button-border-color: var(--vadmin-ant-accent-hover);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-button[theme~="tertiary"] {
+  --vaadin-button-background: transparent;
+  --vaadin-button-border-color: transparent;
+  --vaadin-button-text-color: var(--vadmin-ant-text-secondary);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-button[disabled] {
+  --vaadin-button-background: var(--vadmin-ant-canvas);
+  --vaadin-button-border-color: var(--vadmin-ant-border);
+  --vaadin-button-text-color: var(--vadmin-ant-disabled);
+  opacity: 1;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-text-field::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-password-field::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-number-field::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-text-area::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-combo-box::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-select::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-date-picker::part(input-field) {
+  background: var(--vadmin-ant-surface);
+  border: 1px solid var(--vadmin-ant-border);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-text-field:not([disabled]):hover::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-password-field:not([disabled]):hover::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-number-field:not([disabled]):hover::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-text-area:not([disabled]):hover::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-combo-box:not([disabled]):hover::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-select:not([disabled]):hover::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-date-picker:not([disabled]):hover::part(input-field) {
+  border-color: var(--vadmin-ant-accent-hover);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-text-field[focus-ring]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-password-field[focus-ring]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-number-field[focus-ring]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-text-area[focus-ring]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-combo-box[focus-ring]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-select[focus-ring]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-date-picker[focus-ring]::part(input-field) {
+  border-color: var(--vadmin-ant-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--vadmin-ant-accent) 20%, transparent);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-text-field[invalid]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-password-field[invalid]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-number-field[invalid]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-text-area[invalid]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-combo-box[invalid]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-select[invalid]::part(input-field),
+[data-vadmin-visual-language="ant"] vaadin-date-picker[invalid]::part(input-field) {
+  border-color: var(--vadmin-ant-danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--vadmin-ant-danger) 12%, transparent);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-menu-bar-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-select-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-combo-box-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-date-picker-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-dialog-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-notification-card::part(overlay) {
+  background: var(--vadmin-ant-surface);
+  border: 1px solid var(--vadmin-ant-border);
+  box-shadow: var(--vadmin-ant-overlay-shadow);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-menu-bar-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-select-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-combo-box-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-date-picker-overlay::part(overlay),
+[data-vadmin-visual-language="ant"] vaadin-notification-card::part(overlay) {
+  border-radius: 6px;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-dialog-overlay::part(overlay) {
+  border-radius: 8px;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-dialog-overlay::part(header),
+[data-vadmin-visual-language="ant"] vaadin-dialog-overlay::part(footer) {
+  padding: var(--vaadin-padding-m);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-dialog-overlay::part(header) {
+  border-bottom: 1px solid var(--vadmin-ant-border);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-dialog-overlay::part(footer) {
+  border-top: 1px solid var(--vadmin-ant-border);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-grid::part(header-cell) {
+  background: light-dark(#fafafa, #262626);
+  border-bottom: 1px solid light-dark(#f0f0f0, #303030);
+  color: var(--vadmin-ant-text-secondary);
+  font-weight: 600;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-grid::part(body-cell) {
+  box-shadow: inset 0 -1px light-dark(#f0f0f0, #303030);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-grid::part(row):hover {
+  background: light-dark(#fafafa, #262626);
+}
+
+[data-vadmin-visual-language="ant"] vaadin-grid::part(selected-row) {
+  background: light-dark(#e6f4ff, #111d2c);
+}
+
+[data-vadmin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state],
+[data-vadmin-visual-language="ant"] .admin-pagination-bar {
+  border-color: light-dark(#f0f0f0, #303030);
+}
+
+[data-vadmin-visual-language="ant"] .admin-page-workspace > [role="status"],
+[data-vadmin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state="empty"] .admin-empty-state,
+[data-vadmin-visual-language="ant"] .admin-page-workspace[data-admin-workspace-state="failure"] .admin-empty-state {
+  background: light-dark(#fafafa, #262626);
+}
+
+[data-vadmin-visual-language="ant"] .admin-pagination-bar {
+  border-top: 1px solid;
+  justify-content: flex-end;
+  padding-top: var(--vaadin-padding-s);
+  width: 100%;
+}
+
+[data-vadmin-visual-language="ant"] .admin-confirmation-consequence {
+  background: light-dark(#fff2f0, #2a1215);
+  border-inline-start: 3px solid var(--vadmin-ant-danger);
+  color: var(--vadmin-ant-text);
+  margin: 0;
+  padding: var(--vaadin-padding-s);
+}
+
+[data-vadmin-visual-language="ant"] .admin-icon {
+  --vadmin-ant-icon-mask: none;
+  align-items: center;
+  background: currentcolor;
+  display: inline-flex;
+  flex: 0 0 1rem;
+  height: 1rem;
+  justify-content: center;
+  mask-image: var(--vadmin-ant-icon-mask);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 1rem;
+}
+
+[data-vadmin-visual-language="ant"] .admin-icon > vaadin-icon {
+  display: none;
+}
+
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="add"] { --vadmin-ant-icon-mask: url("./icons/add.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="attachment"] { --vadmin-ant-icon-mask: url("./icons/attachment.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="briefcase"] { --vadmin-ant-icon-mask: url("./icons/briefcase.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="clock"] { --vadmin-ant-icon-mask: url("./icons/clock.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="cube"] { --vadmin-ant-icon-mask: url("./icons/cube.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="delete"] { --vadmin-ant-icon-mask: url("./icons/delete.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="edit"] { --vadmin-ant-icon-mask: url("./icons/edit.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="eye"] { --vadmin-ant-icon-mask: url("./icons/eye.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="globe"] { --vadmin-ant-icon-mask: url("./icons/globe.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="history"] { --vadmin-ant-icon-mask: url("./icons/history.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="home"] { --vadmin-ant-icon-mask: url("./icons/home.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="key"] { --vadmin-ant-icon-mask: url("./icons/key.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="palette"] { --vadmin-ant-icon-mask: url("./icons/palette.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="pause"] { --vadmin-ant-icon-mask: url("./icons/pause.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="play"] { --vadmin-ant-icon-mask: url("./icons/play.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="shield"] { --vadmin-ant-icon-mask: url("./icons/shield.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="shopping-cart"] { --vadmin-ant-icon-mask: url("./icons/shopping-cart.svg"); }
+[data-vadmin-visual-language="ant"] .admin-icon[data-admin-icon="users"] { --vadmin-ant-icon-mask: url("./icons/users.svg"); }
+
+[data-vadmin-visual-language="ant"] .admin-shell-header {
+  gap: 0.75rem;
+  min-height: 3rem;
+}
+
+[data-vadmin-visual-language="ant"] .admin-product-mark,
+[data-vadmin-visual-language="ant"] vaadin-side-nav-item::part(link) {
+  border-radius: 0.375rem;
+}
+
+[data-vadmin-visual-language="ant"] .admin-drawer-content {
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+[data-vadmin-visual-language="ant"] vaadin-side-nav-item[current]::part(link) {
+  background: color-mix(in srgb, var(--vadmin-ant-accent) 12%, transparent);
+}

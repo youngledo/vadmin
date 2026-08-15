@@ -102,7 +102,7 @@ class BrowserE2EIT {
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Users"))).isVisible();
         openShellMenu("admin-appearance-menu");
         page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)).click();
-        assertThat(page.locator("body")).hasAttribute("theme", "dark");
+        assertThat(page.locator("html")).hasAttribute("theme", "dark");
     }
 
     @Test

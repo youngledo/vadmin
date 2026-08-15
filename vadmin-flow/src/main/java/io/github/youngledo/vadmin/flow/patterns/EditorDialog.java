@@ -46,7 +46,7 @@ public final class EditorDialog extends Dialog implements LocaleChangeObserver {
         footerActions.setSpacing(true);
         footerActions.setWidthFull();
         footerActions.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
-        footerActions.getStyle().set("flex-wrap", "wrap");
+        footerActions.setWrap(true);
         getFooter().add(footerActions);
         add(form, validation);
         updateText();

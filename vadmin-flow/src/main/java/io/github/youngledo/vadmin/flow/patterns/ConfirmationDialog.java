@@ -50,7 +50,7 @@ public final class ConfirmationDialog extends Dialog implements LocaleChangeObse
         footerActions.setSpacing(true);
         footerActions.setWidthFull();
         footerActions.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
-        footerActions.getStyle().set("flex-wrap", "wrap");
+        footerActions.setWrap(true);
         getFooter().add(footerActions);
         updateText();
     }
