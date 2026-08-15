@@ -18,8 +18,6 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -42,7 +40,7 @@ import java.util.Locale;
 @Uses(RolesView.class)
 @Uses(PermissionsView.class)
 @Uses(AuditView.class)
-public final class DefaultMainLayout extends AppLayout implements AfterNavigationObserver, LocaleChangeObserver {
+public final class DefaultMainLayout extends AppLayout implements LocaleChangeObserver {
     private static final String COLOR_SCHEME_KEY = DefaultMainLayout.class.getName() + ".color-scheme";
 
     private final AdminModuleRegistry modules;
@@ -51,14 +49,11 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
     private final AdminLocalePreference localePreference;
     private final I18NProvider translations;
     private final AdminAppearanceProperties appearance;
-    private final Span currentLocation = new Span();
+    private final AuthenticationContext authenticationContext;
     private final VerticalLayout drawer = new VerticalLayout();
     private final DrawerToggle toggle = new DrawerToggle();
     private final MenuBar userMenu;
-    private final MenuBar languageMenu;
-    private final MenuBar appearanceMenu;
     private final boolean authenticated;
-    private String currentRoute = "";
 
     public DefaultMainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
@@ -69,20 +64,19 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         this.localePreference = localePreference;
         this.translations = translations;
         this.appearance = appearance;
+        this.authenticationContext = authenticationContext;
         var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
         var productName = new Span("VAdmin");
         productName.addClassName("admin-shell-brand");
-        currentLocation.addClassName("admin-shell-location");
+        var brand = createBrand(productMark, productName);
 
         var currentUserValue = currentUser.currentUser();
         authenticated = currentUserValue.isPresent();
         if (!authenticated) {
             user = null;
             userMenu = null;
-            languageMenu = null;
-            appearanceMenu = null;
-            addHeader(productMark, productName);
+            addHeader(brand);
             return;
         }
 
@@ -91,11 +85,9 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         setDrawerOpened(true);
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
-        userMenu = createUserMenu(user.username(), authenticationContext);
-        languageMenu = createUtilityMenu("admin-language-menu");
-        appearanceMenu = createUtilityMenu("admin-appearance-menu");
+        userMenu = createUserMenu();
         updateHeaderText();
-        addHeader(toggle, productMark, productName, currentLocation, createUtilityControls());
+        addHeader(createNavigation(brand), createUtilityControls());
 
         drawer.setPadding(false);
         drawer.setSpacing(true);
@@ -104,21 +96,31 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         addToDrawer(drawer);
     }
 
+    private HorizontalLayout createBrand(Component productMark, Component productName) {
+        var brand = new HorizontalLayout(productMark, productName);
+        brand.setPadding(false);
+        brand.setSpacing(true);
+        brand.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        return brand;
+    }
+
+    private HorizontalLayout createNavigation(Component brand) {
+        var navigation = new HorizontalLayout(toggle, brand);
+        navigation.setPadding(false);
+        navigation.setSpacing(true);
+        navigation.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        return navigation;
+    }
+
     private void addHeader(Component... components) {
         var header = new HorizontalLayout(components);
         header.setWidthFull();
+        header.setPadding(true);
+        header.setSpacing(true);
         header.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        header.setWrap(true);
+        header.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
         header.addClassName("admin-shell-header");
         addToNavbar(header);
-    }
-
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        if (!authenticated) return;
-        currentRoute = event.getLocation().getPath();
-        updateCurrentLocation();
-        getContent().addClassName("admin-content-canvas");
     }
 
     @Override
@@ -133,30 +135,18 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         if (!authenticated) return;
         updateHeaderText();
         rebuildDrawer();
-        updateCurrentLocation();
     }
 
-    private MenuBar createUserMenu(String username, AuthenticationContext authenticationContext) {
+    private MenuBar createUserMenu() {
         var menu = new MenuBar();
         menu.setOpenOnHover(false);
         menu.addClassName("admin-user-menu");
-        var avatar = new Avatar(username);
-        var trigger = menu.addItem(avatar);
-        trigger.getSubMenu().addItem(text("system.shell.logout"), event -> {
-            if (event.isFromClient()) authenticationContext.logout();
-        });
-        return menu;
-    }
-
-    private MenuBar createUtilityMenu(String className) {
-        var menu = new MenuBar();
-        menu.setOpenOnHover(false);
-        menu.addClassNames("admin-shell-utility", className);
+        updateUserMenu(menu);
         return menu;
     }
 
     private HorizontalLayout createUtilityControls() {
-        var utilities = new HorizontalLayout(languageMenu, appearanceMenu, userMenu);
+        var utilities = new HorizontalLayout(userMenu);
         utilities.setPadding(false);
         utilities.setSpacing(false);
         utilities.setAlignItems(HorizontalLayout.Alignment.CENTER);
@@ -192,7 +182,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
     private void selectColorScheme(String colorScheme) {
         VaadinSession.getCurrent().setAttribute(COLOR_SCHEME_KEY, colorScheme);
         applyColorScheme(colorScheme);
-        updateAppearanceMenu();
+        updateUserMenu();
     }
 
     private String sessionColorScheme() {
@@ -219,23 +209,29 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
         userMenu.getElement().setAttribute("aria-label", text("system.shell.current-user"));
-        updateLanguageMenu();
-        updateAppearanceMenu();
+        updateUserMenu();
     }
 
-    private void updateCurrentLocation() {
-        currentLocation.setText(modules.pages().stream().filter(page -> page.route().equals(currentRoute)).findFirst()
-                .map(this::titleFor).orElse(text("system.shell.home")));
+    private void updateUserMenu() {
+        updateUserMenu(userMenu);
     }
 
-    private void updateLanguageMenu() {
-        languageMenu.removeAll();
-        languageMenu.getElement().setAttribute("aria-label", text("system.shell.language-menu"));
-        languageMenu.setVisible(translations.getProvidedLocales().size() > 1);
-        var trigger = languageMenu.addItem(AdminIcon.of(AdminIconName.GLOBE));
-        trigger.setAriaLabel(text("system.shell.language"));
-        trigger.setTooltipText(text("system.shell.language"));
-        translations.getProvidedLocales().forEach(locale -> addLanguageChoice(trigger, locale));
+    private void updateUserMenu(MenuBar menu) {
+        menu.removeAll();
+        var trigger = menu.addItem(new Avatar(user.username()));
+        trigger.setAriaLabel(text("system.shell.current-user"));
+        trigger.setTooltipText(text("system.shell.current-user"));
+        if (translations.getProvidedLocales().size() > 1) {
+            var language = trigger.getSubMenu().addItem(text("system.shell.language"));
+            translations.getProvidedLocales().forEach(locale -> addLanguageChoice(language, locale));
+        }
+        var appearance = trigger.getSubMenu().addItem(text("system.shell.appearance"));
+        addColorSchemeChoice(appearance, "system");
+        addColorSchemeChoice(appearance, "light");
+        addColorSchemeChoice(appearance, "dark");
+        trigger.getSubMenu().addItem(text("system.shell.logout"), event -> {
+            if (event.isFromClient()) authenticationContext.logout();
+        });
     }
 
     private void addLanguageChoice(MenuItem trigger, Locale locale) {
@@ -248,18 +244,7 @@ public final class DefaultMainLayout extends AppLayout implements AfterNavigatio
 
     private void selectLanguage(Locale locale) {
         localePreference.select(UI.getCurrent(), locale);
-        updateLanguageMenu();
-    }
-
-    private void updateAppearanceMenu() {
-        appearanceMenu.removeAll();
-        appearanceMenu.getElement().setAttribute("aria-label", text("system.shell.appearance-menu"));
-        var trigger = appearanceMenu.addItem(AdminIcon.of(AdminIconName.PALETTE));
-        trigger.setAriaLabel(text("system.shell.appearance"));
-        trigger.setTooltipText(text("system.shell.appearance"));
-        addColorSchemeChoice(trigger, "system");
-        addColorSchemeChoice(trigger, "light");
-        addColorSchemeChoice(trigger, "dark");
+        updateUserMenu();
     }
 
     private void addColorSchemeChoice(MenuItem trigger, String colorScheme) {

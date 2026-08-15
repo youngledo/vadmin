@@ -27,9 +27,9 @@ Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring B
 | `vadmin-spring-boot-starter` | 默认外壳和主题、系统管理 UI 与翻译、面向使用方的依赖组合。 |
 | `vadmin-reference-app` | 精简 starter 使用方、启动配置、种子数据和浏览器验收覆盖。 |
 
-`vadmin-spring-boot-starter` 提供外壳、主题、首页，以及 Users、Roles、Permissions、Audit 系统
-管理模块。`vadmin-reference-app` 不再拥有复制的基线，而是验证普通应用仅依赖 starter 并添加
-自身功能即可运行。
+`vadmin-spring-boot-starter` 提供完整的默认后台框架、首页，以及 Users、Roles、Permissions、
+Audit 系统管理模块。`vadmin-reference-app` 不再拥有复制的基线，而是验证普通应用仅依赖 starter
+并添加自身功能即可运行。
 
 ## 默认使用路径
 
@@ -42,8 +42,12 @@ Spring Boot 4.x、Vaadin Flow 25.x、PostgreSQL 和 Flyway SQL 迁移。Spring B
 ```
 
 普通使用方配置数据源和 Flyway 迁移位置、依赖 `vadmin-spring-boot-starter` 后即可启动。无需定义
-布局、主题或系统页面，即可获得本地登录、按权限过滤的外壳、Users、Roles、Permissions、
+布局、主题或系统页面，即可获得本地登录、按权限过滤的响应式后台外壳、Users、Roles、Permissions、
 Audit、`zh-CN`/`en-US` 翻译、跟随系统/浅色/深色配色方案以及 Vaadin 或 Ant 风格外观。
+
+默认后台外壳是 VAdmin 的产品职责，而不是让业务模块从 Flow 的基础布局组件开始拼装。它提供
+稳定的应用导航、全局操作区和统一的页面工作流；业务模块只补充领域数据、页面、命令、权限和
+翻译。VAdmin 并不试图构建低代码页面编辑器，也不替业务方决定领域页面的内容。
 
 业务功能通过 `AdminModule` Bean 声明。每个页面都有稳定元数据、所需权限、路由、图标 key、
 Flow View 类型和两套消息资源包。启动时，`vadmin-spring-flow` 校验模块 ID、页面 ID、路由、
@@ -53,11 +57,16 @@ Flow View 类型和两套消息资源包。启动时，`vadmin-spring-flow` 校�
 导航是按授权过滤后的已组装页面投影。路由守卫也会在创建 View 前检查直接访问；用例会再次
 授权变更操作。导航控制改善用户体验，用例检查才是权威安全边界。
 
-## 主题与生产构建
+## 默认体验与视觉语言
 
-starter 默认应用外壳显式加载 Aura 与结构样式表。默认 `vaadin` 语言使用 Aura 属性、
-组件 variant、`ColorScheme` 和已文档化的 App Layout 属性；显式 `ant` 语言拥有其自身作用域内的
-覆写。模块使用共享 Flow 模式，不注册全局主题，也不修改全局主题属性。
+默认 `vaadin` 语言以 Vaadin Aura 的原生组件外观为准。VAdmin 可以通过 `AppLayout`、
+`SideNav`、`MenuBar`、`Avatar`、`Notification` 及 Flow 布局组件的公开 API 组合完整的后台
+体验，但不得注册改变 Aura 外观的全局 CSS、组件 `part` 覆写，或自建颜色、圆角、间距、密度和
+通知 token。结构组合与重造视觉样式是两个不同的职责。
+
+显式 `ant` 语言拥有其自身作用域内的 CSS 覆写，以复现 Ant Design 风格。模块使用共享 Flow
+模式，不注册全局主题，也不修改全局主题属性。系统、浅色和深色模式仅通过 `ColorScheme` 与
+`Page.setColorScheme()` 处理。
 
 动态路由需要静态生产前端锚点。使用方新增动态业务 View 时，在自己拥有的应用配置类型上
 为该 View 声明一次 `@Uses(该View.class)`。View 本身不声明 `@Route`；模块元数据才是路由

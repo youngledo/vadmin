@@ -34,7 +34,6 @@ public final class DefaultHomeView extends VerticalLayout implements LocaleChang
         user = currentUser.currentUser().orElseThrow();
         this.authorization = authorization;
         setSizeFull();
-        setPadding(true);
         header.setLocation(account);
         shortcuts.setPadding(false);
         shortcuts.setSpacing(true);

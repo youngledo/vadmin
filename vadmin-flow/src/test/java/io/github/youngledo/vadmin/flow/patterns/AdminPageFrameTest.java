@@ -23,6 +23,8 @@ class AdminPageFrameTest {
         assertThat(controls.getClassNames()).contains("admin-page-controls");
         assertThat(workspace.getClassNames()).contains("admin-page-workspace");
         assertThat(frame.getFlexGrow(workspace)).isEqualTo(1.0);
+        assertThat(frame.isPadding()).isTrue();
+        assertThat(frame.isSpacing()).isTrue();
     }
 
     @Test

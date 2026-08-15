@@ -21,5 +21,6 @@ class PageHeaderTest {
         assertThat(header.getLocation()).isSameAs(location);
         assertThat(header.getActions().getChildren()).contains(create);
         assertThat(header.getClassNames()).contains("admin-page-header");
+        assertThat(header.isSpacing()).isTrue();
     }
 }

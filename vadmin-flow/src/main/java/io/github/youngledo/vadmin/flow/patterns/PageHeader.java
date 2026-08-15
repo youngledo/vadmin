@@ -43,7 +43,7 @@ public final class PageHeader extends VerticalLayout implements LocaleChangeObse
 
     private void initialize() {
         setPadding(false);
-        setSpacing(false);
+        setSpacing(true);
         setWidthFull();
         addClassName("admin-page-header");
 

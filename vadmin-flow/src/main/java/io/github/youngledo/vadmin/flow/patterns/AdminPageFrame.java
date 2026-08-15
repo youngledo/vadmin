@@ -7,8 +7,8 @@ import java.util.Objects;
 /** Composes the shared header, optional controls, and work area of an administration page. */
 public final class AdminPageFrame extends VerticalLayout {
     public AdminPageFrame(PageHeader header, PageToolbar controls, Component workspace) {
-        setPadding(false);
-        setSpacing(false);
+        setPadding(true);
+        setSpacing(true);
         addClassName("admin-page-frame");
 
         var pageHeader = Objects.requireNonNull(header);

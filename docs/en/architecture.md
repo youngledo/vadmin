@@ -30,8 +30,8 @@ configuration.
 | `vadmin-spring-boot-starter` | Default shell and theme, system administration UI and translations, and consumer-facing dependency composition. |
 | `vadmin-reference-app` | Thin starter consumer, launch configuration, seed data, and browser acceptance coverage. |
 
-`vadmin-spring-boot-starter` supplies the shell, theme, home page, and the Users,
-Roles, Permissions, and Audit administration module. `vadmin-reference-app`
+`vadmin-spring-boot-starter` supplies the complete default administration experience,
+home page, and the Users, Roles, Permissions, and Audit administration module. `vadmin-reference-app`
 does not own a copied baseline; it proves that a normal application can depend
 on the starter and contribute only its own functionality.
 
@@ -51,6 +51,13 @@ local login, the permission-filtered shell, Users, Roles, Permissions, Audit,
 `zh-CN`/`en-US` translations, system/light/dark color schemes, and Vaadin or Ant-inspired
 appearance profiles without defining a layout, theme, or system pages.
 
+The default administration shell is a VAdmin product responsibility. It supplies
+stable application navigation, global actions, and shared page workflows instead
+of asking business modules to assemble a Flow application from primitive layout
+components. Business modules contribute domain data, pages, commands,
+permissions, and translations. VAdmin is not a low-code page builder and does
+not determine a domain page's content.
+
 Business features are declared as `AdminModule` beans. Each page has stable
 metadata, a required permission, a route, an icon key, a Flow view type, and
 two message bundles. At startup `vadmin-spring-flow` validates module IDs, page
@@ -63,13 +70,20 @@ route guard also checks direct navigation before the view is constructed; use
 cases authorize mutations again. Navigation controls improve the user
 experience, while the use-case check is the authoritative boundary.
 
-## Themes And Production Builds
+## Default Experience And Visual Languages
 
-The starter's default application shell explicitly loads Aura followed by its
-structural stylesheet. The default `vaadin` language uses Aura properties, component
-variants, `ColorScheme`, and documented App Layout properties. The explicit
-`ant` language owns its own scoped overrides. Modules consume the shared Flow
-patterns; they do not register a global theme or modify global theme properties.
+The default `vaadin` language preserves the native Vaadin Aura appearance.
+VAdmin may compose a complete administration experience through public APIs on
+`AppLayout`, `SideNav`, `MenuBar`, `Avatar`, `Notification`, and Flow layout
+components. It must not register global CSS that changes Aura's appearance,
+override component `part`s, or introduce color, radius, spacing, density, or
+notification token systems. Structural composition and recreating a visual
+language are different responsibilities.
+
+The explicit `ant` language owns scoped CSS overrides to reproduce an
+Ant Design-inspired visual language. Modules consume the shared Flow patterns;
+they do not register a global theme or modify global theme properties. System,
+light, and dark modes use only `ColorScheme` and `Page.setColorScheme()`.
 
 Dynamic routes need a static production frontend anchor. A consumer that adds
 a dynamic business view declares `@Uses(ThatView.class)` once on a host-owned

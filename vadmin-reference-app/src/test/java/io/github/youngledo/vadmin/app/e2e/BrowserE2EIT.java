@@ -95,14 +95,31 @@ class BrowserE2EIT {
     @Test
     void starterShellTranslatesAndSwitchesColorMode() {
         signInAs("admin", "change-me");
-        openShellMenu("admin-language-menu");
+        openShellMenu("admin-user-menu");
+        page.getByText("语言", new Page.GetByTextOptions().setExact(true)).click();
         page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Workplace"))).isVisible();
         assertThat(page.getByLabel("System administration").getByRole(AriaRole.LINK,
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Users"))).isVisible();
-        openShellMenu("admin-appearance-menu");
+        openShellMenu("admin-user-menu");
+        page.getByText("Appearance", new Page.GetByTextOptions().setExact(true)).click();
         page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)).click();
         assertThat(page.locator("html")).hasAttribute("theme", "dark");
+    }
+
+    @Test
+    void starterShellSeparatesNavigationFromGlobalUtilities() {
+        signInAs("admin", "change-me");
+        var header = page.locator(".admin-shell-header");
+        var brand = header.locator(".admin-shell-brand");
+        var utilities = header.locator(".admin-shell-utilities");
+
+        var brandBox = brand.boundingBox();
+        var utilitiesBox = utilities.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(brandBox).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(utilitiesBox).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(utilitiesBox.x)
+                .isGreaterThan(brandBox.x + brandBox.width);
     }
 
     @Test
@@ -125,8 +142,11 @@ class BrowserE2EIT {
         var width = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
         org.assertj.core.api.Assertions.assertThat(((Number) header.evaluate("element => element.scrollWidth")).doubleValue())
                 .isLessThanOrEqualTo(width + 1);
-        assertThat(page.locator("vaadin-menu-bar.admin-language-menu vaadin-menu-bar-button:not([hidden])")).isVisible();
-        assertThat(page.locator("vaadin-menu-bar.admin-appearance-menu vaadin-menu-bar-button:not([hidden])")).isVisible();
+        var userMenu = page.locator("vaadin-menu-bar.admin-user-menu vaadin-menu-bar-button:not([hidden])");
+        assertThat(userMenu).isVisible();
+        var userMenuBounds = userMenu.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(userMenuBounds).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(userMenuBounds.x + userMenuBounds.width).isLessThanOrEqualTo(width + 1);
     }
 
     private void signInAs(String username, String password) {
