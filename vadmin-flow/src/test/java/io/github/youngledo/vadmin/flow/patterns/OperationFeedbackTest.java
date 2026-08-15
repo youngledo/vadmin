@@ -21,6 +21,16 @@ class OperationFeedbackTest {
     }
 
     @Test
+    void presentsErrorsThroughTheConfiguredErrorPresenter() {
+        var message = new AtomicReference<String>();
+        var feedback = new OperationFeedback(ignored -> { }, message::set);
+
+        feedback.error("User update failed");
+
+        assertThat(message).hasValue("User update failed");
+    }
+
+    @Test
     void sendsValidationFailuresToTheLocalFailureHandler() {
         var handled = new AtomicReference<BusinessFailure>();
         var feedback = new OperationFeedback(message -> { });

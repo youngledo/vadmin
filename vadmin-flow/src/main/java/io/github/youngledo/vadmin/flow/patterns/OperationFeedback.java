@@ -10,13 +10,19 @@ import java.util.function.Consumer;
 /** Presents successful commands locally while preserving Flow's global failure handling boundary. */
 public final class OperationFeedback {
     private final Consumer<String> successPresenter;
+    private final Consumer<String> errorPresenter;
 
     public OperationFeedback() {
-        this(OperationFeedback::showSuccess);
+        this(OperationFeedback::showSuccess, OperationFeedback::showError);
     }
 
     public OperationFeedback(Consumer<String> successPresenter) {
+        this(successPresenter, OperationFeedback::showError);
+    }
+
+    public OperationFeedback(Consumer<String> successPresenter, Consumer<String> errorPresenter) {
         this.successPresenter = Objects.requireNonNull(successPresenter);
+        this.errorPresenter = Objects.requireNonNull(errorPresenter);
     }
 
     public void success(String message) {
@@ -24,8 +30,20 @@ public final class OperationFeedback {
     }
 
     private static void showSuccess(String message) {
+        show(message, NotificationVariant.LUMO_SUCCESS);
+    }
+
+    public void error(String message) {
+        errorPresenter.accept(Objects.requireNonNull(message));
+    }
+
+    private static void showError(String message) {
+        show(message, NotificationVariant.LUMO_ERROR);
+    }
+
+    private static void show(String message, NotificationVariant variant) {
         var notification = Notification.show(message, 5_000, Notification.Position.TOP_CENTER);
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        notification.addThemeVariants(variant);
     }
 
     /**
