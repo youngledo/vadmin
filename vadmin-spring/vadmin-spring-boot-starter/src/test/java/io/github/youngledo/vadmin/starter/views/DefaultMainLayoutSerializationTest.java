@@ -10,6 +10,7 @@ import io.github.youngledo.vadmin.flow.navigation.AdminModuleRegistry;
 import io.github.youngledo.vadmin.springflow.i18n.AdminLocalePreference;
 import io.github.youngledo.vadmin.springflow.i18n.CompositeAdminI18NProvider;
 import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
+import io.github.youngledo.vadmin.starter.shell.AdminShellProperties;
 import io.github.youngledo.vadmin.starter.theme.AdminAppearanceProperties;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -27,7 +28,8 @@ class DefaultMainLayoutSerializationTest {
                 new AdminLocalePreference(),
                 new CompositeAdminI18NProvider(List.of()),
                 new AdminAppearanceProperties(),
-                new AdminBrandProperties());
+                new AdminBrandProperties(),
+                new AdminShellProperties());
 
         var bytes = new ByteArrayOutputStream();
         try (var output = new ObjectOutputStream(bytes)) {

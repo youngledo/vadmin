@@ -6,13 +6,17 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.page.ColorScheme;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.component.popover.PopoverPosition;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.i18n.I18NProvider;
@@ -23,6 +27,7 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
+import io.github.youngledo.vadmin.starter.shell.AdminShellProperties;
 import io.github.youngledo.vadmin.starter.theme.AdminAppearanceProperties;
 import io.github.youngledo.vadmin.contracts.auth.AuthorizationService;
 import io.github.youngledo.vadmin.contracts.auth.CurrentUser;
@@ -52,20 +57,23 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private final AdminLocalePreference localePreference;
     private final I18NProvider translations;
     private final AdminAppearanceProperties appearance;
+    private final AdminShellProperties shell;
     private final VerticalLayout drawer = new VerticalLayout();
     private final DrawerToggle toggle = new DrawerToggle();
-    private final MenuBar userMenu;
+    private final Button userAvatar;
+    private final Popover userPopover;
     private final boolean authenticated;
 
     public DefaultMainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
                       AuthorizationService authorization, AdminLocalePreference localePreference,
                       I18NProvider translations, AdminAppearanceProperties appearance,
-                      AdminBrandProperties brandProperties) {
+                      AdminBrandProperties brandProperties, AdminShellProperties shell) {
         this.modules = modules;
         this.authorization = authorization;
         this.localePreference = localePreference;
         this.translations = translations;
         this.appearance = appearance;
+        this.shell = shell;
         var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
         var productName = new Span(brandProperties.name());
@@ -76,7 +84,8 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         authenticated = currentUserValue.isPresent();
         if (!authenticated) {
             user = null;
-            userMenu = null;
+            userAvatar = null;
+            userPopover = null;
             addHeader(brand);
             return;
         }
@@ -84,14 +93,19 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         user = currentUserValue.orElseThrow();
         setPrimarySection(Section.DRAWER);
         setDrawerOpened(true);
+        // AppLayout exposes drawer width through this documented component property.
+        getStyle().set("--vaadin-app-layout-drawer-width", "20rem");
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
-        userMenu = createUserMenu();
+        userAvatar = createUserAvatar();
+        userPopover = createUserPopover();
         updateHeaderText();
         addHeader(createNavigation(brand), createUtilityControls());
 
-        drawer.setPadding(false);
+        drawer.setPadding(true);
         drawer.setSpacing(true);
+        drawer.setWidthFull();
+        drawer.setAlignItems(VerticalLayout.Alignment.STRETCH);
         drawer.addClassName("admin-drawer-content");
         rebuildDrawer();
         addToDrawer(drawer);
@@ -138,16 +152,27 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         rebuildDrawer();
     }
 
-    private MenuBar createUserMenu() {
-        var menu = new MenuBar();
-        menu.setOpenOnHover(false);
-        menu.addClassName("admin-user-menu");
-        updateUserMenu(menu);
-        return menu;
+    private Button createUserAvatar() {
+        var avatar = new Avatar(user.username());
+        var trigger = new Button(avatar);
+        trigger.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        trigger.addClassName("admin-user-avatar");
+        trigger.setAriaLabel(text("system.shell.current-user"));
+        trigger.setTooltipText(text("system.shell.current-user"));
+        return trigger;
+    }
+
+    private Popover createUserPopover() {
+        var popover = new Popover();
+        popover.setTarget(userAvatar);
+        popover.setPosition(PopoverPosition.BOTTOM_END);
+        popover.setAriaLabel(text("system.shell.current-user"));
+        updateUserPopover(popover);
+        return popover;
     }
 
     private HorizontalLayout createUtilityControls() {
-        var utilities = new HorizontalLayout(userMenu);
+        var utilities = new HorizontalLayout(userAvatar);
         utilities.setPadding(false);
         utilities.setSpacing(false);
         utilities.setAlignItems(HorizontalLayout.Alignment.CENTER);
@@ -157,8 +182,10 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
 
     private void rebuildDrawer() {
         drawer.removeAll();
-        drawer.add(navigationGroup(text("system.shell.workspace"),
-                new SideNavItem(text("system.shell.home"), "", AdminIcon.of(AdminIconName.HOME))));
+        if (shell.workplaceEnabled()) {
+            drawer.add(navigationGroup(text("system.shell.workspace"),
+                    new SideNavItem(text("system.shell.home"), "", AdminIcon.of(AdminIconName.HOME))));
+        }
         var visiblePages = modules.pagesVisibleTo(user, authorization);
         modules.groupsVisibleTo(user, authorization).forEach(group -> addNavigationGroup(drawer, text(group.titleKey()),
                 visiblePages.stream().filter(page -> page.groupId().equals(group.id())).toList()));
@@ -175,6 +202,7 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         section.addClassName("admin-drawer-section");
         var navigation = new SideNav();
         navigation.getElement().setAttribute("aria-label", label);
+        navigation.setWidthFull();
         navigation.addClassName("admin-drawer-nav");
         navigation.addItem(items);
         return new Component[]{section, navigation};
@@ -183,7 +211,7 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private void selectColorScheme(String colorScheme) {
         VaadinSession.getCurrent().setAttribute(COLOR_SCHEME_KEY, colorScheme);
         applyColorScheme(colorScheme);
-        updateUserMenu();
+        updateUserPopover();
     }
 
     private String sessionColorScheme() {
@@ -209,30 +237,45 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private void updateHeaderText() {
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
-        userMenu.getElement().setAttribute("aria-label", text("system.shell.current-user"));
-        updateUserMenu();
+        userAvatar.setAriaLabel(text("system.shell.current-user"));
+        userAvatar.setTooltipText(text("system.shell.current-user"));
+        userPopover.setAriaLabel(text("system.shell.current-user"));
+        updateUserPopover();
     }
 
-    private void updateUserMenu() {
-        updateUserMenu(userMenu);
+    private void updateUserPopover() {
+        updateUserPopover(userPopover);
     }
 
-    private void updateUserMenu(MenuBar menu) {
-        menu.removeAll();
-        var trigger = menu.addItem(new Avatar(user.username()));
-        trigger.setAriaLabel(text("system.shell.current-user"));
-        trigger.setTooltipText(text("system.shell.current-user"));
+    private void updateUserPopover(Popover popover) {
+        popover.removeAll();
+        var content = new VerticalLayout();
+        content.setPadding(true);
+        content.setSpacing(true);
+        content.setWidthFull();
         if (translations.getProvidedLocales().size() > 1) {
-            var language = trigger.getSubMenu().addItem(text("system.shell.language"));
-            translations.getProvidedLocales().forEach(locale -> addLanguageChoice(language, locale));
+            var language = new Select<Locale>();
+            language.setLabel(text("system.shell.language"));
+            language.setItems(translations.getProvidedLocales());
+            language.setItemLabelGenerator(locale -> text("system.shell.language." + locale.toLanguageTag()));
+            language.setValue(UI.getCurrent().getLocale());
+            language.addValueChangeListener(event -> {
+                if (event.isFromClient() && event.getValue() != null) selectLanguage(event.getValue());
+            });
+            content.add(language);
         }
-        var appearance = trigger.getSubMenu().addItem(text("system.shell.appearance"));
-        addColorSchemeChoice(appearance, "system");
-        addColorSchemeChoice(appearance, "light");
-        addColorSchemeChoice(appearance, "dark");
-        trigger.getSubMenu().addItem(text("system.shell.logout"), event -> {
-            if (event.isFromClient()) logout();
+
+        var colorScheme = new RadioButtonGroup<String>();
+        colorScheme.setLabel(text("system.shell.appearance"));
+        colorScheme.setItems("system", "light", "dark");
+        colorScheme.setItemLabelGenerator(value -> text("system.shell.appearance." + value));
+        colorScheme.setValue(sessionColorScheme());
+        colorScheme.addValueChangeListener(event -> {
+            if (event.isFromClient() && event.getValue() != null) selectColorScheme(event.getValue());
         });
+        var logout = new Button(text("system.shell.logout"), event -> logout());
+        content.add(colorScheme, logout);
+        popover.add(content);
     }
 
     private void logout() {
@@ -243,25 +286,9 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
                 .logout();
     }
 
-    private void addLanguageChoice(MenuItem trigger, Locale locale) {
-        var choice = trigger.getSubMenu().addItem(text("system.shell.language." + locale.toLanguageTag()), event -> {
-            if (event.isFromClient()) selectLanguage(locale);
-        });
-        choice.setCheckable(true);
-        choice.setChecked(locale.equals(UI.getCurrent().getLocale()));
-    }
-
     private void selectLanguage(Locale locale) {
         localePreference.select(UI.getCurrent(), locale);
-        updateUserMenu();
-    }
-
-    private void addColorSchemeChoice(MenuItem trigger, String colorScheme) {
-        var choice = trigger.getSubMenu().addItem(text("system.shell.appearance." + colorScheme), event -> {
-            if (event.isFromClient()) selectColorScheme(colorScheme);
-        });
-        choice.setCheckable(true);
-        choice.setChecked(sessionColorScheme().equals(colorScheme));
+        updateUserPopover();
     }
 
     private String titleFor(AdminPage page) { return text(page.titleKey()); }

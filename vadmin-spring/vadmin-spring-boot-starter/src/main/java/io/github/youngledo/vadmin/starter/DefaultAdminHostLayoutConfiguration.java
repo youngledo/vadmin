@@ -4,6 +4,7 @@ import io.github.youngledo.vadmin.flow.navigation.AdminHostLayout;
 import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
 import io.github.youngledo.vadmin.springflow.AdminFlowAutoConfiguration;
 import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
+import io.github.youngledo.vadmin.starter.shell.AdminShellProperties;
 import io.github.youngledo.vadmin.starter.theme.AdminAppearanceProperties;
 import io.github.youngledo.vadmin.starter.views.DefaultMainLayout;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
 @AutoConfigureBefore(AdminFlowAutoConfiguration.class)
-@EnableConfigurationProperties({AdminAppearanceProperties.class, AdminBrandProperties.class})
+@EnableConfigurationProperties({AdminAppearanceProperties.class, AdminBrandProperties.class, AdminShellProperties.class})
 public class DefaultAdminHostLayoutConfiguration {
     @Bean
     @ConditionalOnMissingBean(AdminHostLayout.class)

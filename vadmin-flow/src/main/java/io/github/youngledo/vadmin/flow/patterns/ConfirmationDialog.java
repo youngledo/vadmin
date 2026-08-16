@@ -19,6 +19,7 @@ public final class ConfirmationDialog extends Dialog implements LocaleChangeObse
     private final String consequenceKey;
     private final String confirmActionKey;
     private final boolean translated;
+    private String cancelActionLabel;
     private boolean busy;
     private boolean confirmActionEnabledBeforeBusy;
     private boolean cancelActionEnabledBeforeBusy;
@@ -63,6 +64,11 @@ public final class ConfirmationDialog extends Dialog implements LocaleChangeObse
 
     public Button getConfirmAction() { return confirmAction; }
     public Button getCancelAction() { return cancelAction; }
+    /** Overrides the default cancel label while retaining the shared dialog action layout. */
+    public void setCancelActionLabel(String label) {
+        cancelActionLabel = Objects.requireNonNull(label);
+        cancelAction.setText(cancelActionLabel);
+    }
     public boolean isBusy() { return busy; }
     public String getFailureMessage() { return failure.getText(); }
 
@@ -101,7 +107,8 @@ public final class ConfirmationDialog extends Dialog implements LocaleChangeObse
         consequence.addClassName("admin-confirmation-consequence");
         consequence.setText(text(consequenceKey));
         confirmAction.setText(text(confirmActionKey));
-        cancelAction.setText(translated ? getTranslation("flow.action.cancel") : "Cancel");
+        cancelAction.setText(cancelActionLabel != null ? cancelActionLabel
+                : translated ? getTranslation("flow.action.cancel") : "Cancel");
     }
 
     private String text(String value) { return translated ? getTranslation(value) : value; }

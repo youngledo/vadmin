@@ -12,6 +12,7 @@ public final class PaginationBar extends HorizontalLayout implements LocaleChang
     private final Button previousAction;
     private final Button nextAction;
     private final Span summary = new Span();
+    private final HorizontalLayout navigation = new HorizontalLayout();
     private int pageIndex;
     private int pageCount;
     private long total;
@@ -23,12 +24,19 @@ public final class PaginationBar extends HorizontalLayout implements LocaleChang
         nextAction.addClickListener(event -> Objects.requireNonNull(next).run());
         setPadding(false);
         setSpacing(true);
+        setWidthFull();
         setAlignItems(Alignment.CENTER);
+        setJustifyContentMode(JustifyContentMode.BETWEEN);
         addClassName("admin-pagination-bar");
         getElement().setAttribute("role", "navigation");
+        navigation.setPadding(false);
+        navigation.setSpacing(true);
+        navigation.setAlignItems(Alignment.CENTER);
+        navigation.add(previousAction, nextAction);
         updateText();
         updateAvailability();
-        add(summary, previousAction, nextAction);
+        add(summary, navigation);
+        setFlexGrow(1, summary);
     }
 
     public void setPage(int pageIndex, int pageCount, long total) {
@@ -49,6 +57,11 @@ public final class PaginationBar extends HorizontalLayout implements LocaleChang
 
     public Button getNextAction() {
         return nextAction;
+    }
+
+    /** Returns the grouped page navigation actions displayed at the end of the footer. */
+    public HorizontalLayout getNavigation() {
+        return navigation;
     }
 
     public String getSummary() {

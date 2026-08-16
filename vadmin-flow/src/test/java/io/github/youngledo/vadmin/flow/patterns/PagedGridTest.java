@@ -53,6 +53,11 @@ class PagedGridTest {
 
         assertThat(observed).containsExactly(new PagedQuery(0, 50, "name", true, java.util.Map.of()));
         assertThat(pagedGrid.getPaginationBar().getSummary()).isEqualTo("Page 1 of 3, 120 results");
+        assertThat(pagedGrid.getPaginationBar().getWidth()).isEqualTo("100%");
+        assertThat(pagedGrid.getPaginationBar().getJustifyContentMode())
+                .isEqualTo(com.vaadin.flow.component.orderedlayout.HorizontalLayout.JustifyContentMode.BETWEEN);
+        assertThat(pagedGrid.getPaginationBar().getNavigation().getChildren())
+                .contains(pagedGrid.getPaginationBar().getPreviousAction(), pagedGrid.getPaginationBar().getNextAction());
         assertThat(pagedGrid.getPaginationBar().getPreviousAction().isEnabled()).isFalse();
         assertThat(pagedGrid.getPaginationBar().getNextAction().isEnabled()).isTrue();
 

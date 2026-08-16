@@ -37,6 +37,11 @@ public final class OperationFeedback implements Serializable {
         successPresenter.accept(Objects.requireNonNull(message));
     }
 
+    /** Presents a non-blocking warning using the shared operation-feedback placement. */
+    public void warning(String message) {
+        show(Objects.requireNonNull(message), NotificationVariant.LUMO_WARNING);
+    }
+
     private static void showSuccess(String message) {
         show(message, NotificationVariant.LUMO_SUCCESS);
     }

@@ -13,6 +13,11 @@ class DefaultShellTranslationTest {
         var home = Files.readString(Path.of("src/main/java/io/github/youngledo/vadmin/starter/views/DefaultHomeView.java"));
 
         assertThat(source).contains("return text(page.titleKey());").doesNotContain("legacyLabel");
+        assertThat(source).contains("new Avatar(user.username())")
+                .contains("new Popover()")
+                .contains("--vaadin-app-layout-drawer-width")
+                .contains("navigation.setWidthFull()")
+                .doesNotContain("new MenuBar()");
         assertThat(home).contains("getTranslation(page.titleKey())").contains("getTranslation(page.intentKey())");
     }
 }

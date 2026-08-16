@@ -6,6 +6,7 @@ import com.vaadin.flow.component.html.Div;
 import org.junit.jupiter.api.Test;
 
 class AdminPageFrameTest {
+
     @Test
     void composesHeaderControlsAndWorkspaceInStableSemanticOrder() {
         var header = new PageHeader("Users", "Manage application users");
@@ -23,6 +24,8 @@ class AdminPageFrameTest {
         assertThat(controls.getClassNames()).contains("admin-page-controls");
         assertThat(workspace.getClassNames()).contains("admin-page-workspace");
         assertThat(frame.getFlexGrow(workspace)).isEqualTo(1.0);
+        assertThat(frame.getWidth()).isEqualTo("100%");
+        assertThat(frame.getHeight()).isEqualTo("100%");
         assertThat(frame.isPadding()).isTrue();
         assertThat(frame.isSpacing()).isTrue();
     }

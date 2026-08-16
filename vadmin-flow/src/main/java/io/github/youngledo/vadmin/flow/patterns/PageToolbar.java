@@ -3,12 +3,13 @@ package io.github.youngledo.vadmin.flow.patterns;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /** A compact query area with filter, reset, supplementary, and primary action slots. */
-public final class PageToolbar extends HorizontalLayout {
+public final class PageToolbar extends VerticalLayout {
     private final HorizontalLayout filters = new HorizontalLayout();
     private final HorizontalLayout actions = new HorizontalLayout();
     private final Map<Button, Boolean> enabledBeforeBusy = new LinkedHashMap<>();
@@ -19,14 +20,17 @@ public final class PageToolbar extends HorizontalLayout {
     public PageToolbar() {
         setWidthFull();
         setPadding(false);
-        setAlignItems(Alignment.END);
-        setJustifyContentMode(JustifyContentMode.BETWEEN);
         addClassName("admin-page-controls");
+        filters.setWidthFull();
         filters.setPadding(false);
         filters.setSpacing(true);
         filters.setWrap(true);
+        filters.setAlignItems(Alignment.END);
+        actions.setWidthFull();
         actions.setPadding(false);
         actions.setSpacing(true);
+        actions.setWrap(true);
+        actions.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
         add(filters, actions);
     }
 

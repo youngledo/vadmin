@@ -15,6 +15,7 @@ public final class DetailDialog extends Dialog implements LocaleChangeObserver {
     private final Button closeAction = new Button();
     private final String titleKey;
     private final boolean translated;
+    private String closeActionLabel;
 
     public DetailDialog(String title) { this(title, false); }
     private DetailDialog(String titleKey, boolean translated) {
@@ -42,11 +43,17 @@ public final class DetailDialog extends Dialog implements LocaleChangeObserver {
         return field;
     }
     public Button getCloseAction() { return closeAction; }
+    /** Overrides the default close label while retaining the shared dialog action layout. */
+    public void setCloseActionLabel(String label) {
+        closeActionLabel = Objects.requireNonNull(label);
+        closeAction.setText(closeActionLabel);
+    }
     @Override public void localeChange(LocaleChangeEvent event) { updateText(); }
     private void updateText() {
         var title = translated ? getTranslation(titleKey) : titleKey;
         setHeaderTitle(title);
         getElement().setAttribute("aria-label", title);
-        closeAction.setText(translated ? getTranslation("flow.action.close") : "Close");
+        closeAction.setText(closeActionLabel != null ? closeActionLabel
+                : translated ? getTranslation("flow.action.close") : "Close");
     }
 }

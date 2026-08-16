@@ -20,6 +20,7 @@ public final class EditorDialog extends Dialog implements LocaleChangeObserver {
     private final String titleKey;
     private final String primaryActionKey;
     private final boolean translated;
+    private String cancelActionLabel;
     private boolean busy;
     private boolean primaryActionEnabledBeforeBusy;
     private boolean cancelActionEnabledBeforeBusy;
@@ -58,6 +59,11 @@ public final class EditorDialog extends Dialog implements LocaleChangeObserver {
     public void addField(Component... fields) { form.add(fields); }
     public Button getPrimaryAction() { return primaryAction; }
     public Button getCancelAction() { return cancelAction; }
+    /** Overrides the default cancel label while retaining the shared dialog action layout. */
+    public void setCancelActionLabel(String label) {
+        cancelActionLabel = Objects.requireNonNull(label);
+        cancelAction.setText(cancelActionLabel);
+    }
     public String getValidationMessage() { return validation.getText(); }
     public void showValidationMessage(String message) { validation.setText(Objects.requireNonNull(message)); validation.setVisible(!message.isBlank()); }
     public boolean isBusy() { return busy; }
@@ -78,6 +84,7 @@ public final class EditorDialog extends Dialog implements LocaleChangeObserver {
         var title = translated ? getTranslation(titleKey) : titleKey;
         setHeaderTitle(title); getElement().setAttribute("aria-label", title);
         primaryAction.setText(translated ? getTranslation(primaryActionKey) : primaryActionKey);
-        cancelAction.setText(translated ? getTranslation("flow.action.cancel") : "Cancel");
+        cancelAction.setText(cancelActionLabel != null ? cancelActionLabel
+                : translated ? getTranslation("flow.action.cancel") : "Cancel");
     }
 }

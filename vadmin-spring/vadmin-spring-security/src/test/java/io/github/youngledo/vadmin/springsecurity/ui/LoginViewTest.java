@@ -5,8 +5,8 @@ import static org.mockito.Answers.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.login.LoginOverlay;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
@@ -57,24 +57,18 @@ class LoginViewTest {
     void rendersOneProviderNeutralExternalEntryWhenOidcIsAvailable() {
         var view = new LoginView(new OidcLoginAvailability(true, "oidc"), localLoginAuthenticator);
 
-        assertThat(view.getChildren().filter(Anchor.class::isInstance))
-                .singleElement()
-                .isInstanceOfSatisfying(Anchor.class, anchor -> {
-                    assertThat(anchor.getHref()).isEqualTo("/oauth2/authorization/oidc");
-                    assertThat(anchor.getElement().hasAttribute("router-ignore")).isTrue();
-                    assertThat(anchor.getText()).isEqualTo("Continue with single sign-on");
-                });
-        assertThat(view.getChildren()).anyMatch(LoginForm.class::isInstance);
+        var externalEntry = oidcEntry(view);
+        assertThat(externalEntry.getAttribute("href")).isEqualTo("/oauth2/authorization/oidc");
+        assertThat(externalEntry.hasAttribute("router-ignore")).isTrue();
+        assertThat(externalEntry.getText()).isEqualTo("Continue with single sign-on");
+        assertThat(view.getChildren()).anyMatch(LoginOverlay.class::isInstance);
     }
 
     @Test
     void usesTheConfiguredRegistrationIdForTheExternalEntry() {
         var view = new LoginView(new OidcLoginAvailability(true, "corp-sso"), localLoginAuthenticator);
 
-        assertThat(view.getChildren().filter(Anchor.class::isInstance))
-                .singleElement()
-                .isInstanceOfSatisfying(Anchor.class,
-                        anchor -> assertThat(anchor.getHref()).isEqualTo("/oauth2/authorization/corp-sso"));
+        assertThat(oidcEntry(view).getAttribute("href")).isEqualTo("/oauth2/authorization/corp-sso");
     }
 
     @Test
@@ -85,20 +79,17 @@ class LoginViewTest {
 
         var view = new LoginView(new OidcLoginAvailability(true, "corp-sso"), localLoginAuthenticator);
 
-        assertThat(view.getChildren().filter(Anchor.class::isInstance))
-                .singleElement()
-                .isInstanceOfSatisfying(Anchor.class,
-                        anchor -> assertThat(anchor.getHref()).isEqualTo("/admin/oauth2/authorization/corp-sso"));
+        assertThat(oidcEntry(view).getAttribute("href")).isEqualTo("/admin/oauth2/authorization/corp-sso");
     }
 
     @Test
     void keepsTheExistingLocalLoginWithoutAnExternalEntryWhenOidcIsUnavailable() {
         var view = new LoginView(new OidcLoginAvailability(false, "oidc"), localLoginAuthenticator);
 
-        assertThat(view.getChildren()).noneMatch(Anchor.class::isInstance);
-        assertThat(view.getChildren().filter(LoginForm.class::isInstance))
+        assertThat(loginOverlay(view).getElement().getChildren()).noneMatch(element -> "a".equals(element.getTag()));
+        assertThat(view.getChildren().filter(LoginOverlay.class::isInstance))
                 .singleElement()
-                .isInstanceOfSatisfying(LoginForm.class, login -> assertThat(login.getAction()).isEmpty());
+                .isInstanceOfSatisfying(LoginOverlay.class, login -> assertThat(login.getAction()).isEmpty());
     }
 
     @Test
@@ -109,8 +100,17 @@ class LoginViewTest {
 
         view.beforeEnter(event);
 
-        assertThat(view.getChildren().filter(LoginForm.class::isInstance))
+        assertThat(view.getChildren().filter(LoginOverlay.class::isInstance))
                 .singleElement()
-                .isInstanceOfSatisfying(LoginForm.class, login -> assertThat(login.isError()).isTrue());
+                .isInstanceOfSatisfying(LoginOverlay.class, login -> assertThat(login.isError()).isTrue());
+    }
+
+    private static LoginOverlay loginOverlay(LoginView view) {
+        return view.getChildren().filter(LoginOverlay.class::isInstance).map(LoginOverlay.class::cast).findFirst().orElseThrow();
+    }
+
+    private static Element oidcEntry(LoginView view) {
+        return loginOverlay(view).getElement().getChildren().filter(element -> "a".equals(element.getTag()))
+                .findFirst().orElseThrow();
     }
 }

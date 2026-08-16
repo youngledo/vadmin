@@ -96,7 +96,7 @@ class KeycloakOidcIT {
 
         waitForUsersRoute();
         assertThat(page.getByLabel("当前用户菜单")).isVisible();
-        assertThat(page.locator(".admin-user-menu vaadin-avatar")).isVisible();
+        assertThat(page.locator(".admin-user-avatar vaadin-avatar")).isVisible();
     }
 
     @Test
@@ -118,7 +118,7 @@ class KeycloakOidcIT {
         waitForUsersRoute();
 
         PlaywrightBrowserSupport.clickThroughInjectedOverlay(
-                page.locator("vaadin-menu-bar.admin-user-menu vaadin-menu-bar-button:not([hidden])"));
+                page.locator("vaadin-button.admin-user-avatar"));
         page.getByText("退出登录", new Page.GetByTextOptions().setExact(true)).click();
 
         page.waitForURL(baseUrl() + "/login");

@@ -13,6 +13,10 @@
 - The default `vaadin` visual language uses Vaadin Aura as-is. VAdmin must not
   ship or register CSS that changes its visual appearance; compose the shell
   with documented Vaadin component APIs instead.
+- The product-owned shell may set a documented Vaadin component custom
+  property from Flow only when no component API exists for structural behavior
+  such as the AppLayout drawer width. This is not a VAdmin visual token or a
+  stylesheet override.
 - Use `ColorScheme` and `Page.setColorScheme()` for system, light, and dark
   color schemes. Do not implement color schemes by mutating the `theme` HTML
   attribute or by duplicating light and dark component rules.

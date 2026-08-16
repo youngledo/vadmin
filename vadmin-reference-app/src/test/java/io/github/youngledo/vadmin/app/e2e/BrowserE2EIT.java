@@ -95,14 +95,13 @@ class BrowserE2EIT {
     @Test
     void starterShellTranslatesAndSwitchesColorMode() {
         signInAs("admin", "change-me");
-        openShellMenu("admin-user-menu");
-        page.getByText("语言", new Page.GetByTextOptions().setExact(true)).click();
+        openUserPopover();
+        page.getByLabel("语言").click();
         page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Workplace"))).isVisible();
         assertThat(page.getByLabel("System administration").getByRole(AriaRole.LINK,
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Users"))).isVisible();
-        openShellMenu("admin-user-menu");
-        page.getByText("Appearance", new Page.GetByTextOptions().setExact(true)).click();
+        openUserPopover();
         page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)).click();
         assertThat(page.locator("html")).hasAttribute("theme", "dark");
     }
@@ -142,11 +141,11 @@ class BrowserE2EIT {
         var width = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
         org.assertj.core.api.Assertions.assertThat(((Number) header.evaluate("element => element.scrollWidth")).doubleValue())
                 .isLessThanOrEqualTo(width + 1);
-        var userMenu = page.locator("vaadin-menu-bar.admin-user-menu vaadin-menu-bar-button:not([hidden])");
-        assertThat(userMenu).isVisible();
-        var userMenuBounds = userMenu.boundingBox();
-        org.assertj.core.api.Assertions.assertThat(userMenuBounds).isNotNull();
-        org.assertj.core.api.Assertions.assertThat(userMenuBounds.x + userMenuBounds.width).isLessThanOrEqualTo(width + 1);
+        var userAvatar = page.locator("vaadin-button.admin-user-avatar");
+        assertThat(userAvatar).isVisible();
+        var userAvatarBounds = userAvatar.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(userAvatarBounds).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(userAvatarBounds.x + userAvatarBounds.width).isLessThanOrEqualTo(width + 1);
     }
 
     private void signInAs(String username, String password) {
@@ -160,9 +159,9 @@ class BrowserE2EIT {
         page.waitForURL(baseUrl() + "/");
     }
 
-    private void openShellMenu(String className) {
+    private void openUserPopover() {
         PlaywrightBrowserSupport.clickThroughInjectedOverlay(
-                page.locator("vaadin-menu-bar." + className + " vaadin-menu-bar-button:not([hidden])"));
+                page.locator("vaadin-button.admin-user-avatar"));
     }
 
     private void createUser(String username, String password, UUID roleId) {

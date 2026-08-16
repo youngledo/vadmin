@@ -3,17 +3,22 @@ package io.github.youngledo.vadmin.flow.patterns;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.Test;
 
 class PageToolbarTest {
 
     @Test
-    void wrapsFiltersWhileKeepingActionsInTheSharedToolbar() {
+    void composesFiltersAndActionsAsFullWidthResponsiveRows() {
         var toolbar = new PageToolbar();
 
         assertThat(toolbar.getFilters().isWrap()).isTrue();
-        assertThat(toolbar.getActions().isWrap()).isFalse();
+        assertThat(toolbar.getActions().isWrap()).isTrue();
+        assertThat(toolbar.getFilters().getWidth()).isEqualTo("100%");
+        assertThat(toolbar.getActions().getWidth()).isEqualTo("100%");
+        assertThat(toolbar.getActions().getJustifyContentMode())
+                .isEqualTo(HorizontalLayout.JustifyContentMode.END);
     }
 
     @Test

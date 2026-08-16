@@ -60,6 +60,12 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
         return grid;
     }
 
+    /** Replaces the workspace data while preserving one consistent presentation state. */
+    public void setItems(List<T> items) {
+        var values = List.copyOf(Objects.requireNonNull(items));
+        grid.setItems(values);
+    }
+
     public State getState() {
         return state;
     }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.vaadin.flow.component.applayout.AppLayout;
 import io.github.youngledo.vadmin.flow.navigation.AdminHostLayout;
 import io.github.youngledo.vadmin.flow.navigation.AdminMessageBundle;
+import io.github.youngledo.vadmin.starter.shell.AdminShellProperties;
 import io.github.youngledo.vadmin.starter.views.DefaultMainLayout;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -32,6 +33,12 @@ class DefaultAdminHostLayoutConfigurationTest {
     void contributesTranslationsNeededByTheDefaultShellIndependentlyOfLocalIam() {
         context.run(application -> assertThat(application.getBean("defaultShellMessageBundle", AdminMessageBundle.class))
                 .isEqualTo(new AdminMessageBundle("system", "i18n.system")));
+    }
+
+    @Test
+    void bindsTheWorkplaceNavigationSetting() {
+        context.withPropertyValues("app.shell.workplace-enabled=false").run(application ->
+                assertThat(application.getBean(AdminShellProperties.class).workplaceEnabled()).isFalse());
     }
 
     @Configuration(proxyBeanMethods = false)
