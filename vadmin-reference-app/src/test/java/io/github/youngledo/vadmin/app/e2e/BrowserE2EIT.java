@@ -95,15 +95,18 @@ class BrowserE2EIT {
     @Test
     void starterShellTranslatesAndSwitchesColorMode() {
         signInAs("admin", "change-me");
-        page.getByLabel("语言").click();
-        page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(page.getByLabel("语言"));
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
+                page.getByText("English", new Page.GetByTextOptions().setExact(true)));
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Workplace"))).isVisible();
         assertThat(page.getByLabel("System administration").getByRole(AriaRole.LINK,
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Users"))).isVisible();
-        page.getByLabel("Current user menu").click();
-        page.getByText("Theme settings", new Page.GetByTextOptions().setExact(true)).click();
-        page.getByLabel("Appearance").click();
-        page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)).click();
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(page.getByLabel("Current user menu"));
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
+                page.getByText("Theme settings", new Page.GetByTextOptions().setExact(true)));
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(page.getByLabel("Appearance"));
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
+                page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)));
         org.assertj.core.api.Assertions.assertThat((String) page.locator("html")
                 .evaluate("element => getComputedStyle(element).colorScheme")).isEqualTo("dark");
     }
