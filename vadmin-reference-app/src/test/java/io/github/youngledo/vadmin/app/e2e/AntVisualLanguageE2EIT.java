@@ -17,7 +17,7 @@ class AntVisualLanguageE2EIT extends AbstractVisualLanguageE2EIT {
     void antProfileStylesTheStarterLoginShellAndSystemWorkspace() {
         page.navigate(baseUrl() + "/login");
         assertThat(page.locator("html")).hasAttribute("data-vadmin-visual-language", "ant");
-        assertThat(page.locator("vaadin-login-form")).isVisible();
+        assertThat(page.locator("#vaadinLoginUsername")).isVisible();
         signInAsAdministrator();
         page.navigate(baseUrl() + "/users");
         var icon = page.locator("[data-vadmin-visual-language=ant] .admin-icon[data-admin-icon=users]");

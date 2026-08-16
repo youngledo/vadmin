@@ -95,8 +95,9 @@ class KeycloakOidcIT {
         startExternalLogin("oidc-admin");
 
         waitForUsersRoute();
-        assertThat(page.getByLabel("当前用户菜单")).isVisible();
-        assertThat(page.locator(".admin-user-avatar vaadin-avatar")).isVisible();
+        var userMenu = page.getByLabel("当前用户菜单");
+        assertThat(userMenu).isVisible();
+        assertThat(userMenu.locator("vaadin-avatar")).isVisible();
     }
 
     @Test
@@ -117,12 +118,11 @@ class KeycloakOidcIT {
         startExternalLogin("oidc-admin");
         waitForUsersRoute();
 
-        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
-                page.locator("vaadin-button.admin-user-avatar"));
+        page.getByLabel("当前用户菜单").click();
         page.getByText("退出登录", new Page.GetByTextOptions().setExact(true)).click();
 
         page.waitForURL(baseUrl() + "/login");
-        assertThat(page.locator("vaadin-login-form")).isVisible();
+        assertThat(page.locator("#vaadinLoginUsername")).isVisible();
     }
 
     @Test
@@ -135,7 +135,7 @@ class KeycloakOidcIT {
         page.navigate(baseUrl() + "/users");
 
         page.waitForURL(baseUrl() + "/login");
-        assertThat(page.locator("vaadin-login-form")).isVisible();
+        assertThat(page.locator("#vaadinLoginUsername")).isVisible();
     }
 
     private void startExternalLogin(String username) {

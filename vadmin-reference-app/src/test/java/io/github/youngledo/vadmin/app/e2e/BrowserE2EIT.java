@@ -95,23 +95,24 @@ class BrowserE2EIT {
     @Test
     void starterShellTranslatesAndSwitchesColorMode() {
         signInAs("admin", "change-me");
-        openUserPopover();
         page.getByLabel("语言").click();
         page.getByText("English", new Page.GetByTextOptions().setExact(true)).click();
         assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Workplace"))).isVisible();
         assertThat(page.getByLabel("System administration").getByRole(AriaRole.LINK,
                 new com.microsoft.playwright.Locator.GetByRoleOptions().setName("Users"))).isVisible();
-        openUserPopover();
+        page.getByLabel("Current user menu").click();
+        page.getByText("Theme settings", new Page.GetByTextOptions().setExact(true)).click();
+        page.getByLabel("Appearance").click();
         page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)).click();
-        assertThat(page.locator("html")).hasAttribute("theme", "dark");
+        org.assertj.core.api.Assertions.assertThat((String) page.locator("html")
+                .evaluate("element => getComputedStyle(element).colorScheme")).isEqualTo("dark");
     }
 
     @Test
     void starterShellSeparatesNavigationFromGlobalUtilities() {
         signInAs("admin", "change-me");
-        var header = page.locator(".admin-shell-header");
-        var brand = header.locator(".admin-shell-brand");
-        var utilities = header.locator(".admin-shell-utilities");
+        var brand = page.locator(".admin-shell-brand");
+        var utilities = page.locator(".admin-shell-utilities");
 
         var brandBox = brand.boundingBox();
         var utilitiesBox = utilities.boundingBox();
@@ -137,31 +138,26 @@ class BrowserE2EIT {
         page = browserContext.newPage();
         page.setDefaultTimeout(10_000);
         signInAs("admin", "change-me");
-        var header = page.locator(".admin-shell-header");
+        var appLayout = page.locator("vaadin-app-layout");
         var width = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
-        org.assertj.core.api.Assertions.assertThat(((Number) header.evaluate("element => element.scrollWidth")).doubleValue())
+        org.assertj.core.api.Assertions.assertThat(((Number) appLayout.evaluate("element => element.scrollWidth")).doubleValue())
                 .isLessThanOrEqualTo(width + 1);
-        var userAvatar = page.locator("vaadin-button.admin-user-avatar");
-        assertThat(userAvatar).isVisible();
-        var userAvatarBounds = userAvatar.boundingBox();
-        org.assertj.core.api.Assertions.assertThat(userAvatarBounds).isNotNull();
-        org.assertj.core.api.Assertions.assertThat(userAvatarBounds.x + userAvatarBounds.width).isLessThanOrEqualTo(width + 1);
+        var userMenu = page.getByLabel("当前用户菜单");
+        assertThat(userMenu).isVisible();
+        var userMenuBounds = userMenu.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(userMenuBounds).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(userMenuBounds.x + userMenuBounds.width).isLessThanOrEqualTo(width + 1);
     }
 
     private void signInAs(String username, String password) {
         page.navigate(baseUrl() + "/login");
-        var form = page.locator("vaadin-login-form");
-        form.waitFor();
+        var form = page.locator("vaadin-login-overlay");
+        page.locator("#vaadinLoginUsername").waitFor();
         var credentials = form.locator("input:not([type=hidden])");
         credentials.nth(0).fill(username);
         credentials.nth(1).fill(password);
         form.locator("vaadin-button[slot=submit]").click();
         page.waitForURL(baseUrl() + "/");
-    }
-
-    private void openUserPopover() {
-        PlaywrightBrowserSupport.clickThroughInjectedOverlay(
-                page.locator("vaadin-button.admin-user-avatar"));
     }
 
     private void createUser(String username, String password, UUID roleId) {

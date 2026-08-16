@@ -74,8 +74,8 @@ abstract class AbstractVisualLanguageE2EIT {
 
     void signInAsAdministrator() {
         page.navigate(baseUrl() + "/login");
-        var loginForm = page.locator("vaadin-login-form");
-        loginForm.waitFor();
+        var loginForm = page.locator("vaadin-login-overlay");
+        page.locator("#vaadinLoginUsername").waitFor();
         var credentials = loginForm.locator("input:not([type=hidden])");
         credentials.nth(0).fill("admin");
         credentials.nth(1).fill("change-me");
