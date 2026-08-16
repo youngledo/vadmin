@@ -1,24 +1,26 @@
 package io.github.youngledo.vadmin.starter.views;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.page.ColorScheme;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.popover.Popover;
-import com.vaadin.flow.component.popover.PopoverPosition;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
@@ -29,6 +31,7 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import io.github.youngledo.vadmin.starter.brand.AdminBrandProperties;
 import io.github.youngledo.vadmin.starter.shell.AdminShellProperties;
 import io.github.youngledo.vadmin.starter.theme.AdminAppearanceProperties;
+import io.github.youngledo.vadmin.starter.theme.AdminVisualLanguage;
 import io.github.youngledo.vadmin.contracts.auth.AuthorizationService;
 import io.github.youngledo.vadmin.contracts.auth.CurrentUser;
 import io.github.youngledo.vadmin.contracts.auth.CurrentUserProvider;
@@ -60,8 +63,8 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private final AdminShellProperties shell;
     private final VerticalLayout drawer = new VerticalLayout();
     private final DrawerToggle toggle = new DrawerToggle();
-    private final Button userAvatar;
-    private final Popover userPopover;
+    private final MenuBar languageMenu;
+    private final MenuBar userMenu;
     private final boolean authenticated;
 
     public DefaultMainLayout(AdminModuleRegistry modules, CurrentUserProvider currentUser,
@@ -74,35 +77,33 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         this.translations = translations;
         this.appearance = appearance;
         this.shell = shell;
+        var currentUserValue = currentUser.currentUser();
+        authenticated = currentUserValue.isPresent();
+        if (!authenticated) {
+            user = null;
+            languageMenu = null;
+            userMenu = null;
+            return;
+        }
+
+        user = currentUserValue.orElseThrow();
         var productMark = AdminIcon.of(AdminIconName.CUBE);
         productMark.addClassName("admin-product-mark");
         var productName = new Span(brandProperties.name());
         productName.addClassName("admin-shell-brand");
         var brand = createBrand(productMark, productName);
-
-        var currentUserValue = currentUser.currentUser();
-        authenticated = currentUserValue.isPresent();
-        if (!authenticated) {
-            user = null;
-            userAvatar = null;
-            userPopover = null;
-            addHeader(brand);
-            return;
-        }
-
-        user = currentUserValue.orElseThrow();
         setPrimarySection(Section.DRAWER);
         setDrawerOpened(true);
         // AppLayout exposes drawer width through this documented component property.
         getStyle().set("--vaadin-app-layout-drawer-width", "20rem");
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
-        userAvatar = createUserAvatar();
-        userPopover = createUserPopover();
+        languageMenu = translations.getProvidedLocales().size() > 1 ? createLanguageMenu() : null;
+        userMenu = createUserMenu();
         updateHeaderText();
         addHeader(createNavigation(brand), createUtilityControls());
 
-        drawer.setPadding(false);
+        drawer.setPadding(true);
         drawer.setSpacing(true);
         drawer.setWidthFull();
         drawer.setAlignItems(VerticalLayout.Alignment.STRETCH);
@@ -127,16 +128,12 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         return navigation;
     }
 
-    private void addHeader(Component... components) {
-        var header = new HorizontalLayout(components);
-        header.setWidthFull();
-        // AppLayout supplies the native Aura navbar inset; avoid applying it a second time.
-        header.setPadding(false);
-        header.setSpacing(true);
-        header.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        header.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
-        header.addClassName("admin-shell-header");
-        addToNavbar(header);
+    private void addHeader(HorizontalLayout navigation, HorizontalLayout utilities) {
+        // Flow's full-width navbar children otherwise extend through AppLayout's slot inset.
+        navigation.getElement().getStyle().set("margin-inline-start", "var(--lumo-space-m)");
+        utilities.getElement().getStyle().set("margin-inline-end", "var(--lumo-space-m)");
+        navigation.getElement().getStyle().set("flex-grow", "1");
+        addToNavbar(navigation, utilities);
     }
 
     @Override
@@ -153,49 +150,62 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         rebuildDrawer();
     }
 
-    private Button createUserAvatar() {
-        var avatar = new Avatar(user.username());
-        var trigger = new Button(avatar);
-        trigger.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        trigger.addClassName("admin-user-avatar");
-        trigger.setAriaLabel(text("system.shell.current-user"));
-        trigger.setTooltipText(text("system.shell.current-user"));
-        return trigger;
-    }
-
-    private Popover createUserPopover() {
-        var popover = new Popover();
-        popover.setTarget(userAvatar);
-        popover.setPosition(PopoverPosition.BOTTOM_END);
-        popover.setAriaLabel(text("system.shell.current-user"));
-        updateUserPopover(popover);
-        return popover;
-    }
-
     private HorizontalLayout createUtilityControls() {
-        var utilities = new HorizontalLayout(userAvatar);
+        var utilities = new HorizontalLayout();
         utilities.setPadding(false);
-        utilities.setSpacing(false);
+        utilities.setSpacing(true);
         utilities.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        if (languageMenu != null) utilities.add(languageMenu);
+        utilities.add(userMenu);
         utilities.addClassName("admin-shell-utilities");
         return utilities;
+    }
+
+    private MenuBar createLanguageMenu() {
+        var menu = new MenuBar();
+        menu.addThemeVariants(MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_TERTIARY_INLINE);
+        rebuildLanguageMenu(menu);
+        return menu;
+    }
+
+    private MenuBar createUserMenu() {
+        var menu = new MenuBar();
+        menu.addThemeVariants(MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_TERTIARY_INLINE);
+        rebuildUserMenu(menu);
+        return menu;
     }
 
     private void rebuildDrawer() {
         drawer.removeAll();
         if (shell.workplaceEnabled()) {
             drawer.add(navigationGroup(text("system.shell.workspace"),
-                    new SideNavItem(text("system.shell.home"), "", AdminIcon.of(AdminIconName.HOME))));
+                    new SideNavItem(text("system.shell.home"), "", navigationIcon(AdminIconName.HOME.cssValue()))));
         }
         var visiblePages = modules.pagesVisibleTo(user, authorization);
-        modules.groupsVisibleTo(user, authorization).forEach(group -> addNavigationGroup(drawer, text(group.titleKey()),
-                visiblePages.stream().filter(page -> page.groupId().equals(group.id())).toList()));
+        var visibleGroups = modules.groupsVisibleTo(user, authorization).stream()
+                .map(group -> new NavigationGroup(group.titleKey(), visiblePages.stream()
+                        .filter(page -> page.groupId().equals(group.id()))
+                        .toList()))
+                .filter(group -> !group.pages().isEmpty())
+                .toList();
+        var showGroupLabels = visibleGroups.size() > 1;
+        visibleGroups.forEach(group -> addNavigationGroup(drawer, text(group.titleKey()), group.pages(), showGroupLabels));
     }
 
-    private void addNavigationGroup(VerticalLayout target, String label, java.util.List<AdminPage> pages) {
-        if (!pages.isEmpty()) target.add(navigationGroup(label, pages.stream()
-                .map(page -> new SideNavItem(titleFor(page), page.route(), AdminIconCatalog.createAdminIcon(page.iconKey())))
-                .toArray(SideNavItem[]::new)));
+    private void addNavigationGroup(VerticalLayout target, String label, java.util.List<AdminPage> pages, boolean showLabel) {
+        var navigation = new SideNav();
+        navigation.getElement().setAttribute("aria-label", label);
+        navigation.addClassName("admin-drawer-nav");
+        navigation.addItem(pages.stream()
+                .map(page -> new SideNavItem(titleFor(page), page.route(), navigationIcon(page.iconKey())))
+                .toArray(SideNavItem[]::new));
+        if (showLabel) {
+            var section = new Span(label);
+            section.addClassName("admin-drawer-section");
+            target.add(section, navigation);
+            return;
+        }
+        target.add(navigation);
     }
 
     private Component[] navigationGroup(String label, SideNavItem... items) {
@@ -203,16 +213,19 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         section.addClassName("admin-drawer-section");
         var navigation = new SideNav();
         navigation.getElement().setAttribute("aria-label", label);
-        navigation.setWidthFull();
         navigation.addClassName("admin-drawer-nav");
         navigation.addItem(items);
         return new Component[]{section, navigation};
     }
 
+    private Component navigationIcon(String iconKey) {
+        if (appearance.visualLanguage() == AdminVisualLanguage.ANT) return AdminIconCatalog.createAdminIcon(iconKey);
+        return AdminIconCatalog.create(iconKey);
+    }
+
     private void selectColorScheme(String colorScheme) {
         VaadinSession.getCurrent().setAttribute(COLOR_SCHEME_KEY, colorScheme);
         applyColorScheme(colorScheme);
-        updateUserPopover();
     }
 
     private String sessionColorScheme() {
@@ -238,45 +251,66 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private void updateHeaderText() {
         toggle.setAriaLabel(text("system.shell.navigation-toggle"));
         toggle.setTooltipText(text("system.shell.navigation-toggle"));
-        userAvatar.setAriaLabel(text("system.shell.current-user"));
-        userAvatar.setTooltipText(text("system.shell.current-user"));
-        userPopover.setAriaLabel(text("system.shell.current-user"));
-        updateUserPopover();
+        rebuildLanguageMenu(languageMenu);
+        rebuildUserMenu(userMenu);
     }
 
-    private void updateUserPopover() {
-        updateUserPopover(userPopover);
+    private void rebuildLanguageMenu(MenuBar menu) {
+        if (menu == null) return;
+        menu.removeAll();
+        var trigger = menu.addItem(VaadinIcon.GLOBE.create());
+        trigger.setAriaLabel(text("system.shell.language"));
+        trigger.setTooltipText(text("system.shell.language"));
+        var selectedLocale = UI.getCurrent().getLocale();
+        translations.getProvidedLocales().forEach(locale -> {
+            var option = trigger.getSubMenu().addItem(languageLabel(locale), event -> selectLanguage(locale));
+            option.setCheckable(true);
+            option.setChecked(locale.equals(selectedLocale));
+        });
     }
 
-    private void updateUserPopover(Popover popover) {
-        popover.removeAll();
-        var content = new VerticalLayout();
-        content.setPadding(true);
-        content.setSpacing(true);
-        content.setWidthFull();
-        if (translations.getProvidedLocales().size() > 1) {
-            var language = new Select<Locale>();
-            language.setLabel(text("system.shell.language"));
-            language.setItems(translations.getProvidedLocales());
-            language.setItemLabelGenerator(locale -> text("system.shell.language." + locale.toLanguageTag()));
-            language.setValue(UI.getCurrent().getLocale());
-            language.addValueChangeListener(event -> {
-                if (event.isFromClient() && event.getValue() != null) selectLanguage(event.getValue());
-            });
-            content.add(language);
-        }
+    private void rebuildUserMenu(MenuBar menu) {
+        menu.removeAll();
+        var trigger = menu.addItem(new Avatar(user.username()));
+        trigger.setAriaLabel(text("system.shell.current-user"));
+        trigger.setTooltipText(text("system.shell.current-user"));
+        var actions = trigger.getSubMenu();
+        actions.addItem(text("system.shell.profile"), event -> openPersonalSettings());
+        actions.addItem(text("system.shell.theme"), event -> openThemeSettings());
+        actions.addSeparator();
+        actions.addItem(text("system.shell.logout"), event -> logout());
+    }
 
-        var colorScheme = new RadioButtonGroup<String>();
+    private void openPersonalSettings() {
+        var dialog = new Dialog();
+        dialog.setHeaderTitle(text("system.shell.profile"));
+        var form = new FormLayout();
+        var username = new TextField(text("system.shell.username"));
+        username.setValue(user.username());
+        username.setReadOnly(true);
+        form.add(username);
+        dialog.add(form);
+        dialog.open();
+    }
+
+    private void openThemeSettings() {
+        var dialog = new Dialog();
+        dialog.setHeaderTitle(text("system.shell.theme"));
+        var colorScheme = new Select<String>();
         colorScheme.setLabel(text("system.shell.appearance"));
         colorScheme.setItems("system", "light", "dark");
-        colorScheme.setItemLabelGenerator(value -> text("system.shell.appearance." + value));
+        colorScheme.setItemLabelGenerator(value -> switch (value) {
+            case "light" -> text("system.shell.appearance.light");
+            case "dark" -> text("system.shell.appearance.dark");
+            default -> text("system.shell.appearance.system");
+        });
         colorScheme.setValue(sessionColorScheme());
         colorScheme.addValueChangeListener(event -> {
             if (event.isFromClient() && event.getValue() != null) selectColorScheme(event.getValue());
         });
-        var logout = new Button(text("system.shell.logout"), event -> logout());
-        content.add(colorScheme, logout);
-        popover.add(content);
+        dialog.add(colorScheme);
+        dialog.getFooter().add(new Button(text("system.shell.close"), event -> dialog.close()));
+        dialog.open();
     }
 
     private void logout() {
@@ -289,9 +323,18 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
 
     private void selectLanguage(Locale locale) {
         localePreference.select(UI.getCurrent(), locale);
-        updateUserPopover();
     }
 
     private String titleFor(AdminPage page) { return text(page.titleKey()); }
+    private String languageLabel(Locale locale) {
+        return switch (locale.toLanguageTag()) {
+            case "zh-CN" -> "简体中文";
+            case "en-US" -> "English";
+            default -> locale.getDisplayLanguage(locale);
+        };
+    }
     private String text(String key, Object... parameters) { return getTranslation(key, parameters); }
+
+    private record NavigationGroup(String titleKey, java.util.List<AdminPage> pages) {
+    }
 }

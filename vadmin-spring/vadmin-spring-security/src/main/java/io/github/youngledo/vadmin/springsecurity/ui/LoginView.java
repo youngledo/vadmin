@@ -1,11 +1,11 @@
 package io.github.youngledo.vadmin.springsecurity.ui;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.login.AbstractLogin.LoginEvent;
 import com.vaadin.flow.component.login.LoginOverlay;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -19,9 +19,9 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import io.github.youngledo.vadmin.springsecurity.OidcLoginAvailability;
 import io.github.youngledo.vadmin.springsecurity.auth.LocalLoginAuthenticator;
 
-@Route("login")
+@Route(value = "login", autoLayout = false)
 @AnonymousAllowed
-public final class LoginView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver, HasDynamicTitle {
+public final class LoginView extends com.vaadin.flow.component.orderedlayout.VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver, HasDynamicTitle {
     private final Span deniedMessage = new Span();
     private final LoginOverlay login = new LoginOverlay();
     private final Anchor oidcLogin;
@@ -35,9 +35,7 @@ public final class LoginView extends VerticalLayout implements BeforeEnterObserv
         }
         deniedMessage.setVisible(false);
         login.getCustomFormArea().add(deniedMessage);
-        if (oidcLogin != null) {
-            login.getFooter().add(oidcLogin);
-        }
+        if (oidcLogin != null) login.getFooter().add(oidcLogin);
         add(login);
         updateText();
     }
@@ -65,6 +63,7 @@ public final class LoginView extends VerticalLayout implements BeforeEnterObserv
         var i18n = LoginI18n.createDefault();
         var header = new LoginI18n.Header();
         header.setTitle(getTranslation("flow.login.heading"));
+        header.setDescription("");
         i18n.setHeader(header);
         i18n.getForm().setTitle(getTranslation("flow.login.form.title"));
         i18n.getForm().setUsername(getTranslation("flow.login.form.username"));
@@ -78,7 +77,7 @@ public final class LoginView extends VerticalLayout implements BeforeEnterObserv
         return i18n;
     }
 
-    private void authenticateLocally(LoginOverlay.LoginEvent event, LocalLoginAuthenticator localLoginAuthenticator) {
+    private void authenticateLocally(LoginEvent event, LocalLoginAuthenticator localLoginAuthenticator) {
         var request = VaadinServletRequest.getCurrent();
         var response = VaadinServletResponse.getCurrent();
         if (request == null || response == null || !localLoginAuthenticator.authenticate(event.getUsername(), event.getPassword(),

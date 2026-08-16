@@ -3,22 +3,21 @@
 VAdmin publication coordinate: `io.github.youngledo:vadmin-spring-boot-starter`.
 
 `vadmin-spring-boot-starter` owns the default Vaadin Flow shell. Its
-`DefaultApplicationShell` explicitly loads Aura; the bundled Ant resource is
+`DefaultApplicationShell` explicitly loads Lumo; the bundled Ant resource is
 fully scoped and has no effect unless the host selects the `ant` language.
 Normal consumers and business modules do not define a competing shell or global
 theme.
 
 ## Default Vaadin Language
 
-`vaadin` is the default visual language. It uses Aura and Vaadin base-style
-properties directly: `--aura-*` and `--vaadin-*`. Use component variants before
+`vaadin` is the default visual language. It uses Lumo and Vaadin base-style
+properties directly: `--lumo-*` and `--vaadin-*`. Use component variants before
 writing CSS. Color scheme selection uses `ColorScheme` and
 `Page.setColorScheme()` with System preference, Light, and Dark choices.
 
 The shell does not override App Layout, Grid, fields, buttons, dialogs,
-overlays, or notifications. The official Aura `--aura-base-size` property is available as
-the optional `app.appearance.aura-base-size` setting; it accepts values from 12
-through 24 and is passed through unchanged.
+overlays, or notifications. Lumo's standard sizing is retained without a VAdmin
+density setting.
 
 ## Ant Visual Language
 
@@ -38,7 +37,7 @@ Keep CSS scoped to a module-owned component class:
 
 ```css
 .inventory-summary {
-  background: var(--aura-surface-color);
+  background: var(--lumo-base-color);
   border: 1px solid var(--vaadin-border-color-secondary);
   border-radius: var(--vaadin-radius-m);
   color: var(--vaadin-text-color);

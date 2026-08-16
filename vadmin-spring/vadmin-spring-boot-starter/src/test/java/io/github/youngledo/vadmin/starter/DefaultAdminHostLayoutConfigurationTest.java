@@ -9,6 +9,7 @@ import io.github.youngledo.vadmin.starter.shell.AdminShellProperties;
 import io.github.youngledo.vadmin.starter.views.DefaultMainLayout;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,11 @@ class DefaultAdminHostLayoutConfigurationTest {
     void bindsTheWorkplaceNavigationSetting() {
         context.withPropertyValues("app.shell.workplace-enabled=false").run(application ->
                 assertThat(application.getBean(AdminShellProperties.class).workplaceEnabled()).isFalse());
+    }
+
+    @Test
+    void registersTheStarterPackageForVaadinDiscovery() {
+        assertThat(DefaultAdminHostLayoutConfiguration.class.getAnnotation(AutoConfigurationPackage.class)).isNotNull();
     }
 
     @Configuration(proxyBeanMethods = false)

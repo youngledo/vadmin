@@ -1,4 +1,4 @@
-/* Explicit Ant Design language. Never applies to the default Aura language. */
+/* Explicit Ant Design language. Never applies to the default Lumo language. */
 [data-vadmin-visual-language="ant"] {
   --vadmin-ant-canvas: light-dark(#f5f5f5, #141414);
   --vadmin-ant-surface: light-dark(#ffffff, #1f1f1f);
@@ -32,7 +32,6 @@
 
 [data-vadmin-visual-language="ant"] vaadin-app-layout::part(drawer) {
   border-inline-end: 1px solid var(--vadmin-ant-border);
-  width: 13rem;
 }
 
 [data-vadmin-visual-language="ant"] .admin-content-canvas {

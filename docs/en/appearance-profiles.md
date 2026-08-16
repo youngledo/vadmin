@@ -6,7 +6,7 @@ VAdmin has one optional visual-language choice:
 
 | Visual language | Owner | Behavior |
 | --- | --- | --- |
-| `vaadin` | Host configuration | Default. Uses Vaadin Aura and documented Vaadin APIs. |
+| `vaadin` | Host configuration | Default. Uses Vaadin Lumo and documented Vaadin APIs. |
 | `ant` | Host configuration | Explicit Ant Design-inspired alternative implemented by VAdmin. |
 
 Both languages use Vaadin's `ColorScheme` API. Each UI session can select System
@@ -28,22 +28,9 @@ The same value can be supplied through `APP_APPEARANCE_VISUAL_LANGUAGE`. Unknown
 or blank values safely resolve to `vaadin`. The host applies the resolved value
 as `data-vadmin-visual-language` on the UI root.
 
-Aura's official `--aura-base-size` property controls global density. To set it
-from host configuration without introducing VAdmin density aliases, use an
-integer from 12 through 24:
-
-```yaml
-app:
-  appearance:
-    aura-base-size: 16
-```
-
-The equivalent environment variable is `APP_APPEARANCE_AURA_BASE_SIZE`. When
-unset or outside the supported range, VAdmin leaves Aura's default unchanged.
-
 ## Module Boundary
 
-Business modules use Vaadin component variants, Aura and base-style properties,
+Business modules use Vaadin component variants, Lumo and base-style properties,
 and the shared Flow page patterns. They must not add a VAdmin global stylesheet,
 register a global stylesheet, modify global theme properties, or depend on Ant-only
 selectors or `--vadmin-ant-*` tokens.

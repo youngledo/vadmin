@@ -6,7 +6,7 @@ VAdmin 只有一个可选的视觉语言维度：
 
 | 视觉语言 | 所有者 | 行为 |
 | --- | --- | --- |
-| `vaadin` | 宿主应用配置 | 默认值，直接使用 Vaadin Aura 与官方 API。 |
+| `vaadin` | 宿主应用配置 | 默认值，直接使用 Vaadin Lumo 与官方 API。 |
 | `ant` | 宿主应用配置 | VAdmin 实现的、受 Ant Design 启发的显式替代方案。 |
 
 两种语言都使用 Vaadin 的 `ColorScheme` API。每个 UI session 都可选择跟随系统、浅色或深色。
@@ -27,21 +27,9 @@ app:
 `vaadin`。宿主会将解析后的值设置为 UI 根节点的
 `data-vadmin-visual-language` 属性。
 
-Aura 的官方 `--aura-base-size` 属性控制全局密度。若需要通过宿主配置设置它，请直接传入
-12 到 24 的整数，不引入 VAdmin 密度别名：
-
-```yaml
-app:
-  appearance:
-    aura-base-size: 16
-```
-
-对应的环境变量为 `APP_APPEARANCE_AURA_BASE_SIZE`。未设置或超出支持范围时，VAdmin 保持
-Aura 默认值。
-
 ## 模块边界
 
-业务模块使用 Vaadin 组件 variant、Aura 和基础样式属性，以及共享 Flow 页面模式。模块不得导入
+业务模块使用 Vaadin 组件 variant、Lumo 和基础样式属性，以及共享 Flow 页面模式。模块不得导入
 VAdmin 全局样式表、修改全局主题属性，或依赖 Ant 专用选择器及
 `--vadmin-ant-*` token。
 

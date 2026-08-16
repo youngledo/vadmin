@@ -27,9 +27,10 @@ Add the single first-party dependency to a Spring Boot application:
 </dependency>
 ```
 
-Ensure the application's existing `@EnableVaadin` scan includes the Starter UI
-packages. This is Vaadin's route-discovery requirement, not custom shell
-composition:
+The starter registers its default shell package for Vaadin discovery. If the
+application declares `@EnableVaadin` explicitly, that declaration replaces the
+default scan roots. Include the starter UI packages in that case; this is
+Vaadin's route-discovery requirement, not custom shell composition:
 
 ```java
 @EnableVaadin({"com.example.inventory", "io.github.youngledo.vadmin.starter",

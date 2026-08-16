@@ -12,6 +12,7 @@ import java.util.Objects;
 public final class PageToolbar extends VerticalLayout {
     private final HorizontalLayout filters = new HorizontalLayout();
     private final HorizontalLayout actions = new HorizontalLayout();
+    private final HorizontalLayout commandRow = new HorizontalLayout(filters, actions);
     private final Map<Button, Boolean> enabledBeforeBusy = new LinkedHashMap<>();
     private Button resetAction;
     private Button primaryAction;
@@ -20,18 +21,24 @@ public final class PageToolbar extends VerticalLayout {
     public PageToolbar() {
         setWidthFull();
         setPadding(false);
+        setSpacing(false);
         addClassName("admin-page-controls");
-        filters.setWidthFull();
         filters.setPadding(false);
         filters.setSpacing(true);
         filters.setWrap(true);
         filters.setAlignItems(Alignment.END);
-        actions.setWidthFull();
         actions.setPadding(false);
         actions.setSpacing(true);
         actions.setWrap(true);
         actions.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
-        add(filters, actions);
+        actions.setAlignItems(Alignment.END);
+        commandRow.setWidthFull();
+        commandRow.setPadding(false);
+        commandRow.setSpacing(true);
+        commandRow.setWrap(true);
+        commandRow.setAlignItems(Alignment.END);
+        commandRow.setFlexGrow(1, filters);
+        add(commandRow);
     }
 
     public HorizontalLayout getFilters() {

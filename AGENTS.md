@@ -10,7 +10,7 @@
 
 ## Theme Governance
 
-- The default `vaadin` visual language uses Vaadin Aura as-is. VAdmin must not
+- The default `vaadin` visual language uses Vaadin Lumo as-is. VAdmin must not
   ship or register CSS that changes its visual appearance; compose the shell
   with documented Vaadin component APIs instead.
 - The product-owned shell may set a documented Vaadin component custom
@@ -21,8 +21,7 @@
   color schemes. Do not implement color schemes by mutating the `theme` HTML
   attribute or by duplicating light and dark component rules.
 - Do not introduce VAdmin color, radius, spacing, density, control, or
-  notification token systems in the default visual language. An application
-  may set the official Aura `--aura-base-size` property directly.
+  notification token systems in the default visual language.
 - The optional `ant` visual language is the only place that may define
   VAdmin-owned visual tokens or use targeted `::part()` overrides to reproduce
   Ant Design behavior. Keep every such selector scoped by

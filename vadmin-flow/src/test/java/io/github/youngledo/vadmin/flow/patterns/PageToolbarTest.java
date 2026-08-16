@@ -10,13 +10,14 @@ import org.junit.jupiter.api.Test;
 class PageToolbarTest {
 
     @Test
-    void composesFiltersAndActionsAsFullWidthResponsiveRows() {
+    void composesFiltersAndActionsInOneResponsiveCommandRow() {
         var toolbar = new PageToolbar();
 
         assertThat(toolbar.getFilters().isWrap()).isTrue();
         assertThat(toolbar.getActions().isWrap()).isTrue();
-        assertThat(toolbar.getFilters().getWidth()).isEqualTo("100%");
-        assertThat(toolbar.getActions().getWidth()).isEqualTo("100%");
+        assertThat(toolbar.getFilters().getWidth()).isNull();
+        assertThat(toolbar.getActions().getWidth()).isNull();
+        assertThat(toolbar.getChildren()).hasSize(1);
         assertThat(toolbar.getActions().getJustifyContentMode())
                 .isEqualTo(HorizontalLayout.JustifyContentMode.END);
     }

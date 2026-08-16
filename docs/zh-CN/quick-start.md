@@ -25,8 +25,8 @@ VAdmin 的发布坐标为 `io.github.youngledo:vadmin-spring-boot-starter`。
 </dependency>
 ```
 
-确保应用已有的 `@EnableVaadin` 扫描包含 Starter 的 UI 包。这是 Vaadin 的路由发现要求，
-不是自行组装外壳：
+Starter 会自动登记默认外壳包供 Vaadin 发现。若应用显式声明了 `@EnableVaadin`，该声明会覆盖
+默认扫描根，此时应将 Starter 的 UI 包加入扫描范围。这是 Vaadin 的路由发现要求，不是自行组装外壳：
 
 ```java
 @EnableVaadin({"com.example.inventory", "io.github.youngledo.vadmin.starter",

@@ -5,6 +5,7 @@ import static org.mockito.Answers.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.di.Instantiator;
@@ -62,6 +63,7 @@ class LoginViewTest {
         assertThat(externalEntry.hasAttribute("router-ignore")).isTrue();
         assertThat(externalEntry.getText()).isEqualTo("Continue with single sign-on");
         assertThat(view.getChildren()).anyMatch(LoginOverlay.class::isInstance);
+        assertThat(LoginView.class.getAnnotation(com.vaadin.flow.router.Route.class).autoLayout()).isFalse();
     }
 
     @Test
@@ -87,9 +89,7 @@ class LoginViewTest {
         var view = new LoginView(new OidcLoginAvailability(false, "oidc"), localLoginAuthenticator);
 
         assertThat(loginOverlay(view).getElement().getChildren()).noneMatch(element -> "a".equals(element.getTag()));
-        assertThat(view.getChildren().filter(LoginOverlay.class::isInstance))
-                .singleElement()
-                .isInstanceOfSatisfying(LoginOverlay.class, login -> assertThat(login.getAction()).isEmpty());
+        assertThat(loginOverlay(view).getAction()).isEmpty();
     }
 
     @Test
@@ -100,9 +100,7 @@ class LoginViewTest {
 
         view.beforeEnter(event);
 
-        assertThat(view.getChildren().filter(LoginOverlay.class::isInstance))
-                .singleElement()
-                .isInstanceOfSatisfying(LoginOverlay.class, login -> assertThat(login.isError()).isTrue());
+        assertThat(loginOverlay(view).isError()).isTrue();
     }
 
     private static LoginOverlay loginOverlay(LoginView view) {

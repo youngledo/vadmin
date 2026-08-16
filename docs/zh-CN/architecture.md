@@ -61,9 +61,9 @@ Flow View 类型和两套消息资源包。启动时，`vadmin-spring-flow` 校�
 
 ## 默认体验与视觉语言
 
-默认 `vaadin` 语言以 Vaadin Aura 的原生组件外观为准。VAdmin 可以通过 `AppLayout`、
+默认 `vaadin` 语言以 Vaadin Lumo 的原生组件外观为准。VAdmin 可以通过 `AppLayout`、
 `SideNav`、`MenuBar`、`Avatar`、`Notification` 及 Flow 布局组件的公开 API 组合完整的后台
-体验，但不得注册改变 Aura 外观的全局 CSS、组件 `part` 覆写，或自建颜色、圆角、间距、密度和
+体验，但不得注册改变 Lumo 外观的全局 CSS、组件 `part` 覆写，或自建颜色、圆角、间距、密度和
 通知 token。结构组合与重造视觉样式是两个不同的职责。
 
 显式 `ant` 语言拥有其自身作用域内的 CSS 覆写，以复现 Ant Design 风格。模块使用共享 Flow

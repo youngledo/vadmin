@@ -75,10 +75,10 @@ experience, while the use-case check is the authoritative boundary.
 
 ## Default Experience And Visual Languages
 
-The default `vaadin` language preserves the native Vaadin Aura appearance.
+The default `vaadin` language preserves the native Vaadin Lumo appearance.
 VAdmin may compose a complete administration experience through public APIs on
 `AppLayout`, `SideNav`, `MenuBar`, `Avatar`, `Notification`, and Flow layout
-components. It must not register global CSS that changes Aura's appearance,
+components. It must not register global CSS that changes Lumo's appearance,
 override component `part`s, or introduce color, radius, spacing, density, or
 notification token systems. Structural composition and recreating a visual
 language are different responsibilities.

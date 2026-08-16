@@ -2,7 +2,7 @@ package io.github.youngledo.vadmin.flow.patterns;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -13,7 +13,7 @@ public final class PageHeader extends VerticalLayout implements LocaleChangeObse
     private final String titleKey;
     private final String descriptionKey;
     private final boolean translated;
-    private final H1 title = new H1();
+    private final H2 title = new H2();
     private final Paragraph description = new Paragraph();
     private final VerticalLayout location = new VerticalLayout();
     private final HorizontalLayout actions = new HorizontalLayout();

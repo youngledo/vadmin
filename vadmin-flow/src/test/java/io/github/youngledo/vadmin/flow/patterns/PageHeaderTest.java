@@ -22,5 +22,6 @@ class PageHeaderTest {
         assertThat(header.getActions().getChildren()).contains(create);
         assertThat(header.getClassNames()).contains("admin-page-header");
         assertThat(header.isSpacing()).isTrue();
+        assertThat(header.getElement().getOuterHTML()).contains("<h2>Users</h2>");
     }
 }
