@@ -17,6 +17,8 @@ class DefaultShellTranslationTest {
                 .contains("new Popover()")
                 .contains("--vaadin-app-layout-drawer-width")
                 .contains("navigation.setWidthFull()")
+                .contains("drawer.setPadding(false)")
+                .contains("header.setPadding(false)")
                 .doesNotContain("new MenuBar()");
         assertThat(home).contains("getTranslation(page.titleKey())").contains("getTranslation(page.intentKey())");
     }

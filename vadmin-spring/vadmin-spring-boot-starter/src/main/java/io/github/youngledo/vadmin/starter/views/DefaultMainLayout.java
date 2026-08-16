@@ -102,7 +102,7 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
         updateHeaderText();
         addHeader(createNavigation(brand), createUtilityControls());
 
-        drawer.setPadding(true);
+        drawer.setPadding(false);
         drawer.setSpacing(true);
         drawer.setWidthFull();
         drawer.setAlignItems(VerticalLayout.Alignment.STRETCH);
@@ -130,7 +130,8 @@ public final class DefaultMainLayout extends AppLayout implements LocaleChangeOb
     private void addHeader(Component... components) {
         var header = new HorizontalLayout(components);
         header.setWidthFull();
-        header.setPadding(true);
+        // AppLayout supplies the native Aura navbar inset; avoid applying it a second time.
+        header.setPadding(false);
         header.setSpacing(true);
         header.setAlignItems(HorizontalLayout.Alignment.CENTER);
         header.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
