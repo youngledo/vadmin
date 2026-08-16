@@ -107,8 +107,7 @@ class BrowserE2EIT {
         PlaywrightBrowserSupport.clickThroughInjectedOverlay(page.getByLabel("Appearance"));
         PlaywrightBrowserSupport.clickThroughInjectedOverlay(
                 page.getByText("Dark mode", new Page.GetByTextOptions().setExact(true)));
-        org.assertj.core.api.Assertions.assertThat((String) page.locator("html")
-                .evaluate("element => getComputedStyle(element).colorScheme")).isEqualTo("dark");
+        page.waitForFunction("() => document.documentElement.style.colorScheme === 'dark'");
     }
 
     @Test
