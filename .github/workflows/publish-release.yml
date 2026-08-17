@@ -237,6 +237,46 @@ jobs:
             central-deploy.log
           if-no-files-found: error
 
+      - name: Generate GitHub Release notes
+        id: release_notes
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          notes_file="${RUNNER_TEMP}/github-release-notes.md"
+          previous_tag="$(git tag --merged HEAD --list 'v*' --sort=-version:refname | while IFS= read -r candidate; do
+            if [[ "${candidate}" != "${RELEASE_TAG}" ]]; then
+              printf '%s\n' "${candidate}"
+              break
+            fi
+          done)"
+
+          {
+            printf '# VAdmin %s\n\n' "${RELEASE_VERSION}"
+            echo '## Changes'
+            if [[ -n "${previous_tag}" ]]; then
+              git log --no-merges \
+                --format="- %s ([%h](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H))" \
+                "${previous_tag}..HEAD"
+            else
+              git log --no-merges \
+                --format="- %s ([%h](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H))"
+            fi
+            echo
+            echo '## Full Changelog'
+            if [[ -n "${previous_tag}" ]]; then
+              printf '[%s...%s](%s/%s/compare/%s...%s)\n' \
+                "${previous_tag}" "${RELEASE_TAG}" "${GITHUB_SERVER_URL}" "${GITHUB_REPOSITORY}" \
+                "${previous_tag}" "${RELEASE_TAG}"
+            else
+              printf '[View source](%s/%s/tree/%s)\n' \
+                "${GITHUB_SERVER_URL}" "${GITHUB_REPOSITORY}" "${RELEASE_TAG}"
+            fi
+          } > "${notes_file}"
+          echo "path=${notes_file}" >> "${GITHUB_OUTPUT}"
+
       - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -247,9 +287,11 @@ jobs:
 
           if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" \
-              --title "VAdmin ${RELEASE_VERSION}" --draft=false --prerelease=false
+              --title "VAdmin ${RELEASE_VERSION}" --draft=false --prerelease=false \
+              --notes-file "${{ steps.release_notes.outputs.path }}"
             exit 0
           fi
 
-          gh release create "${RELEASE_TAG}" --verify-tag --generate-notes \
-            --repo "${GITHUB_REPOSITORY}" --title "VAdmin ${RELEASE_VERSION}"
+          gh release create "${RELEASE_TAG}" --verify-tag \
+            --repo "${GITHUB_REPOSITORY}" --title "VAdmin ${RELEASE_VERSION}" \
+            --notes-file "${{ steps.release_notes.outputs.path }}"
