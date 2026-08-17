@@ -6,7 +6,14 @@ RUN apt-get update \
 
 WORKDIR /workspace
 COPY . .
-RUN ./mvnw -B -ntp -Pproduction -pl vadmin-reference-app -am package -DskipTests
+RUN ./mvnw -B -ntp -Pproduction -pl vadmin-reference-app -am package -DskipTests \
+    && app_jar="$(find vadmin-reference-app/target -maxdepth 1 -type f \
+        -name 'vadmin-reference-app-*.jar' \
+        ! -name '*-sources.jar' \
+        ! -name '*-javadoc.jar' \
+        -print -quit)" \
+    && test -n "${app_jar}" \
+    && cp "${app_jar}" /workspace/app.jar
 
 FROM eclipse-temurin:25-jre
 
@@ -14,8 +21,7 @@ RUN groupadd --gid 10001 appgroup \
     && useradd --uid 10001 --gid appgroup --create-home --home-dir /app appuser
 
 WORKDIR /app
-COPY --from=build --chown=appuser:appgroup \
-    /workspace/vadmin-reference-app/target/vadmin-reference-app-0.1.1-SNAPSHOT.jar /app/app.jar
+COPY --from=build --chown=appuser:appgroup /workspace/app.jar /app/app.jar
 
 USER appuser
 ENV SPRING_PROFILES_ACTIVE=prod
