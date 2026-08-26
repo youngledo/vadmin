@@ -24,4 +24,19 @@ class CompactDataItemTest {
         assertThat(item.getActions().getChildren()).containsExactly(details);
         assertThat(item.getActions().isVisible()).isTrue();
     }
+
+    @Test
+    void hidesRowActionsWhileTheWorkspaceIsSelectingItems() {
+        var item = new CompactDataItem("admin");
+        item.addActions(new Button("Details"));
+
+        item.setSelectionMode(true);
+
+        assertThat(item.isSelectionMode()).isTrue();
+        assertThat(item.getActions().isVisible()).isFalse();
+
+        item.setSelectionMode(false);
+
+        assertThat(item.getActions().isVisible()).isTrue();
+    }
 }

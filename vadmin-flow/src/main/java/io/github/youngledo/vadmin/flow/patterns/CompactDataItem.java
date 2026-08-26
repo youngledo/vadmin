@@ -14,6 +14,7 @@ public final class CompactDataItem extends VerticalLayout {
     private final Span status = new Span();
     private final HorizontalLayout metadata = new HorizontalLayout();
     private final HorizontalLayout actions = new HorizontalLayout();
+    private boolean selectionMode;
 
     public CompactDataItem(String primaryText) {
         this.primaryText.setText(Objects.requireNonNull(primaryText));
@@ -80,7 +81,17 @@ public final class CompactDataItem extends VerticalLayout {
 
     public void addActions(Component... commands) {
         actions.add(commands);
-        actions.setVisible(actions.getComponentCount() > 0);
+        updateActionsVisibility();
+    }
+
+    /** Hides row-level commands while the containing workspace is selecting entities. */
+    public void setSelectionMode(boolean selectionMode) {
+        this.selectionMode = selectionMode;
+        updateActionsVisibility();
+    }
+
+    public boolean isSelectionMode() {
+        return selectionMode;
     }
 
     public HorizontalLayout getMetadata() {
@@ -89,5 +100,9 @@ public final class CompactDataItem extends VerticalLayout {
 
     public HorizontalLayout getActions() {
         return actions;
+    }
+
+    private void updateActionsVisibility() {
+        actions.setVisible(actions.getComponentCount() > 0 && !selectionMode);
     }
 }

@@ -3,8 +3,10 @@ package io.github.youngledo.vadmin.flow.patterns;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +21,10 @@ class DataWorkspaceTest {
 
         assertThat(MessageFormat.format(translations.getString("flow.workspace.selected"), 2))
                 .isEqualTo("已选择 2 项");
+        assertThat(translations.getString("flow.workspace.select")).isEqualTo("选择");
+        assertThat(translations.getString("flow.workspace.cancel-selection")).isEqualTo("取消选择");
+        assertThat(MessageFormat.format(translations.getString("flow.workspace.select-item"), "admin"))
+                .isEqualTo("选择 admin");
     }
 
     @Test
@@ -243,6 +249,105 @@ class DataWorkspaceTest {
 
         assertThat(grid.isVisible()).isTrue();
         assertThat(workspace.getCompactList().isVisible()).isFalse();
+    }
+
+    @Test
+    void entersExplicitCompactSelectionAndSynchronizesCheckboxesWithTheGrid() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(item -> {
+            var compactItem = new CompactDataItem(item.name());
+            compactItem.addActions(new Button("Details"));
+            return compactItem;
+        }, Row::name);
+        workspace.addBulkAction(new Button("Disable"));
+        workspace.setItems(List.of(row));
+        workspace.applyViewportWidth(390);
+
+        workspace.compactSelectionTrigger().click();
+
+        assertThat(workspace.isCompactSelectionMode()).isTrue();
+        assertThat(workspace.isSelectionBarVisible()).isTrue();
+        assertThat(workspace.compactSelectionTrigger().isVisible()).isFalse();
+        assertThat(workspace.compactSelectionCancel().isVisible()).isTrue();
+        assertThat(workspace.selectionBar().getStyle().get("position")).isEqualTo("sticky");
+        assertThat(workspace.selectionBar().getStyle().get("bottom")).isEqualTo("0");
+
+        var selectableItem = (HorizontalLayout) workspace.renderCompactItem(row);
+        var checkbox = (Checkbox) selectableItem.getComponentAt(0);
+        var compactItem = (CompactDataItem) selectableItem.getComponentAt(1);
+        assertThat(checkbox.getAriaLabel()).hasValue("Select Ada");
+        assertThat(checkbox.getValue()).isFalse();
+        assertThat(compactItem.isSelectionMode()).isTrue();
+        assertThat(compactItem.getActions().isVisible()).isFalse();
+
+        checkbox.setValue(true);
+
+        assertThat(grid.getSelectedItems()).containsExactly(row);
+        assertThat(workspace.getSelectedItemCount()).isOne();
+        assertThat(((Button) workspace.getBulkActions().getComponentAt(0)).isEnabled()).isTrue();
+    }
+
+    @Test
+    void cancellingCompactSelectionClearsTheGridAndRestoresDefaultPresentation() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(item -> new CompactDataItem(item.name()), Row::name);
+        workspace.addBulkAction(new Button("Disable"));
+        workspace.setItems(List.of(row));
+        workspace.applyViewportWidth(390);
+        workspace.setCompactSelectionMode(true);
+        grid.select(row);
+
+        workspace.compactSelectionCancel().click();
+
+        assertThat(workspace.isCompactSelectionMode()).isFalse();
+        assertThat(grid.getSelectedItems()).isEmpty();
+        assertThat(workspace.isSelectionBarVisible()).isFalse();
+        assertThat(workspace.compactSelectionTrigger().isVisible()).isTrue();
+        assertThat(workspace.selectionBar().getStyle().get("position")).isNull();
+        assertThat(workspace.renderCompactItem(row)).isInstanceOf(CompactDataItem.class);
+    }
+
+    @Test
+    void doesNotOfferCompactSelectionWithoutBulkActionsOrGridSelection() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
+        var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(item -> new CompactDataItem(item.name()), Row::name);
+        workspace.applyViewportWidth(390);
+
+        workspace.setCompactSelectionMode(true);
+
+        assertThat(workspace.isCompactSelectionMode()).isFalse();
+        assertThat(workspace.compactSelectionTrigger().isVisible()).isFalse();
+    }
+
+    @Test
+    void leavingTheCompactBreakpointRestoresOrdinaryCompactItems() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var row = new Row("Ada");
+        var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(item -> new CompactDataItem(item.name()), Row::name);
+        workspace.addBulkAction(new Button("Disable"));
+        workspace.applyViewportWidth(390);
+        workspace.setCompactSelectionMode(true);
+
+        workspace.applyViewportWidth(DataWorkspace.COMPACT_BREAKPOINT + 1);
+
+        assertThat(workspace.isCompactSelectionMode()).isFalse();
+        assertThat(workspace.selectionBar().getStyle().get("position")).isNull();
+        assertThat(workspace.renderCompactItem(row)).isInstanceOf(CompactDataItem.class);
+
+        workspace.applyViewportWidth(390);
+
+        assertThat(workspace.isCompactSelectionMode()).isFalse();
+        assertThat(workspace.renderCompactItem(row)).isInstanceOf(CompactDataItem.class);
     }
 
     private record Row(String name) { }
