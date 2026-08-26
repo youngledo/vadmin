@@ -17,3 +17,4 @@ vadmin-reference-app/types.d.ts
 vadmin-reference-app/vite.config.ts
 vadmin-reference-app/vite.generated.ts
 data/
+graphify-out/

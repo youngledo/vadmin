@@ -1,6 +1,7 @@
 package io.github.youngledo.vadmin.starter.views;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
@@ -12,6 +13,7 @@ import io.github.youngledo.vadmin.contracts.auth.CurrentUserProvider;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCatalog;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 import io.github.youngledo.vadmin.flow.patterns.AdminPageFrame;
+import io.github.youngledo.vadmin.flow.patterns.CompactDataItem;
 import io.github.youngledo.vadmin.flow.patterns.DataWorkspace;
 import io.github.youngledo.vadmin.flow.patterns.DetailDialog;
 import io.github.youngledo.vadmin.flow.patterns.EditorDialog;
@@ -50,20 +52,19 @@ public final class RolesView extends PermissionProtectedView implements LocaleCh
         actionsColumn = grid.addComponentColumn(this::detailsAction).setAutoWidth(true);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
-        pages = new PagedGrid<>(grid, queries::roles, "code");
-
-        grantAction = new Button();
-        grantAction.addClickListener(event -> grantDialog(queries, catalog, grants, pages, new OperationFeedback()).open());
-        grantAction.setVisible(authorization.hasPermission(requireCurrentUser(), GRANT));
-
         var header = PageHeader.translated("system.roles.title", "system.roles.intent");
-        var toolbar = new PageToolbar();
-        toolbar.getElement().setAttribute("data-testid", "roles-toolbar");
-        toolbar.setPrimaryAction(grantAction);
         var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(this::compactItem, AdministrationQueryService.RoleRow::code);
+        pages = new PagedGrid<>(workspace, queries::roles, "code");
         workspace.setSelectionBarVisible(false);
         workspace.getElement().setAttribute("data-testid", "roles-workspace");
         workspace.setFooter(pages.getPaginationBar());
+        grantAction = new Button();
+        grantAction.addClickListener(event -> grantDialog(queries, catalog, grants, pages, new OperationFeedback()).open());
+        grantAction.setVisible(authorization.hasPermission(requireCurrentUser(), GRANT));
+        var toolbar = new PageToolbar();
+        toolbar.getElement().setAttribute("data-testid", "roles-toolbar");
+        toolbar.setPrimaryAction(grantAction);
 
         var frame = new AdminPageFrame(header, toolbar, workspace);
         add(frame);
@@ -76,6 +77,16 @@ public final class RolesView extends PermissionProtectedView implements LocaleCh
         details.setTooltipText(getTranslation("system.roles.details"));
         details.setAriaLabel(getTranslation("system.roles.details-aria", role.code()));
         return details;
+    }
+
+    private CompactDataItem compactItem(AdministrationQueryService.RoleRow role) {
+        var item = new CompactDataItem(role.code());
+        item.addMetadata(getTranslation("system.roles.permission-count"), Long.toString(role.permissionCount()));
+        var details = new Button(getTranslation("system.roles.details"), AdminIcon.of(AdminIconName.EYE),
+                event -> showDetails(role));
+        details.addThemeVariants(ButtonVariant.TERTIARY);
+        item.addActions(details);
+        return item;
     }
 
     private void showDetails(AdministrationQueryService.RoleRow role) {

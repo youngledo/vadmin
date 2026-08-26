@@ -3,6 +3,7 @@ package io.github.youngledo.vadmin.flow.patterns;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.Query;
 import io.github.youngledo.vadmin.contracts.navigation.PagedQuery;
 import io.github.youngledo.vadmin.contracts.navigation.PagedResult;
 import java.util.ArrayList;
@@ -87,6 +88,19 @@ class PagedGridTest {
         assertThat(observed).containsExactly(
                 new PagedQuery(0, 50, "name", true, java.util.Map.of()),
                 new PagedQuery(0, 50, "name", true, java.util.Map.of()));
+    }
+
+    @Test
+    void suppliesTheSameServerPageToResponsiveWorkspacePresentations() {
+        var workspace = new DataWorkspace<>(new Grid<Row>(Row.class, false));
+        workspace.setCompactItemRenderer(row -> new CompactDataItem(row.name()), Row::name);
+
+        new PagedGrid<>(workspace, query ->
+                new PagedResult<>(List.of(new Row("Ada"), new Row("Lin")), 2), "name");
+
+        assertThat(workspace.getCompactList().getDataProvider().fetch(new Query<>()).toList())
+                .extracting(Row::name)
+                .containsExactly("Ada", "Lin");
     }
 
     private static List<Row> rowsFor(PagedQuery query) {

@@ -1,6 +1,7 @@
 package io.github.youngledo.vadmin.starter.views;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -18,6 +19,7 @@ import io.github.youngledo.vadmin.contracts.error.BusinessFailure;
 import io.github.youngledo.vadmin.flow.patterns.AdminPageFrame;
 import io.github.youngledo.vadmin.flow.patterns.DataWorkspace;
 import io.github.youngledo.vadmin.flow.patterns.ConfirmationDialog;
+import io.github.youngledo.vadmin.flow.patterns.CompactDataItem;
 import io.github.youngledo.vadmin.flow.patterns.DetailDialog;
 import io.github.youngledo.vadmin.flow.patterns.EditorDialog;
 import io.github.youngledo.vadmin.flow.patterns.OperationFeedback;
@@ -69,9 +71,6 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
         actionsColumn = grid.addComponentColumn(user -> action(user, authorization));
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.setSizeFull();
-        pages = new PagedGrid<>(grid, queries::users, () -> Map.of("q", filter.getValue()), "username");
-        filter.addValueChangeListener(event -> pages.refresh());
-
         var header = PageHeader.translated("system.users.title", "system.users.intent");
         var toolbar = new PageToolbar();
         toolbar.getElement().setAttribute("data-testid", "users-toolbar");
@@ -81,6 +80,10 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
         toolbar.setPrimaryAction(createAction);
 
         var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(user -> compactItem(user, authorization),
+                AdministrationQueryService.UserRow::username);
+        pages = new PagedGrid<>(workspace, queries::users, () -> Map.of("q", filter.getValue()), "username");
+        filter.addValueChangeListener(event -> pages.refresh());
         workspace.getElement().setAttribute("data-testid", "users-workspace");
         workspace.setFooter(pages.getPaginationBar());
         enableSelectedAction = bulkAction(AdminIconName.PLAY, true, authorization);
@@ -114,6 +117,25 @@ public final class UsersView extends PermissionProtectedView implements LocaleCh
         actions.setPadding(false);
         actions.setSpacing(true);
         return actions;
+    }
+
+    private CompactDataItem compactItem(AdministrationQueryService.UserRow user,
+                                        AuthorizationService authorization) {
+        var item = new CompactDataItem(user.username());
+        item.setStatus(getTranslation(user.enabled() ? "system.users.enabled" : "system.users.disabled"));
+        item.addMetadata(getTranslation("system.users.auth-version"), Long.toString(user.authVersion()));
+
+        var details = new Button(getTranslation("system.users.details"), AdminIcon.of(AdminIconName.EYE),
+                event -> showDetails(user));
+        details.addThemeVariants(ButtonVariant.TERTIARY);
+        var statusKey = user.enabled() ? "system.users.disable" : "system.users.enable";
+        var statusChange = new Button(getTranslation(statusKey),
+                AdminIcon.of(user.enabled() ? AdminIconName.PAUSE : AdminIconName.PLAY),
+                event -> confirmStatusChange(Set.of(user.id()), user.enabled()));
+        statusChange.addThemeVariants(ButtonVariant.TERTIARY);
+        statusChange.setVisible(authorization.hasPermission(requireCurrentUser(), UPDATE));
+        item.addActions(details, statusChange);
+        return item;
     }
 
     private Button bulkAction(AdminIconName icon, boolean enabled, AuthorizationService authorization) {

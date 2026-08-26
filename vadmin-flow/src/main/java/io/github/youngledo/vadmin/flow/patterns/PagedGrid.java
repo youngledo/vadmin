@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Binds a Grid and pager to one server-side page at a time using the shared paging contract. */
+/** Binds a data workspace and pager to one server-side page at a time. */
 public final class PagedGrid<T> {
     @FunctionalInterface
     public interface PageLoader<T> {
@@ -18,6 +19,7 @@ public final class PagedGrid<T> {
     }
 
     private final Grid<T> grid;
+    private final Consumer<List<T>> itemsTarget;
     private final PageLoader<T> loader;
     private final Supplier<Map<String, String>> filters;
     private final String defaultSortField;
@@ -29,12 +31,27 @@ public final class PagedGrid<T> {
     private boolean ascending = true;
 
     public PagedGrid(Grid<T> grid, PageLoader<T> loader, String defaultSortField) {
-        this(grid, loader, () -> Map.of(), defaultSortField);
+        this(grid, grid::setItems, loader, () -> Map.of(), defaultSortField);
     }
 
     public PagedGrid(Grid<T> grid, PageLoader<T> loader, Supplier<Map<String, String>> filters,
                      String defaultSortField) {
+        this(grid, grid::setItems, loader, filters, defaultSortField);
+    }
+
+    public PagedGrid(DataWorkspace<T> workspace, PageLoader<T> loader, String defaultSortField) {
+        this(workspace, loader, () -> Map.of(), defaultSortField);
+    }
+
+    public PagedGrid(DataWorkspace<T> workspace, PageLoader<T> loader, Supplier<Map<String, String>> filters,
+                     String defaultSortField) {
+        this(Objects.requireNonNull(workspace).getGrid(), workspace::setItems, loader, filters, defaultSortField);
+    }
+
+    private PagedGrid(Grid<T> grid, Consumer<List<T>> itemsTarget,
+                      PageLoader<T> loader, Supplier<Map<String, String>> filters, String defaultSortField) {
         this.grid = Objects.requireNonNull(grid);
+        this.itemsTarget = Objects.requireNonNull(itemsTarget);
         this.loader = Objects.requireNonNull(loader);
         this.filters = Objects.requireNonNull(filters);
         this.defaultSortField = Objects.requireNonNull(defaultSortField);
@@ -81,7 +98,7 @@ public final class PagedGrid<T> {
             currentResult = load(queryForCurrentPage());
             pageCount = pageCount(currentResult.total());
         }
-        grid.setItems(currentResult.items());
+        itemsTarget.accept(currentResult.items());
         paginationBar.setPage(currentPage, pageCount, currentResult.total());
     }
 

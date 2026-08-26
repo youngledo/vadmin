@@ -9,6 +9,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.shared.Registration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +23,8 @@ import java.util.function.BooleanSupplier;
 
 /** A grid frame with selection-aware bulk actions and explicit data presentation states. */
 public final class DataWorkspace<T> extends VerticalLayout implements LocaleChangeObserver {
+    static final int COMPACT_BREAKPOINT = 640;
+
     public enum State { READY, BUSY, EMPTY, FAILURE }
 
     private final Grid<T> grid;
@@ -26,12 +32,17 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
     private final HorizontalLayout bulkActions = new HorizontalLayout();
     private final HorizontalLayout selectionBar = new HorizontalLayout(selectionSummary, bulkActions);
     private final Div status = new Div();
+    private final VirtualList<T> compactList = new VirtualList<>();
     private final List<Button> selectionActions = new ArrayList<>();
     private final Map<Button, BooleanSupplier> actionEligibility = new LinkedHashMap<>();
     private Component stateView;
     private Component footer;
     private State state = State.READY;
     private int selectedItemCount;
+    private boolean selectionBarRequested = true;
+    private boolean compactViewConfigured;
+    private boolean compactViewport;
+    private Registration resizeRegistration;
 
     public DataWorkspace(Grid<T> grid) {
         this.grid = Objects.requireNonNull(grid);
@@ -48,10 +59,15 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
         status.getElement().setAttribute("aria-live", "polite");
         status.setVisible(false);
         grid.setSizeFull();
+        compactList.setSizeFull();
+        compactList.setVisible(false);
+        compactList.addClassName("admin-page-compact-list");
         if (grid.getSelectionMode() != Grid.SelectionMode.NONE) {
             grid.addSelectionListener(event -> updateSelection(event.getAllSelectedItems().size()));
         }
-        add(selectionBar, status, grid);
+        addAttachListener(event -> connectResponsivePresentation(event.getUI()));
+        addDetachListener(event -> disconnectResponsivePresentation());
+        add(selectionBar, status, grid, compactList);
         updateSelection(0);
         updateStatePresentation();
     }
@@ -60,10 +76,25 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
         return grid;
     }
 
+    public VirtualList<T> getCompactList() {
+        return compactList;
+    }
+
+    /** Installs the narrow-screen entity renderer while retaining the Grid on wider screens. */
+    public void setCompactItemRenderer(SerializableFunction<T, ? extends Component> renderer,
+                                       SerializableFunction<T, String> accessibleNameGenerator) {
+        Objects.requireNonNull(renderer);
+        compactList.setRenderer(new ComponentRenderer<>(item -> renderer.apply(item)));
+        compactList.setItemAccessibleNameGenerator(Objects.requireNonNull(accessibleNameGenerator));
+        compactViewConfigured = true;
+        updateStatePresentation();
+    }
+
     /** Replaces the workspace data while preserving one consistent presentation state. */
     public void setItems(List<T> items) {
         var values = List.copyOf(Objects.requireNonNull(items));
         grid.setItems(values);
+        compactList.setItems(values);
     }
 
     public State getState() {
@@ -102,7 +133,8 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
 
     /** Shows or hides selection controls for workspaces that support bulk operations. */
     public void setSelectionBarVisible(boolean visible) {
-        selectionBar.setVisible(visible);
+        selectionBarRequested = visible;
+        updateStatePresentation();
     }
 
     public boolean isSelectionBarVisible() {
@@ -179,7 +211,11 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
     private void updateStatePresentation() {
         getElement().setAttribute("data-admin-workspace-state", state.name().toLowerCase(Locale.ROOT));
         status.setVisible(state != State.READY);
-        grid.setVisible(state != State.EMPTY && state != State.FAILURE);
+        var showData = state != State.EMPTY && state != State.FAILURE;
+        var showCompact = compactViewConfigured && compactViewport;
+        grid.setVisible(showData && !showCompact);
+        compactList.setVisible(showData && showCompact);
+        selectionBar.setVisible(selectionBarRequested && !showCompact);
         if (footer != null) {
             footer.setVisible(state == State.READY);
         }
@@ -201,6 +237,32 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
 
     private void updateActionAvailability(Button action, boolean selectionAvailable) {
         action.setEnabled(actionEligibility.get(action).getAsBoolean() && selectionAvailable);
+    }
+
+    void applyViewportWidth(int width) {
+        if (width <= 0) {
+            return;
+        }
+        compactViewport = width <= COMPACT_BREAKPOINT;
+        updateStatePresentation();
+    }
+
+    private void connectResponsivePresentation(com.vaadin.flow.component.UI ui) {
+        disconnectResponsivePresentation();
+        var page = ui.getPage();
+        resizeRegistration = page.addBrowserWindowResizeListener(event -> applyViewportWidth(event.getWidth()));
+        page.getExtendedClientDetails().refresh(details -> {
+            if (isAttached() && getUI().filter(current -> current == ui).isPresent()) {
+                applyViewportWidth(details.getWindowInnerWidth());
+            }
+        });
+    }
+
+    private void disconnectResponsivePresentation() {
+        if (resizeRegistration != null) {
+            resizeRegistration.remove();
+            resizeRegistration = null;
+        }
     }
 
     @Override

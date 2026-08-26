@@ -206,5 +206,44 @@ class DataWorkspaceTest {
         assertThat(workspace.getSelectionSummary()).isEqualTo("0 selected");
     }
 
+    @Test
+    void switchesToTheConfiguredCompactListAtTheSharedBreakpoint() {
+        var grid = new Grid<Row>(Row.class, false);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(row -> new CompactDataItem(row.name()), Row::name);
+
+        workspace.applyViewportWidth(DataWorkspace.COMPACT_BREAKPOINT);
+
+        assertThat(grid.isVisible()).isFalse();
+        assertThat(workspace.getCompactList().isVisible()).isTrue();
+        assertThat(workspace.isSelectionBarVisible()).isFalse();
+        assertThat(workspace.getCompactList().getItemAccessibleNameGenerator().apply(new Row("Ada")))
+                .isEqualTo("Ada");
+
+        workspace.showEmpty(new EmptyState("No users", "Create a user to begin."));
+        assertThat(workspace.getCompactList().isVisible()).isFalse();
+
+        workspace.showData();
+        assertThat(workspace.getCompactList().isVisible()).isTrue();
+
+        workspace.applyViewportWidth(DataWorkspace.COMPACT_BREAKPOINT + 1);
+
+        assertThat(grid.isVisible()).isTrue();
+        assertThat(workspace.getCompactList().isVisible()).isFalse();
+        assertThat(workspace.isSelectionBarVisible()).isTrue();
+    }
+
+    @Test
+    void keepsTheGridVisibleWhenNoCompactRendererIsConfigured() {
+        var grid = new Grid<Row>(Row.class, false);
+        var workspace = new DataWorkspace<>(grid);
+
+        workspace.applyViewportWidth(390);
+
+        assertThat(grid.isVisible()).isTrue();
+        assertThat(workspace.getCompactList().isVisible()).isFalse();
+    }
+
     private record Row(String name) { }
 }
