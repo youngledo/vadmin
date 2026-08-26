@@ -4,6 +4,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
@@ -151,6 +152,97 @@ class BrowserE2EIT {
         org.assertj.core.api.Assertions.assertThat(userMenuBounds.x + userMenuBounds.width).isLessThanOrEqualTo(width + 1);
     }
 
+    @Test
+    void narrowUsersWorkspaceSupportsExplicitBulkSelection() {
+        browserContext.close();
+        browserContext = browser.newContext(new Browser.NewContextOptions()
+                .setViewportSize(new ViewportSize(390, 844))
+                .setLocale("zh-CN"));
+        page = browserContext.newPage();
+        page.setDefaultTimeout(10_000);
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        var workspace = page.getByTestId("users-workspace");
+        var compactList = workspace.locator("vaadin-virtual-list");
+        var grid = workspace.locator("vaadin-grid");
+        var selectionBar = workspace.locator(".admin-page-selection-bar");
+        var selectionTrigger = workspace.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("选择").setExact(true));
+        var cancelSelection = workspace.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("取消选择").setExact(true));
+        var detailsAction = compactList.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("查看用户详情").setExact(true));
+        var disableRowAction = compactList.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("停用用户").setExact(true));
+        var adminCheckbox = workspace.getByLabel("选择 admin",
+                new Locator.GetByLabelOptions().setExact(true));
+        var enableSelected = workspace.getByLabel("启用所选用户",
+                new Locator.GetByLabelOptions().setExact(true));
+        var disableSelected = workspace.getByLabel("停用所选用户",
+                new Locator.GetByLabelOptions().setExact(true));
+
+        assertThat(compactList).isVisible();
+        assertThat(grid).not().isVisible();
+        assertThat(selectionTrigger).isVisible();
+        assertThat(detailsAction).isVisible();
+        assertThat(disableRowAction).isVisible();
+        assertThat(adminCheckbox).not().isVisible();
+        assertDocumentDoesNotOverflowHorizontally();
+
+        selectionTrigger.click();
+
+        assertThat(adminCheckbox).isVisible();
+        assertThat(detailsAction).not().isVisible();
+        assertThat(disableRowAction).not().isVisible();
+        assertThat(workspace.getByText("已选择 0 项", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(enableSelected).isDisabled();
+        assertThat(disableSelected).isDisabled();
+        assertThat(cancelSelection).isVisible();
+        org.assertj.core.api.Assertions.assertThat(
+                selectionBar.evaluate("element => getComputedStyle(element).position")).isEqualTo("sticky");
+        org.assertj.core.api.Assertions.assertThat(
+                selectionBar.evaluate("element => getComputedStyle(element).bottom")).isEqualTo("0px");
+        var selectionBarBounds = selectionBar.boundingBox();
+        org.assertj.core.api.Assertions.assertThat(selectionBarBounds).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(selectionBarBounds.y + selectionBarBounds.height)
+                .isLessThanOrEqualTo(845);
+
+        adminCheckbox.check();
+
+        assertThat(workspace.getByText("已选择 1 项", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(enableSelected).isEnabled();
+        assertThat(disableSelected).isEnabled();
+
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(cancelSelection);
+
+        assertThat(adminCheckbox).not().isVisible();
+        assertThat(selectionBar).not().isVisible();
+        assertThat(selectionTrigger).isVisible();
+        assertThat(detailsAction).isVisible();
+        assertThat(disableRowAction).isVisible();
+
+        selectionTrigger.click();
+        assertThat(workspace.getByText("已选择 0 项", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(adminCheckbox).not().isChecked();
+        adminCheckbox.check();
+        page.setViewportSize(641, 844);
+
+        assertThat(grid).isVisible();
+        assertThat(compactList).not().isVisible();
+        org.assertj.core.api.Assertions.assertThat(
+                selectionBar.evaluate("element => getComputedStyle(element).position")).isNotEqualTo("sticky");
+
+        page.setViewportSize(390, 844);
+
+        assertThat(compactList).isVisible();
+        assertThat(grid).not().isVisible();
+        assertThat(selectionTrigger).isVisible();
+        assertThat(adminCheckbox).not().isVisible();
+        assertThat(selectionBar).not().isVisible();
+        assertDocumentDoesNotOverflowHorizontally();
+    }
+
     private void signInAs(String username, String password) {
         page.navigate(baseUrl() + "/login");
         var form = page.locator("vaadin-login-overlay");
@@ -175,6 +267,12 @@ class BrowserE2EIT {
         jdbcTemplate.update("delete from role_permissions where role_id not in (select id from roles where code = 'administrator')");
         jdbcTemplate.update("delete from roles where code <> 'administrator'");
         jdbcTemplate.update("delete from users where username <> 'admin'");
+    }
+
+    private void assertDocumentDoesNotOverflowHorizontally() {
+        var documentWidth = ((Number) page.evaluate("() => document.documentElement.scrollWidth")).doubleValue();
+        var viewportWidth = ((Number) page.evaluate("() => window.innerWidth")).doubleValue();
+        org.assertj.core.api.Assertions.assertThat(documentWidth).isLessThanOrEqualTo(viewportWidth + 1);
     }
 
     private String baseUrl() { return "http://localhost:" + port; }

@@ -65,6 +65,7 @@ public final class DataWorkspace<T> extends VerticalLayout implements LocaleChan
         addClassName("admin-page-workspace");
 
         selectionBar.setWidthFull();
+        selectionBar.addClassName("admin-page-selection-bar");
         selectionBar.setPadding(false);
         selectionBar.setSpacing(true);
         selectionBar.setWrap(true);

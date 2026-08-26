@@ -270,6 +270,7 @@ class DataWorkspaceTest {
 
         assertThat(workspace.isCompactSelectionMode()).isTrue();
         assertThat(workspace.isSelectionBarVisible()).isTrue();
+        assertThat(workspace.selectionBar().hasClassName("admin-page-selection-bar")).isTrue();
         assertThat(workspace.compactSelectionTrigger().isVisible()).isFalse();
         assertThat(workspace.compactSelectionCancel().isVisible()).isTrue();
         assertThat(workspace.selectionBar().getStyle().get("position")).isEqualTo("sticky");
