@@ -5,12 +5,30 @@ import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.DescriptionList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import java.util.Objects;
 
 /** A read-only, responsive dialog for presenting an entity's already-authorized details. */
 public final class DetailDialog extends Dialog implements LocaleChangeObserver {
+    /** One semantic term-description pair in the responsive detail surface. */
+    public static final class DetailField extends DescriptionList {
+        private final Term term;
+        private final Description description;
+
+        private DetailField(String label, String value) {
+            term = new Term(Objects.requireNonNull(label));
+            description = new Description(Objects.requireNonNull(value));
+            getStyle().set("margin", "0");
+            description.getStyle().set("margin-inline-start", "0");
+            description.getStyle().set("overflow-wrap", "anywhere");
+            add(term, description);
+        }
+
+        public String getLabel() { return term.getText(); }
+        public String getValue() { return description.getText(); }
+    }
+
     private final FormLayout form = new FormLayout();
     private final Button closeAction = new Button();
     private final String titleKey;
@@ -35,10 +53,8 @@ public final class DetailDialog extends Dialog implements LocaleChangeObserver {
     }
     public static DetailDialog translated(String titleKey) { return new DetailDialog(titleKey, true); }
     public FormLayout getForm() { return form; }
-    public TextField addField(String label, String value) {
-        var field = new TextField(Objects.requireNonNull(label));
-        field.setValue(Objects.requireNonNull(value));
-        field.setReadOnly(true);
+    public DetailField addField(String label, String value) {
+        var field = new DetailField(label, value);
         form.add(field);
         return field;
     }

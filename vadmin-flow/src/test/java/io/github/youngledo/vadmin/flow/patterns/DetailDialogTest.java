@@ -2,24 +2,27 @@ package io.github.youngledo.vadmin.flow.patterns;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.vaadin.flow.component.html.DescriptionList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.Test;
 
 class DetailDialogTest {
     @Test
-    void composesReadOnlyLabeledFieldsInAResponsiveDetailSurface() {
+    void composesSemanticDescriptionsInAResponsiveDetailSurface() {
         var dialog = new DetailDialog("User details");
 
         var username = dialog.addField("Username", "ada");
         var status = dialog.addField("Status", "Enabled");
 
         assertThat(dialog.getForm().getChildren()).containsExactly(username, status);
-        assertThat(username).isInstanceOf(TextField.class);
+        assertThat(username).isInstanceOf(DescriptionList.class);
+        assertThat(username.getElement().getTag()).isEqualTo("dl");
+        assertThat(username.getElement().getChildren().map(element -> element.getTag()))
+                .containsExactly("dt", "dd");
         assertThat(username.getLabel()).isEqualTo("Username");
         assertThat(username.getValue()).isEqualTo("ada");
-        assertThat(username.isReadOnly()).isTrue();
-        assertThat(status.isReadOnly()).isTrue();
+        assertThat(status.getLabel()).isEqualTo("Status");
+        assertThat(status.getValue()).isEqualTo("Enabled");
     }
 
     @Test

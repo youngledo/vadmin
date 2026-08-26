@@ -5,11 +5,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 class DataWorkspaceTest {
+    @Test
+    void providesALocalizedChineseSelectionSummary() {
+        var translations = ResourceBundle.getBundle("i18n.flow", Locale.SIMPLIFIED_CHINESE);
+
+        assertThat(MessageFormat.format(translations.getString("flow.workspace.selected"), 2))
+                .isEqualTo("已选择 2 项");
+    }
+
     @Test
     void reportsSelectedItemsAndEnablesBulkActionsWhenRowsAreSelected() {
         var grid = new Grid<Row>(Row.class, false);
