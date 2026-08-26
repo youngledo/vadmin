@@ -9,6 +9,7 @@ import io.github.youngledo.vadmin.contracts.auth.AuthorizationService;
 import io.github.youngledo.vadmin.contracts.auth.CurrentUserProvider;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 import io.github.youngledo.vadmin.flow.patterns.AdminPageFrame;
+import io.github.youngledo.vadmin.flow.patterns.CompactDataItem;
 import io.github.youngledo.vadmin.flow.patterns.DataWorkspace;
 import io.github.youngledo.vadmin.flow.patterns.PagedGrid;
 import io.github.youngledo.vadmin.flow.patterns.PageHeader;
@@ -40,16 +41,27 @@ public final class AuditView extends PermissionProtectedView implements LocaleCh
         outcomeColumn = grid.addColumn(AdministrationQueryService.AuditRow::outcome);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
-        pages = new PagedGrid<>(grid, queries::audit, "occurred_at");
         var header = PageHeader.translated("system.audit.title", "system.audit.intent");
         var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(this::compactItem,
+                audit -> audit.action() + " " + audit.targetId());
+        pages = new PagedGrid<>(workspace, queries::audit, "occurred_at");
         workspace.setSelectionBarVisible(false);
-        workspace.getElement().setAttribute("data-testid", "read-only-workspace");
+        workspace.getElement().setAttribute("data-testid", "audit-workspace");
         workspace.setFooter(pages.getPaginationBar());
         var frame = new AdminPageFrame(header, null, workspace);
         add(frame);
         expand(frame);
         updateText();
+    }
+
+    private CompactDataItem compactItem(AdministrationQueryService.AuditRow audit) {
+        var item = new CompactDataItem(audit.action());
+        item.setStatus(audit.outcome());
+        item.addMetadata(getTranslation("system.audit.time"), audit.occurredAt().toString());
+        item.addMetadata(getTranslation("system.audit.target-type"), audit.targetType());
+        item.addMetadata(getTranslation("system.audit.target-id"), audit.targetId());
+        return item;
     }
 
     @Override protected PermissionCode requiredPermission() { return REQUIRED_PERMISSION; }

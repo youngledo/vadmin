@@ -243,6 +243,101 @@ class BrowserE2EIT {
         assertDocumentDoesNotOverflowHorizontally();
     }
 
+    @Test
+    void filteringUsersClearsCompactSelectionForTheNewResultSet() {
+        createUser("analyst", "password", null);
+        browserContext.close();
+        browserContext = browser.newContext(new Browser.NewContextOptions()
+                .setViewportSize(new ViewportSize(390, 844))
+                .setLocale("zh-CN"));
+        page = browserContext.newPage();
+        page.setDefaultTimeout(10_000);
+        signInAs("admin", "change-me");
+        page.navigate(baseUrl() + "/users");
+
+        var workspace = page.getByTestId("users-workspace");
+        var selectionTrigger = workspace.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("选择").setExact(true));
+        var adminCheckbox = workspace.getByLabel("选择 admin",
+                new Locator.GetByLabelOptions().setExact(true));
+        var analystCheckbox = workspace.getByLabel("选择 analyst",
+                new Locator.GetByLabelOptions().setExact(true)).first();
+        var enableSelected = workspace.getByLabel("启用所选用户",
+                new Locator.GetByLabelOptions().setExact(true));
+        var disableSelected = workspace.getByLabel("停用所选用户",
+                new Locator.GetByLabelOptions().setExact(true));
+
+        selectionTrigger.click();
+        adminCheckbox.check();
+        assertThat(workspace.getByText("已选择 1 项", new Locator.GetByTextOptions().setExact(true))).isVisible();
+
+        page.getByLabel("搜索用户", new Page.GetByLabelOptions().setExact(true)).fill("analyst");
+
+        assertThat(adminCheckbox).not().isVisible();
+        assertThat(analystCheckbox).isVisible();
+        assertThat(analystCheckbox).not().isChecked();
+        assertThat(workspace.getByText("已选择 0 项", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(enableSelected).isDisabled();
+        assertThat(disableSelected).isDisabled();
+        assertDocumentDoesNotOverflowHorizontally();
+    }
+
+    @Test
+    void narrowReadOnlyWorkspacesUseCompactServerPages() {
+        createCustomPermissions(51);
+        createAuditEntries();
+        browserContext.close();
+        browserContext = browser.newContext(new Browser.NewContextOptions()
+                .setViewportSize(new ViewportSize(390, 844))
+                .setLocale("zh-CN"));
+        page = browserContext.newPage();
+        page.setDefaultTimeout(10_000);
+        signInAs("admin", "change-me");
+
+        page.navigate(baseUrl() + "/permissions");
+        var permissionsWorkspace = page.getByTestId("permissions-workspace");
+        var permissionsList = permissionsWorkspace.locator("vaadin-virtual-list");
+        var permissionsGrid = permissionsWorkspace.locator("vaadin-grid");
+        var permissionCount = jdbcTemplate.queryForObject("select count(*) from permissions", Long.class);
+        assertThat(permissionsList).isVisible();
+        assertThat(permissionsGrid).not().isVisible();
+        assertThat(permissionsList.getByText("system:audit:read", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(permissionsList.getByText("系统管理", new Locator.GetByTextOptions().setExact(true)).first()).isVisible();
+        assertThat(permissionsWorkspace.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("选择").setExact(true))).not().isVisible();
+        assertThat(permissionsWorkspace.getByText("第 1 / 2 页，共 " + permissionCount + " 条",
+                new Locator.GetByTextOptions().setExact(true))).isVisible();
+        PlaywrightBrowserSupport.clickThroughInjectedOverlay(permissionsWorkspace.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("下一页").setExact(true)));
+        assertThat(permissionsList.getByText("zz:test:permission:050",
+                new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(permissionsWorkspace.getByText("第 2 / 2 页，共 " + permissionCount + " 条",
+                new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertDocumentDoesNotOverflowHorizontally();
+
+        page.navigate(baseUrl() + "/audit");
+        var auditWorkspace = page.getByTestId("audit-workspace");
+        var auditList = auditWorkspace.locator("vaadin-virtual-list");
+        var auditGrid = auditWorkspace.locator("vaadin-grid");
+        assertThat(auditList).isVisible();
+        assertThat(auditGrid).not().isVisible();
+        assertThat(auditList.getByText("user.disable", new Locator.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(auditList.getByText("SUCCESS", new Locator.GetByTextOptions().setExact(true)).first()).isVisible();
+        assertThat(auditList.getByText("对象类型", new Locator.GetByTextOptions().setExact(true)).first()).isVisible();
+        assertThat(auditList.getByText("对象 ID", new Locator.GetByTextOptions().setExact(true)).first()).isVisible();
+        assertThat(auditList.getByText("admin", new Locator.GetByTextOptions().setExact(true)).first()).isVisible();
+        assertThat(auditWorkspace.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName("选择").setExact(true))).not().isVisible();
+        assertDocumentDoesNotOverflowHorizontally();
+
+        page.setViewportSize(641, 844);
+        assertThat(auditGrid).isVisible();
+        assertThat(auditList).not().isVisible();
+        page.setViewportSize(390, 844);
+        assertThat(auditList).isVisible();
+        assertThat(auditGrid).not().isVisible();
+    }
+
     private void signInAs(String username, String password) {
         page.navigate(baseUrl() + "/login");
         var form = page.locator("vaadin-login-overlay");
@@ -261,12 +356,35 @@ class BrowserE2EIT {
         if (roleId != null) jdbcTemplate.update("insert into user_roles (user_id, role_id) values (?, ?)", userId, roleId);
     }
 
+    private void createCustomPermissions(int count) {
+        for (var index = 0; index < count; index++) {
+            jdbcTemplate.update("insert into permissions (id, code, system_managed) values (?, ?, false)",
+                    UUID.randomUUID(), "zz:test:permission:" + String.format("%03d", index));
+        }
+    }
+
+    private void createAuditEntries() {
+        jdbcTemplate.update("""
+                insert into audit_entries
+                    (id, actor_user_id, action_code, target_type, target_id, outcome, occurred_at, correlation_id)
+                values (?, (select id from users where username = 'admin'),
+                    'user.disable', 'user', 'admin', 'SUCCESS', current_timestamp, 'compact-audit-1')
+                """, UUID.randomUUID());
+        jdbcTemplate.update("""
+                insert into audit_entries
+                    (id, actor_user_id, action_code, target_type, target_id, outcome, occurred_at, correlation_id)
+                values (?, (select id from users where username = 'admin'),
+                    'user.enable', 'user', 'admin', 'SUCCESS', current_timestamp - interval '1 minute', 'compact-audit-2')
+                """, UUID.randomUUID());
+    }
+
     private void resetData() {
         jdbcTemplate.update("delete from audit_entries");
         jdbcTemplate.update("delete from user_roles where user_id <> (select id from users where username = 'admin')");
         jdbcTemplate.update("delete from role_permissions where role_id not in (select id from roles where code = 'administrator')");
         jdbcTemplate.update("delete from roles where code <> 'administrator'");
         jdbcTemplate.update("delete from users where username <> 'admin'");
+        jdbcTemplate.update("delete from permissions where system_managed = false");
     }
 
     private void assertDocumentDoesNotOverflowHorizontally() {

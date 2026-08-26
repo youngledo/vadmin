@@ -9,6 +9,7 @@ import io.github.youngledo.vadmin.contracts.auth.AuthorizationService;
 import io.github.youngledo.vadmin.contracts.auth.CurrentUserProvider;
 import io.github.youngledo.vadmin.contracts.auth.PermissionCode;
 import io.github.youngledo.vadmin.flow.patterns.AdminPageFrame;
+import io.github.youngledo.vadmin.flow.patterns.CompactDataItem;
 import io.github.youngledo.vadmin.flow.patterns.DataWorkspace;
 import io.github.youngledo.vadmin.flow.patterns.PagedGrid;
 import io.github.youngledo.vadmin.flow.patterns.PageHeader;
@@ -34,16 +35,24 @@ public final class PermissionsView extends PermissionProtectedView implements Lo
         sourceColumn = grid.addColumn(permission -> permission.systemManaged() ? getTranslation("system.permissions.system-managed") : getTranslation("system.permissions.custom"));
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();
-        pages = new PagedGrid<>(grid, queries::permissions, "code");
         var header = PageHeader.translated("system.permissions.title", "system.permissions.intent");
         var workspace = new DataWorkspace<>(grid);
+        workspace.setCompactItemRenderer(this::compactItem, AdministrationQueryService.PermissionRow::code);
+        pages = new PagedGrid<>(workspace, queries::permissions, "code");
         workspace.setSelectionBarVisible(false);
-        workspace.getElement().setAttribute("data-testid", "read-only-workspace");
+        workspace.getElement().setAttribute("data-testid", "permissions-workspace");
         workspace.setFooter(pages.getPaginationBar());
         var frame = new AdminPageFrame(header, null, workspace);
         add(frame);
         expand(frame);
         updateText();
+    }
+
+    private CompactDataItem compactItem(AdministrationQueryService.PermissionRow permission) {
+        var item = new CompactDataItem(permission.code());
+        item.setStatus(getTranslation(permission.systemManaged()
+                ? "system.permissions.system-managed" : "system.permissions.custom"));
+        return item;
     }
 
     @Override protected PermissionCode requiredPermission() { return REQUIRED_PERMISSION; }
