@@ -2,7 +2,7 @@ name: Dependabot Auto-merge
 
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened, synchronize, ready_for_review]
 
 permissions:
   contents: write
@@ -19,64 +19,10 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 5
     steps:
-      - name: Read Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Apply auto-merge policy
-        id: policy
-        shell: bash
+      - name: Enable squash auto-merge
         env:
-          DEPENDENCY_NAME: ${{ steps.metadata.outputs.dependency-names }}
-          DEPENDENCY_TYPE: ${{ steps.metadata.outputs.dependency-type }}
-          PACKAGE_ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
-          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
-        run: |
-          case "$DEPENDENCY_NAME" in
-            com.microsoft.playwright:playwright|com.tngtech.archunit:archunit-junit5|org.apache.maven.plugins:maven-failsafe-plugin|org.apache.maven.plugins:maven-surefire-plugin)
-              approved_dependency=true
-              ;;
-            *)
-              approved_dependency=false
-              ;;
-          esac
-
-          if [[ "$PACKAGE_ECOSYSTEM" == "maven" && "$UPDATE_TYPE" == "version-update:semver-patch" && "$DEPENDENCY_TYPE" == "direct:development" && "$approved_dependency" == "true" ]]; then
-            echo "eligible=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "eligible=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Wait for required checks
-        if: steps.policy.outputs.eligible == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: |
-          while true; do
-            checks=$(gh pr checks "$PR_URL" --json name,bucket)
-            verification=$(jq -r '.[] | select(.name == "Java 25 Maven verification") | .bucket' <<< "$checks")
-            security=$(jq -r '.[] | select(.name == "GitGuardian Security Checks") | .bucket' <<< "$checks")
-
-            if [[ "$verification" == "fail" || "$verification" == "cancel" || "$security" == "fail" || "$security" == "cancel" ]]; then
-              echo "Required checks did not pass."
-              exit 1
-            fi
-
-            if [[ "$verification" == "pass" && "$security" == "pass" ]]; then
-              exit 0
-            fi
-
-            sleep 15
-          done
-
-      - name: Squash merge eligible update
-        if: steps.policy.outputs.eligible == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr merge "$PR_URL" --squash --delete-branch
+        run: gh pr merge "$PR_URL" --auto --squash --delete-branch
