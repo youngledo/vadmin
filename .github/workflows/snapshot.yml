@@ -1,0 +1,68 @@
+name: Snapshot
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+      - AGENTS.md
+      - docs/**
+  workflow_dispatch:
+
+concurrency:
+  group: snapshot-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-snapshot:
+    name: Publish SNAPSHOT to Maven Central
+    runs-on: ubuntu-latest
+    environment: vadmin
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Java and Maven Central credentials
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: |
+            **/pom.xml
+            .mvn/wrapper/maven-wrapper.properties
+          server-id: central
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_PASSWORD
+
+      - name: Resolve version
+        id: version
+        run: |
+          set -euo pipefail
+
+          version="$(sed -n 's@^[[:space:]]*<version>\([^<]*\)</version>.*@\1@p' pom.xml | head -n 1)"
+          test -n "${version}"
+          case "${version}" in
+            *-SNAPSHOT)
+              echo "Publishing ${version}"
+              echo "is_snapshot=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "Skipping non-SNAPSHOT version: ${version}"
+              echo "is_snapshot=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Publish SNAPSHOT
+        if: steps.version.outputs.is_snapshot == 'true'
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: >
+          ./mvnw -B -ntp -DskipTests deploy
+          -DaltDeploymentRepository=central::https://central.sonatype.com/repository/maven-snapshots/

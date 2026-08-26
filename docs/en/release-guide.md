@@ -107,7 +107,7 @@ repository secrets. Before its first use, configure these protected, never
 source-controlled values:
 
 - `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`: Maven Central Portal
-  publishing credentials.
+  publishing credentials. They are also used for SNAPSHOT publication.
 - `GPG_PRIVATE_KEY`: ASCII-armored private signing key.
 - `GPG_PASSPHRASE`: signing key passphrase.
 
@@ -134,6 +134,45 @@ For an exceptional local publication, credentials belong in the local Maven
 
 The profile waits for Central Portal publication to complete. Then verify a
 clean consumer resolves `io.github.youngledo:vadmin-spring-boot-starter:0.1.0`.
+
+## SNAPSHOT Publication
+
+Central Portal must have SNAPSHOT publishing enabled for the
+`io.github.youngledo` namespace. The `Snapshot` GitHub Actions workflow runs
+automatically for non-documentation pushes to `main` and can also be started
+manually. It uses the `vadmin` environment and the same
+`MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD` secrets as the release
+workflow.
+
+The workflow reads the root Maven version and deploys only when it ends with
+`-SNAPSHOT`. It uses the standard Maven deploy lifecycle and the Central Portal
+snapshots repository without the release profile or GPG signing:
+
+```bash
+./mvnw -B -ntp -DskipTests deploy \
+  -DaltDeploymentRepository=central::https://central.sonatype.com/repository/maven-snapshots/
+```
+
+The ordinary `Verify` workflow remains the build and test gate for every
+`main` push. SNAPSHOTs are mutable development artifacts and must not be used
+as production release substitutes.
+
+Consumers must explicitly enable the Central Portal snapshots repository:
+
+```xml
+<repositories>
+  <repository>
+    <id>central-portal-snapshots</id>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <releases>
+      <enabled>false</enabled>
+    </releases>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
+```
 
 ## Post-Release Record
 

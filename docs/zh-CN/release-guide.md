@@ -84,7 +84,8 @@ Maven 4 Wrapper；Maven Central 的发布则有意使用 Apache Maven 3.9.16，�
 检出不可变的 annotated release tag。其发布 job 绑定到 `vadmin` Environment，因此该环境中的
 secrets 和仓库级 secrets 均可用。首次使用前，配置以下受保护的值，绝不可提交它们：
 
-- `MAVEN_CENTRAL_USERNAME` 和 `MAVEN_CENTRAL_PASSWORD`：Maven Central Portal 发布凭据。
+- `MAVEN_CENTRAL_USERNAME` 和 `MAVEN_CENTRAL_PASSWORD`：Maven Central Portal 发布凭据，
+  SNAPSHOT 发布也使用这两个凭据。
 - `GPG_PRIVATE_KEY`：ASCII-armored 格式的私有签名密钥。
 - `GPG_PASSPHRASE`：私钥口令。
 
@@ -106,6 +107,41 @@ annotated tag，且准确指向已验证的发布提交。
 
 该 profile 会等待 Central Portal 发布完成。然后在干净的使用方项目中确认
 `io.github.youngledo:vadmin-spring-boot-starter:0.1.0` 可以解析。
+
+## SNAPSHOT 发布
+
+必须先在 Central Portal 中为 `io.github.youngledo` 命名空间启用 SNAPSHOT 发布。对于推送到
+`main` 的非文档变更，`Snapshot` GitHub Actions 工作流会自动运行，也可以从 Actions 页面
+手动启动。该工作流使用 `vadmin` Environment，并复用正式发布工作流所用的
+`MAVEN_CENTRAL_USERNAME` 和 `MAVEN_CENTRAL_PASSWORD` secrets。
+
+工作流读取根 Maven 版本，只有版本以 `-SNAPSHOT` 结尾时才会部署。它使用标准 Maven deploy
+生命周期和 Central Portal snapshots 仓库，不启用 `release` profile，也不进行 GPG 签名：
+
+```bash
+./mvnw -B -ntp -DskipTests deploy \
+  -DaltDeploymentRepository=central::https://central.sonatype.com/repository/maven-snapshots/
+```
+
+普通 `Verify` 工作流仍是每次推送到 `main` 时的构建与测试门禁。SNAPSHOT 是可变的开发制品，
+不得替代生产环境使用的正式版本。
+
+使用方必须显式启用 Central Portal snapshots 仓库：
+
+```xml
+<repositories>
+  <repository>
+    <id>central-portal-snapshots</id>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <releases>
+      <enabled>false</enabled>
+    </releases>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
+```
 
 ## 发布后记录
 
